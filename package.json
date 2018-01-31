@@ -1,0 +1,10 @@
+{
+  "name": "xmirror",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "stellar-sdk": "^0.8.0",
+    "web3": "^1.0.0-beta.29"
+  }
+}
