@@ -1,0 +1,6 @@
+version: "2.3"
+services:
+  eth_testnet:
+    image: kunstmaan/ethereum-geth-testnet
+    stdin_open: true
+    tty: true

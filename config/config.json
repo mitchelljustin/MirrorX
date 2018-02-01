@@ -1,0 +1,16 @@
+{
+  "ethereum": {
+    "rpcUri": "http://0.0.0.0:8545",
+    "keys": {
+      "alice": "795d3c8ccbe397f5de6456dae1affb9b9b43ee79062218787e76cbaf8207e3e8",
+      "bob": "170ca6d140d6a3ebaec71a83d26c79e2633b072d34c0e0db7bbbc6aaf7c65c14"
+    }
+  },
+  "stellar": {
+    "keys": {
+      "issuer": "SB6BVWXETQXAYHBUIMKQ76KRUBKI4HOGLYOR3YQQVOUNCRYTUCFRX27Q",
+      "alice": "SBTHGT57SKNSPTX7RLHF5YVASEB5YSABW7WKWZFOIXMGLAE2HFTERDLM",
+      "bob": "SDYE34F3QVIZOJWMG74HWOBAPSGR6HA336TFR2YMKZZQXHC7PSCSIUOP"
+    }
+  }
+}
