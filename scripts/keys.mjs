@@ -15,7 +15,7 @@ Object.keys(Config.stellar.keys).forEach(name => {
 Object.keys(Config.ethereum.keys).forEach(name => {
     const priv = new Buffer(Config.ethereum.keys[name], 'hex')
     Keys.eth[name] = {
-        address: EthUtil.privateToAddress(priv),
+        address: '0x' + EthUtil.privateToAddress(priv).toString('hex'),
         priv,
     }
 })

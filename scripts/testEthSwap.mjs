@@ -2,6 +2,7 @@
 
 import Stellar from "stellar-sdk";
 import { web3, Web3 } from './eth'
+import SolC from 'solc'
 import Keys from './keys'
 import Crypto from 'crypto'
 import FS from 'fs'
@@ -11,6 +12,8 @@ const SWAP_ACT_NUM_ENTRIES = 5
 const SWAP_ACT_BASE_RESERVE = (1.0 + 0.5 * SWAP_ACT_NUM_ENTRIES).toFixed(7)
 
 const SWAP_ACT_REFUND_DELAY = 48 * 60 * 60
+
+const SWAP_CONTRACT_TIMELIMIT = 24 * 60 * 60
 
 class Swapper {
     constructor({keys}) {
@@ -118,18 +121,40 @@ class Swapper {
         return {reserveRefundTx: null}
     }
 
-    async launchSwapContract({swapSize}) {
+    // function XMirrorSwap(bytes32 hashlock, uint256 timelimit, address recipient) public payable
+    async launchSwapContract({hashlock, swapSize}) {
+        const recipient = this.keys.eth.alice.address
+        const sender = this.keys.eth.bob.address
+        await this.web3.eth.personal.unlockAccount(sender, 'bob')
+        const timelimit = SWAP_CONTRACT_TIMELIMIT
         const contractSourceCode = String(FS.readFileSync('../support/XMirrorSwap.sol'))
-        const compileResult = await this.web3.eth.compile.solidity(contractSourceCode)
-        const {XMirrorSwap} = compileResult
-        console.log()
+        const compileResult = SolC.compile(contractSourceCode, 1)
+        const XMirrorSwap = compileResult.contracts[':XMirrorSwap']
+        const Contract = new this.web3.eth.Contract(JSON.parse(XMirrorSwap.interface))
+        const contract = await Contract.deploy({
+            data: `0x${XMirrorSwap.bytecode}`,
+            arguments: [
+                `0x${hashlock.toString('hex')}`,
+                timelimit,
+                recipient,
+            ]
+        })
+        const gasEstimate = await contract.estimateGas()
+        const gasPrice = await this.web3.eth.getGasPrice();
+        const instance = await contract.send({
+            from: sender,
+            gas: gasEstimate,
+            gasPrice: gasPrice,
+        })
+
+        console.log(`Contract launched: ${contract.options.address}`)
     }
 
     async doSwap({swapSize}) {
+        const {preimage, hashlock} = this.makeHashlock()
+        console.log(`Hashlock: ${hashlock.toString('hex')}`)
         // Stellar setup
-        // const {preimage, hashlock} = this.makeHashlock()
-        // console.log(`Hashlock: ${hashlock.toString('hex')}`)
-        // const {swapKeys} = this.makeSwapKeys()
+        // const {swapKeys} = this.makeSwapKe  ys()
         // console.log(`Swap account: ${swapKeys.publicKey()}`)
         // const {swapRefundTx} = await this.genStellarSwapRefundTx({swapKeys})
         // console.log(`Swap refund tx hash: ${swapRefundTx.hash().toString('hex')}`)
@@ -138,7 +163,7 @@ class Swapper {
         // const {reserveRefundTx} = await this.genReserveRefundTx({createSwapTx, hashlock})
 
         // Ethereum setup
-        await this.launchSwapContract({swapSize})
+        await this.launchSwapContract({hashlock, swapSize})
     }
 
 }
