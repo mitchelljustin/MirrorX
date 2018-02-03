@@ -1,7 +1,18 @@
 version: "2.3"
 services:
   eth_testnet:
-    image: ethereum/client-go:v1.7.3
+    image: parity/parity:v1.9.2
     ports:
+    - "8180:8180"
     - "8545:8545"
-    command: --rpc --rpcaddr "0.0.0.0" --testnet --rpcapi eth,net,web3,personal
+    - "8546:8546"
+    - "30303:30303"
+    - "30303:30303/udp"
+    volumes:
+    - "./.parity:/root/.local/share/io.parity.ethereum"
+    command: >
+      ui
+      --ui-interface all
+      --jsonrpc-interface all
+      --ws-interface all
+      --chain=ropsten

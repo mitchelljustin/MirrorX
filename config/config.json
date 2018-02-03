@@ -1,9 +1,14 @@
 {
   "ethereum": {
-    "rpcUri": "http://0.0.0.0:8545",
     "keys": {
-      "alice": "795d3c8ccbe397f5de6456dae1affb9b9b43ee79062218787e76cbaf8207e3e8",
-      "bob": "170ca6d140d6a3ebaec71a83d26c79e2633b072d34c0e0db7bbbc6aaf7c65c14"
+      "alice": {
+        "privkey": "c87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3",
+        "address": "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"
+      },
+      "bob": {
+        "privkey": "ae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f",
+        "address": "0xf17f52151EbEF6C7334FAD080c5704D77216b732"
+      }
     }
   },
   "stellar": {

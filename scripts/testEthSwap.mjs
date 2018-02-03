@@ -1,11 +1,10 @@
 "use strict";
 
 import Stellar from "stellar-sdk";
-import { web3, Web3 } from './eth'
-import SolC from 'solc'
 import Keys from './keys'
 import Crypto from 'crypto'
-import FS from 'fs'
+import XMSwap from './xmSwap'
+import Contract from 'truffle-contract'
 
 const XETH = new Stellar.Asset('XETH', Keys.str.issuer.publicKey())
 const SWAP_ACT_NUM_ENTRIES = 5
@@ -19,7 +18,6 @@ class Swapper {
     constructor({keys}) {
         Stellar.Network.useTestNetwork()
         this.stellar = new Stellar.Server('https://horizon-testnet.stellar.org')
-        this.web3 = web3
         this.keys = keys
     }
 
@@ -122,48 +120,87 @@ class Swapper {
     }
 
     // function XMirrorSwap(bytes32 hashlock, uint256 timelimit, address recipient) public payable
-    async launchSwapContract({hashlock, swapSize}) {
+    async prepareEthSwap({hashlock, swapSize}) {
         const recipient = this.keys.eth.alice.address
         const sender = this.keys.eth.bob.address
-        await this.web3.eth.personal.unlockAccount(sender, 'bob')
         const timelimit = SWAP_CONTRACT_TIMELIMIT
-        const contractSourceCode = String(FS.readFileSync('../support/XMirrorSwap.sol'))
-        const compileResult = SolC.compile(contractSourceCode, 1)
-        const XMirrorSwap = compileResult.contracts[':XMirrorSwap']
-        const Contract = new this.web3.eth.Contract(JSON.parse(XMirrorSwap.interface))
-        const contract = await Contract.deploy({
-            data: `0x${XMirrorSwap.bytecode}`,
-            arguments: [
-                `0x${hashlock.toString('hex')}`,
-                timelimit,
-                recipient,
-            ]
-        })
-        const gasEstimate = await contract.estimateGas()
-        const gasPrice = await this.web3.eth.getGasPrice();
-        const instance = await contract.send({
-            from: sender,
-            gas: gasEstimate,
-            gasPrice: gasPrice,
-        })
+        const contract = await XMSwap.deployed()
+        const wei = parseFloat(swapSize) * 1e18;
+        const gasEstimate = await contract.prepareSwap.estimateGas(
+            recipient,
+            `0x${hashlock.toString('hex')}`,
+            timelimit,
+            {
+                from: sender,
+                value: wei,
+            }
+        )
+        const res = await contract.prepareSwap(
+            recipient,
+            `0x${hashlock.toString('hex')}`,
+            timelimit,
+            {
+                from: sender,
+                value: wei,
+                gas: gasEstimate,
+            }
+        )
+        console.log(`Successfully prepared ETH swap in tx ${res.tx}`)
+    }
 
-        console.log(`Contract launched: ${contract.options.address}`)
+    async executeSwap({preimage, hashlock, swapKeys, swapSize}) {
+        // Bob claims his XETH
+        const swapActId = swapKeys.publicKey()
+        const bobActId = this.keys.str.bob.publicKey()
+
+        const bob = await this.stellar.loadAccount(bobActId)
+        const claimTx = new Stellar.TransactionBuilder(bob)
+            .addOperation(Stellar.Operation.changeTrust({
+                asset: XETH,
+                limit: '4000',
+            }))
+            .addOperation(Stellar.Operation.payment({
+                asset: XETH,
+                source: swapActId,
+                destination: bobActId,
+                amount: swapSize,
+            }))
+            .build()
+        claimTx.sign(this.keys.str.bob)
+        claimTx.signHashX(preimage)
+        let xethRes = await this.stellar.submitTransaction(claimTx)
+        // NOW PREIMAGE IS PUBLIC KNOWLEDGE
+        // Alice claims her ETH
+        const contract = await XMSwap.deployed()
+        const preimageHex = preimage.toString('hex');
+        let ethRes = await contract.fulfillSwap(
+            `0x${preimageHex}`,
+            {
+                from: this.keys.eth.alice.address,
+            }
+        )
+        return {xethRes, ethRes}
     }
 
     async doSwap({swapSize}) {
         const {preimage, hashlock} = this.makeHashlock()
         console.log(`Hashlock: ${hashlock.toString('hex')}`)
+        console.log(`Preimage: ${preimage.toString('hex')}`)
         // Stellar setup
-        // const {swapKeys} = this.makeSwapKe  ys()
-        // console.log(`Swap account: ${swapKeys.publicKey()}`)
-        // const {swapRefundTx} = await this.genStellarSwapRefundTx({swapKeys})
-        // console.log(`Swap refund tx hash: ${swapRefundTx.hash().toString('hex')}`)
-        // // not shown: publish swapRefundTx to Bob
-        // const {createSwapTx, lockFundsTx} = await this.prepareSwapAccount({hashlock, swapSize, swapKeys, swapRefundTx})
+        const {swapKeys} = this.makeSwapKeys()
+        console.log(`Swap account: ${swapKeys.publicKey()}`)
+        const {swapRefundTx} = await this.genStellarSwapRefundTx({swapKeys})
+        console.log(`Swap refund tx hash: ${swapRefundTx.hash().toString('hex')}`)
+        // not shown: publish swapRefundTx to Bob
+        const {createSwapTx, lockFundsTx} = await this.prepareSwapAccount({hashlock, swapSize, swapKeys, swapRefundTx})
         // const {reserveRefundTx} = await this.genReserveRefundTx({createSwapTx, hashlock})
 
         // Ethereum setup
-        await this.launchSwapContract({hashlock, swapSize})
+        await this.prepareEthSwap({hashlock, swapSize})
+
+        // Execute swap
+        let {xethRes, ethRes} = await this.executeSwap({preimage, hashlock, swapKeys, swapSize})
+        console.log(`Success!\nxethRes:${JSON.stringify(xethRes)}\nethRes:${JSON.stringify(ethRes)}`)
     }
 
 }
