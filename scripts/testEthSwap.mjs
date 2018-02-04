@@ -4,7 +4,6 @@ import Stellar from "stellar-sdk";
 import Keys from './keys'
 import Crypto from 'crypto'
 import XMSwap from './xmSwap'
-import Contract from 'truffle-contract'
 
 const XETH = new Stellar.Asset('XETH', Keys.str.issuer.publicKey())
 const SWAP_ACT_NUM_ENTRIES = 5
@@ -66,7 +65,7 @@ class Swapper {
             }))
             .build()
         createSwapTx.sign(this.keys.str.alice)
-        console.log(`Submitting create swap tx: ${createSwapTx.hash().toString('hex')}`)
+        console.log(`Submitting create swap account tx: ${createSwapTx.hash().toString('hex')}`)
         await this.stellar.submitTransaction(createSwapTx)
         const swap = await this.stellar.loadAccount(swapActId)
 
@@ -145,10 +144,12 @@ class Swapper {
                 gas: gasEstimate,
             }
         )
-        console.log(`Successfully prepared ETH swap in tx ${res.tx}`)
+        console.log(`Successfully prepared swap on Ethereum. TX: ${res.tx}`)
     }
 
     async executeSwap({preimage, hashlock, swapKeys, swapSize}) {
+        const preimageHex = preimage.toString('hex');
+
         // Bob claims his XETH
         const swapActId = swapKeys.publicKey()
         const bobActId = this.keys.str.bob.publicKey()
@@ -165,20 +166,30 @@ class Swapper {
                 destination: bobActId,
                 amount: swapSize,
             }))
+            .addOperation(Stellar.Operation.changeTrust({
+                asset: XETH,
+                source: swapActId,
+                limit: '0',
+            }))
+            .addOperation(Stellar.Operation.accountMerge({
+                destination: bobActId,
+                source: swapActId,
+            }))
             .build()
         claimTx.sign(this.keys.str.bob)
         claimTx.signHashX(preimage)
         let xethRes = await this.stellar.submitTransaction(claimTx)
+        console.log(`Bob claimed his ${swapSize} XETH (Stellar) on account ${bobActId}, preimage now public knowledge.`)
         // NOW PREIMAGE IS PUBLIC KNOWLEDGE
         // Alice claims her ETH
         const contract = await XMSwap.deployed()
-        const preimageHex = preimage.toString('hex');
         let ethRes = await contract.fulfillSwap(
             `0x${preimageHex}`,
             {
                 from: this.keys.eth.alice.address,
             }
         )
+        console.log(`Alice claimed her ${swapSize} ETH (Ethereum) on address ${this.keys.eth.alice.address}`)
         return {xethRes, ethRes}
     }
 
@@ -188,19 +199,19 @@ class Swapper {
         console.log(`Preimage: ${preimage.toString('hex')}`)
         // Stellar setup
         const {swapKeys} = this.makeSwapKeys()
-        console.log(`Swap account: ${swapKeys.publicKey()}`)
+        console.log(`Stellar Swap account: ${swapKeys.publicKey()}`)
         const {swapRefundTx} = await this.genStellarSwapRefundTx({swapKeys})
-        console.log(`Swap refund tx hash: ${swapRefundTx.hash().toString('hex')}`)
+        console.log(`Stellar Swap refund tx hash: ${swapRefundTx.hash().toString('hex')}`)
         // not shown: publish swapRefundTx to Bob
         const {createSwapTx, lockFundsTx} = await this.prepareSwapAccount({hashlock, swapSize, swapKeys, swapRefundTx})
-        // const {reserveRefundTx} = await this.genReserveRefundTx({createSwapTx, hashlock})
+        const {reserveRefundTx} = await this.genReserveRefundTx({createSwapTx, hashlock})
 
         // Ethereum setup
         await this.prepareEthSwap({hashlock, swapSize})
 
         // Execute swap
         let {xethRes, ethRes} = await this.executeSwap({preimage, hashlock, swapKeys, swapSize})
-        console.log(`Success!\nxethRes:${JSON.stringify(xethRes)}\nethRes:${JSON.stringify(ethRes)}`)
+        console.log(`Success!\nStellar result:${JSON.stringify(xethRes, null, 2)}\nEthereum result:${JSON.stringify(ethRes, null, 2)}`)
     }
 
 }

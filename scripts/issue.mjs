@@ -24,29 +24,29 @@ run(args)
 async function run({amount, xAsset}) {
     Stellar.Network.useTestNetwork()
 
-    const asset = new Stellar.Asset(xAsset, Keys.issuer.publicKey())
+    const asset = new Stellar.Asset(xAsset, Keys.str.issuer.publicKey())
     const stellar = new Stellar.Server('https://horizon-testnet.stellar.org')
 
-    const issuer = await stellar.loadAccount(Keys.issuer.publicKey())
+    const issuer = await stellar.loadAccount(Keys.str.issuer.publicKey())
     console.log(`Issuing ${args.amount} ${args.xAsset} to Alice`)
     let tx = new Stellar.TransactionBuilder(issuer)
         .addOperation(Stellar.Operation.changeTrust({
             limit: '4294967296',
-            source: Keys.alice.publicKey(),
+            source: Keys.str.alice.publicKey(),
             asset,
         }))
         .addOperation(Stellar.Operation.payment({
-            destination: Keys.alice.publicKey(),
-            source: Keys.issuer.publicKey(),
+            destination: Keys.str.alice.publicKey(),
+            source: Keys.str.issuer.publicKey(),
             amount, asset
         }))
         .build()
-    tx.sign(Keys.issuer)
-    tx.sign(Keys.alice)
+    tx.sign(Keys.str.issuer)
+    tx.sign(Keys.str.alice)
     await stellar.submitTransaction(tx)
     console.log("Issue success")
 
-    const alice = await stellar.loadAccount(Keys.alice.publicKey())
+    const alice = await stellar.loadAccount(Keys.str.alice.publicKey())
     let xAssetBalance = null
     alice.balances.forEach(balance => {
         if (balance.asset_type === 'native') {
