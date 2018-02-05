@@ -5,10 +5,11 @@ module.exports = {
             port: 7545,
             network_id: "*" // Match any network id
         },
-        testnet: {
+        ropsten: {
             host: "localhost",
             port: 8545,
             network_id: 3,
+            gas: 187632,
         },
     }
 };

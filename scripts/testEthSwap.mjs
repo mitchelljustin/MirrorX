@@ -1,6 +1,6 @@
 "use strict";
 
-import Stellar from "stellar-sdk";
+import Stellar from "stellar-sdk"
 import Keys from './keys'
 import Crypto from 'crypto'
 import XMSwap from './xmSwap'

@@ -1,13 +1,14 @@
 "use strict"
 
 import Argparse from 'argparse'
-import Stellar from 'stellar-sdk'
-import Keys from './keys'
+import {stellar, Stellar} from '../lib/stellar'
+import config from '../config/config'
 
 const parser = new Argparse.ArgumentParser()
 
 parser.addArgument(['amount'])
 parser.addArgument(['xAsset'])
+parser.addArgument(['--destination'])
 
 const args = parser.parseArgs()
 
@@ -21,34 +22,27 @@ run(args)
         process.exit(1)
     })
 
-async function run({amount, xAsset}) {
-    Stellar.Network.useTestNetwork()
+async function run({amount, xAsset, destination}) {
+    const issuerKeys = Stellar.Keypair.fromSecret(config.stellar.keys.issuer)
 
-    const asset = new Stellar.Asset(xAsset, Keys.str.issuer.publicKey())
-    const stellar = new Stellar.Server('https://horizon-testnet.stellar.org')
+    const asset = new Stellar.Asset(xAsset, issuerKeys.publicKey())
+    const issuer = await stellar.loadAccount(issuerKeys.publicKey())
 
-    const issuer = await stellar.loadAccount(Keys.str.issuer.publicKey())
-    console.log(`Issuing ${args.amount} ${args.xAsset} to Alice`)
+    console.log(`Issuing ${args.amount} ${args.xAsset} to ${destination}`)
     let tx = new Stellar.TransactionBuilder(issuer)
-        .addOperation(Stellar.Operation.changeTrust({
-            limit: '4294967296',
-            source: Keys.str.alice.publicKey(),
-            asset,
-        }))
         .addOperation(Stellar.Operation.payment({
-            destination: Keys.str.alice.publicKey(),
-            source: Keys.str.issuer.publicKey(),
-            amount, asset
+            amount,
+            asset,
+            destination,
         }))
         .build()
-    tx.sign(Keys.str.issuer)
-    tx.sign(Keys.str.alice)
+    tx.sign(issuerKeys)
     await stellar.submitTransaction(tx)
     console.log("Issue success")
 
-    const alice = await stellar.loadAccount(Keys.str.alice.publicKey())
+    const destAcct = await stellar.loadAccount(destination)
     let xAssetBalance = null
-    alice.balances.forEach(balance => {
+    destAcct.balances.forEach(balance => {
         if (balance.asset_type === 'native') {
             return
         }
@@ -56,6 +50,6 @@ async function run({amount, xAsset}) {
             xAssetBalance = balance.balance
         }
     })
-    console.log(`Alice's account has ${xAssetBalance ? xAssetBalance : 'no'} ${xAsset}`)
+    console.log(`Destination account has ${xAssetBalance ? xAssetBalance : 'no'} ${xAsset}`)
 }
 

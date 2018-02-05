@@ -10,7 +10,7 @@ contract XMSwap {
         uint256 expiry;
     }
 
-    mapping (bytes32 => Swap) _swaps;
+    mapping(bytes32 => Swap) public _swaps;
 
     function prepareSwap(
         address recipient,
@@ -24,13 +24,20 @@ contract XMSwap {
         // Integer overflow
         require(expiry > block.timestamp);
         _swaps[hashlock] = Swap({
-            exists: true,
-            pending: true,
-            sender: msg.sender,
-            recipient: recipient,
-            value: msg.value,
-            expiry: expiry
-        });
+            exists : true,
+            pending : true,
+            sender : msg.sender,
+            recipient : recipient,
+            value : msg.value,
+            expiry : expiry
+            });
+        SwapPrepared(
+            hashlock,
+            msg.sender,
+            recipient,
+            msg.value,
+            expiry
+        );
     }
 
     function fulfillSwap(
@@ -43,6 +50,7 @@ contract XMSwap {
         require(block.timestamp < swap.expiry);
         msg.sender.transfer(swap.value);
         swap.pending = false;
+        SwapFulfilled(hashlock, preimage);
     }
 
     function refundSwap(
@@ -54,5 +62,23 @@ contract XMSwap {
         require(block.timestamp >= swap.expiry);
         msg.sender.transfer(swap.value);
         swap.pending = false;
+        SwapRefunded(hashlock);
     }
+
+    event SwapPrepared(
+        bytes32 hashlock,
+        address sender,
+        address recipient,
+        uint256 value,
+        uint256 expiry
+    );
+
+    event SwapFulfilled(
+        bytes32 hashlock,
+        bytes32 preimage
+    );
+
+    event SwapRefunded(
+        bytes32 hashlock
+    );
 }
