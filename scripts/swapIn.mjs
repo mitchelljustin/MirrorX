@@ -34,7 +34,9 @@ new SwapIn(args)
     .run()
     .then(() => {
         console.log(`Success!`)
+        process.exit(0)
     })
     .catch((e) => {
         console.log(`Failed. ${JSON.stringify(e)}`)
+        process.exit(1)
     })

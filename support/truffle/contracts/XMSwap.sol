@@ -19,7 +19,7 @@ contract XMSwap {
     ) public payable {
         require(msg.value > 0);
         require(refundDelay > 0);
-        require(!_swaps[hashlock].pending);
+        require(!_swaps[hashlock].exists);
         uint256 expiry = block.timestamp + refundDelay;
         // Integer overflow
         require(expiry > block.timestamp);

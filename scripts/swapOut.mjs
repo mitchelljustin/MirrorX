@@ -35,7 +35,9 @@ new SwapOut(args)
     .run()
     .then(() => {
         console.log(`Success!`)
+        process.exit(0)
     })
     .catch((e) => {
         console.log(`Failed. ${e}`)
+        process.exit(1)
     })
