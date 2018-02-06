@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+scripts/swapIn.mjs 0.001 ETH \
+    --stellar-preparer  GBV62PX2WJUBOKUIFKVSYA7NKMCU3VANTPYFO65NNW7P5J72RNT25ESK \
+    --stellar-fulfiller SBTHGT57SKNSPTX7RLHF5YVASEB5YSABW7WKWZFOIXMGLAE2HFTERDLM \
+    --outside-preparer  0x00B0E5b543E53516Eda87c29172dC8FFcf7FDD2e \
+    --outside-fulfiller 0x005816E76D513d4ADa6939fB969D7EBf4d6ed6a8 \
+

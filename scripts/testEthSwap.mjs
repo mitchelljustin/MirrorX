@@ -183,7 +183,7 @@ class Swapper {
         // NOW PREIMAGE IS PUBLIC KNOWLEDGE
         // Alice claims her ETH
         const contract = await XMSwap.deployed()
-        let ethRes = await contract.fulfillSwap(
+        let ethRes = await contract.fulfillStellarSwap(
             `0x${preimageHex}`,
             {
                 from: this.keys.eth.alice.address,

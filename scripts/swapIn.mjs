@@ -8,14 +8,14 @@ const parser = new Argparse.ArgumentParser()
 
 parser.addArgument(['amount'])
 parser.addArgument(['asset'])
-parser.addArgument(['--stellar-ful-secret', '-sf'])
 parser.addArgument(['--stellar-preparer', '-sp'])
+parser.addArgument(['--stellar-fulfiller', '-sf'])
 parser.addArgument(['--outside-preparer', '-op'])
 parser.addArgument(['--outside-fulfiller', '-of'])
 
 const args = parser.parseArgs()
 
-const keys = ['stellar_ful_secret', 'stellar_preparer', 'outside_preparer', 'outside_fulfiller']
+const keys = ['stellar_fulfiller', 'stellar_preparer', 'outside_preparer', 'outside_fulfiller']
 const missing = keys.filter(k => args[k] == null)
 if (missing.length > 0) {
     console.error(`Missing options: ${missing}`)
@@ -36,5 +36,5 @@ new SwapIn(args)
         console.log(`Success!`)
     })
     .catch((e) => {
-        console.log(`Failed. ${e}`)
+        console.log(`Failed. ${JSON.stringify(e)}`)
     })
