@@ -1,11 +1,14 @@
 <template>
   <div id="app">
-    <h1>
-      <router-link to="/">MirrorX</router-link>
-    </h1>
-    <h4>
-      Secure Deposits & Withdrawals on the Stellar DEX
-    </h4>
+    <div class="row">
+      <h1>
+        <img src="./assets/MirrorX.png" alt="" class="logo">
+        <span>MirrorX</span>
+      </h1>
+      <h2>
+        Secure Deposits & Withdrawals on the Stellar DEX
+      </h2>
+    </div>
     <hr>
     <div>
       <router-view/>

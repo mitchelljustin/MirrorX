@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h2>
+  <div class="row content">
+    <div class="landing-action">
       <span>I want to</span>
       <span>
         <label for="action"></label>
@@ -18,11 +18,10 @@
           </option>
         </select>
       </span>
-      <span>{{actionPreposition}} the Stellar DEX</span>
       <button @click="goClicked">
         GO
       </button>
-    </h2>
+    </div>
   </div>
 </template>
 
@@ -51,15 +50,6 @@
       },
     },
     computed: {
-      actionPreposition() {
-        if (this.action === 'Deposit') {
-          return 'on'
-        }
-        if (this.action === 'Withdraw') {
-          return 'from'
-        }
-        return ''
-      },
     },
   }
 </script>
