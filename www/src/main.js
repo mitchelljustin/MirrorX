@@ -6,8 +6,10 @@ import router from './router'
 import './assets/style.css'
 
 import Spinner from 'vue-simple-spinner'
+import Icon from 'vue-awesome'
 
 Vue.component('spinner', Spinner)
+Vue.component('icon', Icon)
 
 Vue.config.productionTip = false
 
