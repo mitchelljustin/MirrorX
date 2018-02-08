@@ -28,10 +28,10 @@ if (Swap === undefined) {
     process.exit(1)
 }
 
-const {SwapOut} = Swap
+const {Withdraw} = Swap
 
 
-new SwapOut(args)
+new Withdraw(args)
     .run()
     .then(() => {
         console.log(`Success!`)

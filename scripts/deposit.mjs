@@ -28,9 +28,9 @@ if (Swap === undefined) {
     process.exit(1)
 }
 
-const {SwapIn} = Swap
+const {Deposit} = Swap
 
-new SwapIn(args)
+new Deposit(args)
     .run()
     .then(() => {
         console.log(`Success!`)

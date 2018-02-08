@@ -3,7 +3,9 @@
     <div class="row">
       <h1>
         <img src="./assets/MirrorX.png" alt="" class="logo">
-        <span>MirrorX</span>
+        <span>
+          <router-link to="/">MirrorX</router-link>
+        </span>
       </h1>
       <h2>
         Secure Deposits & Withdrawals on the Stellar DEX

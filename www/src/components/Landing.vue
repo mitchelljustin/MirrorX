@@ -4,18 +4,19 @@
       <div class="landing-action">
         <span>I want to</span>
         <span>
-        <label for="action"></label>
-        <select name="action" id="action" v-model="action">
-          <option value="Deposit">Deposit</option>
-          <option value="Withdraw">Withdraw</option>
-        </select>
-        <label>
-          <input type="number" step="0.25" disabled v-model="amount">
+        <label for="action" class="sr-only">
+          Action
         </label>
-        <label for="currency"></label>
+        <select name="action" id="action" v-model="action">
+          <option value="deposit">Deposit</option>
+          <option value="withdraw">Withdraw</option>
+        </select>
+        <label for="currency" class="sr-only">
+          Currency
+        </label>
         <select name="currency" id="currency" v-model="currency">
-          <option v-for="supportedCur in supportedCurrencies" :key="supportedCur" :value="supportedCur">
-            {{supportedCur}}
+          <option v-for="cur in supportedCurrencies" :key="cur" :value="cur">
+            {{cur}}
           </option>
         </select>
       </span>
@@ -26,9 +27,9 @@
     </div>
     <div class="row adbox-container">
       <div class="col adbox">
-        <icon name="exchange" scale="2"/>
+        <icon name="bar-chart" scale="2"/>
         <p>
-          Stellar is a secure, production-grade Decentralized Exchange.
+          Stellar is a secure, production-grade Decentralized Exchange for cryptocurrencies and fiat.
         </p>
         <p>
           That means that it looks and feels just like a normal exchange,
@@ -41,7 +42,7 @@
           MirrorX uses a technology called Atomic Swaps to ensure maximum security.
         </p>
         <p>
-          This allows for fast, trustless, peer-to-peer deposits & withdrawals.
+          This allows for fast, peer-to-peer deposits & withdrawals that don't require trust.
         </p>
       </div>
       <div class="col adbox">
@@ -50,7 +51,7 @@
           MirrorX was built to make deposits and withdrawals feel like a breeze.
         </p>
         <p>
-
+          Combined with the power of Stellar, trading cryptocurrencies has never been easier & safer.
         </p>
       </div>
     </div>
@@ -61,23 +62,20 @@
   import SupportedSwaps from '../../../lib/supportedSwaps.mjs'
 
   export default {
-    name: 'Landing',
+    name: 'landing',
     data() {
       return {
-        action: 'Deposit',
-        amount: '0.25',
-        supportedCurrencies: Object.keys(SupportedSwaps),
+        action: 'deposit',
         currency: 'ETH',
+        supportedCurrencies: Object.keys(SupportedSwaps),
       }
     },
     methods: {
       goClicked() {
-        const {action, amount, currency} = this
-        console.log(`Go clicked: ${JSON.stringify({action, amount, currency})}`)
+        const {action, currency} = this
         this.$router.push({
-          name: action,
-          params: {currency},
-          query: {amount},
+          name: 'prepare-swap',
+          params: {action, currency},
         })
       },
     },

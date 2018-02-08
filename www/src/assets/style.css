@@ -17,9 +17,12 @@ body {
 }
 
 h1, h2, a {
-  margin: 0;
   -webkit-margin-before: 0;
   -webkit-margin-after: 0;
+}
+
+h1, h2 {
+  margin: 0.25em 0;
 }
 
 p {
@@ -36,6 +39,13 @@ h1 {
 h2 {
   font-size: 1.2em;
   font-weight: 300;
+}
+
+h3 {
+  font-size: 1.3em;
+  font-weight: 400;
+  margin: 0.2em 0.3em;
+  display: inline-block;
 }
 
 .row {
@@ -55,11 +65,38 @@ h2 {
   justify-content: flex-start;
 }
 
+.full {
+  width: 100%;
+}
+
+.major {
+  width: 62%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.minor {
+  width: 32%;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .adbox {
   width: 30%;
-  min-height: 190px;
+  min-height: 210px;
   padding: 20px 0;
   border: 1px solid #e7e7e7;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
 }
 
 .logo {
@@ -85,11 +122,15 @@ button {
   background: #159dbf;
   color: aliceblue;
   font-size: 1em;
-  margin: 0 0.5em;
+  margin: 0;
   padding: 0.15em 0.75em;
   border: none;
   border-radius: 3px;
   cursor: pointer;
+}
+
+button.happy {
+  background: #009432;
 }
 
 button:active {
@@ -100,14 +141,23 @@ button:focus {
   outline: none;
 }
 
-input {
-  font-size: 1em;
-  width: 4em;
-
+.big {
+  font-size: 2em;
 }
 
-input:disabled {
-  color: #2c3e50;
+input[type="text"] {
+  font-size: 1.15em;
+  padding: 0.4em 0.2em;
+  margin: 0.2em 0;
+  width: 100%;
+  border: 1px solid lightgray;
+  border-radius: 4px;
+}
+
+
+input:focus {
+  outline: none;
+  border: 1px solid #2e1980;
 }
 
 a {
@@ -127,6 +177,22 @@ hr {
   margin: 20px 0;
 }
 
+label {
+  font-weight: 600;
+  margin: 0 0.4em;
+}
+
+.form-label {
+  width: 100%;
+  margin: 1.5em 0 0.2em;
+}
+
+.swapSize {
+  border: 2px #8fb6bf solid;
+  border-radius: 3px;
+  margin: 0.2em 0;
+}
+
 .content {
   justify-content: space-around;
   width: 100%;
@@ -136,4 +202,8 @@ hr {
 .landing-action {
   font-size: 1.7em;
   font-weight: 400;
+}
+
+.prepare-swap-container {
+  align-items: flex-start;
 }
