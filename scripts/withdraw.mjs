@@ -2,7 +2,7 @@
 "use strict";
 
 import Argparse from "argparse"
-import SupportedSwaps from "../lib/supportedSwaps.mjs";
+import SupportedSwaps from "../lib/supportedCurrencies.mjs";
 
 const parser = new Argparse.ArgumentParser()
 

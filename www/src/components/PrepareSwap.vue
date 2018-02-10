@@ -77,12 +77,12 @@
 </template>
 
 <script>
-  import SupportedSwaps from '../../../lib/supportedSwaps.mjs'
+  import supportedCurrencies from '../../../lib/supportedCurrencies.mjs'
 
   export default {
     name: 'prepare-swap',
     data() {
-      const {swapSizes} = SupportedSwaps[this.$route.params.currency]
+      const {swapSizes} = supportedCurrencies[this.$route.params.currency]
       return {
         currency: this.$route.params.currency,
         action: this.$route.params.action,
@@ -96,7 +96,7 @@
       if (to.params.action !== 'withdraw' && to.params.action !== 'deposit') {
         return next(false)
       }
-      if (SupportedSwaps[to.params.currency] === undefined) {
+      if (supportedCurrencies[to.params.currency] === undefined) {
         return next(false)
       }
       next()

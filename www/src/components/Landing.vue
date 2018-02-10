@@ -59,7 +59,7 @@
 </template>
 
 <script>
-  import SupportedSwaps from '../../../lib/supportedSwaps.mjs'
+  import supportedCurrencies from '../../../lib/supportedCurrencies.mjs'
 
   export default {
     name: 'landing',
@@ -67,7 +67,7 @@
       return {
         action: 'deposit',
         currency: 'ETH',
-        supportedCurrencies: Object.keys(SupportedSwaps),
+        supportedCurrencies: Object.keys(supportedCurrencies),
       }
     },
     methods: {
