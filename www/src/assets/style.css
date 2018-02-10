@@ -188,9 +188,10 @@ label {
 }
 
 .swapSize {
-  border: 2px #8fb6bf solid;
+  border: 2px #a3c3cc solid;
   border-radius: 3px;
   margin: 0.2em 0;
+  padding: 0.2em 0;
 }
 
 .content {

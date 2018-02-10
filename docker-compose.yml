@@ -1,18 +1,11 @@
 version: "2.3"
 services:
-  eth_testnet:
-    image: parity/parity:v1.9.2
+  redis:
+    image: redis:4.0.8
     ports:
-    - "8180:8180"
-    - "8545:8545"
-    - "8546:8546"
-    - "30303:30303"
-    - "30303:30303/udp"
-    volumes:
-    - "./.parity:/root/.local/share/io.parity.ethereum"
-    command: >
-      ui
-      --ui-interface all
-      --jsonrpc-interface all
-      --ws-interface all
-      --chain=ropsten
+    - "6379:6379"
+  api:
+    build: .
+    ports:
+    - "9080:80"
+    network_mode: host

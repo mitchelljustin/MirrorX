@@ -37,7 +37,7 @@
         </div>
         <div class="full row">
           <div class="major row">
-            <div class="col swapSize" v-for="(swapSize, i) in supportedSwapSizes" :key="i">
+            <div class="col swapSize" v-for="(swapSize, i) in swapSizes" :key="i">
               <input :checked="i === 0"
                      :id='`swapSize-${i}`'
                      :value="swapSize"
@@ -65,10 +65,11 @@
           MirrorX provides an easy interface to sign Stellar transactions, but you're not required to use it.
         </p>
         <p>
-          Right now we only support a limited set of deposit & withdrawal sizes.
+          To make sure there are enough peers to swap with, right now
+          we only support a limited set of deposit & withdrawal sizes.
         </p>
         <p>
-          Please allow some time for us to match you with another peer.
+          Please allow some time for us to match you with a peer.
         </p>
       </div>
     </div>
@@ -81,14 +82,14 @@
   export default {
     name: 'prepare-swap',
     data() {
-      const {supportedSwapSizes} = SupportedSwaps[this.$route.params.currency]
+      const {swapSizes} = SupportedSwaps[this.$route.params.currency]
       return {
         currency: this.$route.params.currency,
         action: this.$route.params.action,
-        amount: supportedSwapSizes[0],
+        amount: swapSizes[0],
         stellarAccount: '',
         cryptoAddress: '',
-        supportedSwapSizes,
+        swapSizes,
       }
     },
     beforeRouteEnter(to, from, next) {
