@@ -28,7 +28,7 @@ async function run({amount, xAsset, destination}) {
     const asset = new Stellar.Asset(xAsset, issuerKeys.publicKey())
     const issuer = await stellar.loadAccount(issuerKeys.publicKey())
 
-    console.log(`Issuing ${args.amount} ${args.xAsset} to ${destination}`)
+    console.log(`Issuing ${args.swapSize} ${args.xAsset} to ${destination}`)
     let tx = new Stellar.TransactionBuilder(issuer)
         .addOperation(Stellar.Operation.payment({
             amount,

@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import './assets/style.css'
+import ProgressLog from '@/components/ProgressLog'
 
 import Spinner from 'vue-simple-spinner'
 import Icon from 'vue-awesome'
@@ -12,6 +13,7 @@ import VModal from 'vue-js-modal'
 
 Vue.component('spinner', Spinner)
 Vue.component('icon', Icon)
+Vue.component('progress-log', ProgressLog)
 
 Vue.config.productionTip = false
 

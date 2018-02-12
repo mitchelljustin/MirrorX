@@ -11,7 +11,7 @@ body {
   width: 80%;
   min-width: 300px;
   margin: auto;
-  padding: 30px;
+  padding: 10px 15px;
   background-color: white;
   box-shadow: 1px 1px 5px lightgray;
 }
@@ -22,7 +22,7 @@ h1, h2, a {
 }
 
 h1, h2 {
-  margin: 0.25em 0;
+  margin: 0;
 }
 
 p {
@@ -129,8 +129,8 @@ button {
   cursor: pointer;
 }
 
-button.happy {
-  background: #009432;
+.happy {
+  color: #006923;
 }
 
 button:active {
@@ -141,14 +141,19 @@ button:focus {
   outline: none;
 }
 
+button:disabled {
+  background: #6ba5b3;
+  cursor: default;
+}
+
 .big {
   font-size: 2em;
 }
 
 input[type="text"] {
-  font-size: 1.15em;
+  font-size: 1em;
   padding: 0.4em 0.2em;
-  margin: 0.2em 0;
+  margin: 0.3em 0;
   width: 100%;
   border: 1px solid lightgray;
   border-radius: 4px;
@@ -174,23 +179,24 @@ hr {
   height: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 20px 0;
+  margin: 10px 0 0;
 }
 
 label {
   font-weight: 600;
   margin: 0 0.4em;
+  color: #49495c;
 }
 
 .form-label {
   width: 100%;
-  margin: 1.5em 0 0.2em;
+  margin: 1.0em 0 0.2em;
 }
 
 .swapSize {
-  border: 2px #cbcbcb solid;
+  border: 1px #cbcbcb solid;
   border-radius: 3px;
-  margin: 0.2em 0;
+  margin: 0.2em;
   padding: 0.2em 0;
 }
 
@@ -205,6 +211,23 @@ label {
   font-weight: 400;
 }
 
-.prepare-swap-container {
+.justify-left {
+  justify-content: space-around;
+}
+
+.align-left {
   align-items: flex-start;
+}
+
+ul.no-bullets {
+  list-style: none;
+}
+
+li {
+  display: flex;
+  align-items: center;
+}
+
+li > span {
+  margin: 0 0.2em;
 }

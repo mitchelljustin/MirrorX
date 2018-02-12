@@ -59,7 +59,7 @@
 </template>
 
 <script>
-  import supportedCurrencies from '../../../lib/supportedCurrencies.mjs'
+  import SwapSpecs from '../../../lib/swapSpecs.mjs'
 
   export default {
     name: 'landing',
@@ -67,19 +67,21 @@
       return {
         action: 'deposit',
         currency: 'ETH',
-        supportedCurrencies: Object.keys(supportedCurrencies),
       }
     },
     methods: {
       goClicked() {
         const {action, currency} = this
         this.$router.push({
-          name: 'prepare-swap',
-          params: {action, currency},
+          name: `prepare-${action}`,
+          params: {currency},
         })
       },
     },
     computed: {
+      supportedCurrencies() {
+        return Object.keys(SwapSpecs)
+      },
     },
   }
 </script>

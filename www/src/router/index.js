@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Landing from '@/components/Landing'
-import PrepareSwap from '@/components/PrepareSwap'
+import PrepareWithdraw from '@/components/PrepareWithdraw'
+import PrepareDeposit from '@/components/PrepareDeposit'
 
 Vue.use(Router)
 
@@ -13,9 +14,14 @@ export default new Router({
       component: Landing,
     },
     {
-      path: '/:currency/:action',
-      name: 'prepare-swap',
-      component: PrepareSwap,
+      path: '/:currency/withdraw',
+      name: 'prepare-withdraw',
+      component: PrepareWithdraw,
+    },
+    {
+      path: '/:currency/deposit',
+      name: 'prepare-deposit',
+      component: PrepareDeposit,
     },
     {
       path: '*',

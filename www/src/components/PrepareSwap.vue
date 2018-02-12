@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-dialog />
-    <div class="row prepare-swap-container">
+    <div class="row align-left">
       <div class="major col">
         <h1>{{action.toUpperCase()}} {{currency}}</h1>
         <div class="form-label">
@@ -75,26 +75,25 @@
 </template>
 
 <script>
-  import supportedCurrencies from '../../../lib/supportedCurrencies.mjs'
+  import SwapSpecs from '../../../lib/swapSpecs.mjs'
 
   export default {
     name: 'prepare-swap',
     data() {
-      const {swapSizes} = supportedCurrencies[this.$route.params.currency]
+      const {swapSizes} = SwapSpecs[this.$route.params.currency]
       return {
         currency: this.$route.params.currency,
         action: this.$route.params.action,
-        amount: swapSizes[0],
+        swapSize: swapSizes[0],
         stellarAccount: '',
         swapStatus: 'notStarted',
-        swapSizes,
       }
     },
     beforeRouteEnter(to, from, next) {
       if (to.params.action !== 'withdraw' && to.params.action !== 'deposit') {
         return next(false)
       }
-      if (supportedCurrencies[to.params.currency] === undefined) {
+      if (SwapSpecs[to.params.currency] === undefined) {
         return next(false)
       }
       next()
