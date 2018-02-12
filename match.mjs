@@ -1,7 +1,7 @@
+#!/usr/local/bin/node --experimental-modules
 import Argparse from "argparse"
 
 import MatchingEngine from './lib/api/matchingEngine.mjs'
-import supportedCurrencies from './lib/supportedCurrencies.mjs'
 import connectRedis from './lib/api/createRedisClient.mjs'
 
 const parser = new Argparse.ArgumentParser()

@@ -7,11 +7,20 @@ import './assets/style.css'
 
 import Spinner from 'vue-simple-spinner'
 import Icon from 'vue-awesome'
+import Axios from 'axios'
+import VModal from 'vue-js-modal'
 
 Vue.component('spinner', Spinner)
 Vue.component('icon', Icon)
 
 Vue.config.productionTip = false
+
+Vue.use(VModal, {dialog: true})
+Vue.use((Vue) => {
+  Vue.prototype.$client = Axios.create({
+    baseURL: process.env.API_URI,
+  })
+})
 
 /* eslint-disable no-new */
 new Vue({

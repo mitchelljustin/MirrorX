@@ -1,5 +1,6 @@
 <template>
   <div>
+    <v-dialog />
     <div class="row prepare-swap-container">
       <div class="major col">
         <h1>{{action.toUpperCase()}} {{currency}}</h1>
@@ -17,17 +18,6 @@
                placeholder="GCQNGBNTMHDVKFY3KQ5CXBPICFUAWYLMDRCBEWWAJRWYC6VEEMEQ6NIQ"
                v-model="stellarAccount"
                id="stellarAccount"
-
-        >
-        <div class="form-label">
-          <label for="cryptoAddress">
-            {{currency}} Address
-          </label>
-        </div>
-        <input type="text"
-               :placeholder="cryptoAddressPlaceholder"
-               v-model="cryptoAddress"
-               id="cryptoAddress"
 
         >
         <div class="form-label">
@@ -51,8 +41,16 @@
             </div>
           </div>
           <div class="minor">
-            <button class="big" @click="startClicked">
-              START
+            <button class="big" @click="startClicked" :disabled="swapStatus !== 'notStarted'">
+              <span v-if="swapStatus === 'notStarted'">
+                START
+              </span>
+              <span v-if="swapStatus === 'waitingForMatch'">
+                MATCHING..
+              </span>
+              <span v-if="swapStatus === 'waitingForHoldingTx'">
+                MATCHED..
+              </span>
             </button>
 
           </div>
@@ -88,7 +86,7 @@
         action: this.$route.params.action,
         amount: swapSizes[0],
         stellarAccount: '',
-        cryptoAddress: '',
+        swapStatus: 'notStarted',
         swapSizes,
       }
     },
@@ -103,15 +101,30 @@
     },
     methods: {
       startClicked() {
-        const {currency, stellarAccount, cryptoAddress, amount, action} = this
-        console.log(JSON.stringify({currency, stellarAccount, cryptoAddress, amount, action}))
+        this.startSwap()
       },
-    },
-    computed: {
-      cryptoAddressPlaceholder() {
-        if (this.currency === 'ETH') {
-          return '0xc257274276a4e539741ca11b590b9447b26a8051'
+
+      async startSwap() {
+        this.swapStatus = 'waitingForMatch'
+        const {currency, stellarAccount, amount, action} = this
+        let swapId
+        try {
+          const res = await this.$client.post(`swap/${currency}`, {
+            stellarAccount, amount, action,
+          })
+          swapId = res.swapId
+        } catch (e) {
+          this.swapStatus = 'notStarted'
+          const {response} = e
+          this.$modal.show('dialog', {
+            title: `HTTP ${response.status} Error`,
+            text: response.data,
+            buttons: [{title: 'OK'}],
+          })
+          return
         }
+        this.swapId = swapId
+        this.status = 'waitingForHoldingTx'
       },
     },
   }

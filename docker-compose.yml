@@ -4,8 +4,3 @@ services:
     image: redis:4.0.8
     ports:
     - "6379:6379"
-  api:
-    build: .
-    ports:
-    - "9080:80"
-    network_mode: host
