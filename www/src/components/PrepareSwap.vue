@@ -2,9 +2,9 @@
   <div>
     <v-dialog />
     <div class="row align-left">
-      <div class="major col">
+      <div class="twothird col">
         <h1>{{action.toUpperCase()}} {{currency}}</h1>
-        <div class="form-label">
+        <div class="form-field">
           <label for="stellarAccount">
             Stellar Account
           </label>
@@ -20,14 +20,14 @@
                id="stellarAccount"
 
         >
-        <div class="form-label">
+        <div class="form-field">
           <label>
             Amount
           </label>
         </div>
         <div class="full row">
-          <div class="major row">
-            <div class="col swapSize" v-for="(swapSize, i) in swapSizes" :key="i">
+          <div class="twothird row">
+            <div class="col radio-buttons" v-for="(swapSize, i) in swapSizes" :key="i">
               <input :checked="i === 0"
                      :id='`swapSize-${i}`'
                      :value="swapSize"
@@ -40,7 +40,7 @@
               </label>
             </div>
           </div>
-          <div class="minor">
+          <div class="onethird">
             <button class="big" @click="startClicked" :disabled="swapStatus !== 'notStarted'">
               <span v-if="swapStatus === 'notStarted'">
                 START
@@ -56,7 +56,7 @@
           </div>
         </div>
       </div>
-      <div class="minor col">
+      <div class="onethird col">
         <h2>Info</h2>
         <p>
           You can sign transactions however you please.

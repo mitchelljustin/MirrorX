@@ -2,13 +2,13 @@
   <ul class="progress-log">
     <li v-for="(desc, i) in statusDescriptions"
         :key="i"
-        :class="i <= currentStatus ? '' : 'subdued'"
+        :class="i <= currentStatus ? '' : 'progress-log--inactive'"
     >
-      <span class="row icon-small">
+      <span class="progress-log__icon">
         <icon name="check" class="happy" v-if="i < currentStatus"/>
         <icon name="spinner" v-if="i === currentStatus" pulse/>
       </span>
-      <span>
+      <span class="progress-log__description">
         {{desc}}
       </span>
     </li>

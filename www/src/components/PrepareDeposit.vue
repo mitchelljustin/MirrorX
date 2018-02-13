@@ -1,60 +1,61 @@
 <template>
-  <div>
-    <v-dialog />
-    <div class="row">
-      <div class="major col align-left">
-        <h1>
-          DEPOSIT {{currency}}
-        </h1>
-        <div class="form-label">
-          <label for="depositorAccount">
-            Stellar Account
-          </label>
-          <input type="text"
-                 placeholder="GCQNGBNTMHDVKFY3KQ5CXBPICFUAWYLMDRCBEWWAJRWYC6VEEMEQ6NIQ"
-                 :disabled="requestingSwap"
-                 v-model="depositorAccount"
-                 id="depositorAccount"
-          >
-        </div>
-        <div class="form-label">
-          <label>
-            Amount
-          </label>
-        </div>
-        <div class="full row">
-          <div class="major">
-            <div class="row justify-left">
-              <div class="col swapSize" v-for="(size, i) in swapSpec.swapSizes" :key="i">
-                <input :checked="i === 0"
-                       :id='`swapSize-${size}`'
-                       :value="size"
-                       :disabled="requestingSwap"
-                       v-model="swapSize"
-                       name='swapSize'
-                       type='radio'
-                >
-                <label :for='`swapSize-${size}`'>
-                  {{ size }} {{ currency }}
-                </label>
-              </div>
-            </div>
-          </div>
-          <div class="minor">
-            <div class="col">
-              <button class="big" @click="startClicked" :disabled="requestingSwap">
-                START
-              </button>
-            </div>
+  <div class="row-spaced">
+    <v-dialog/>
+    <div class="twothird form">
+      <h1 class="form__header">
+        DEPOSIT {{currency}}
+      </h1>
+      <div class="form__group">
+        <label for="depositorAccount">
+          Stellar Account
+        </label>
+        <input type="text"
+               placeholder="GCQNGBNTMHDVKFY3KQ5CXBPICFUAWYLMDRCBEWWAJRWYC6VEEMEQ6NIQ"
+               :disabled="requestingSwap"
+               v-model="depositorAccount"
+               id="depositorAccount"
+               name="depositorAccount"
+        >
+      </div>
+      <div class="form__group">
+        <label>
+          Amount
+        </label>
+        <div class="radio-buttons">
+          <div
+            class="radio-buttons__option"
+            v-for="(size, i) in swapSpec.swapSizes"
+            :key="i">
+            <input :checked="i === 0"
+                   :id='`swapSize-${size}`'
+                   :value="size"
+                   :disabled="requestingSwap"
+                   v-model="swapSize"
+                   name='swapSize'
+                   type='radio'
+            >
+            <label class="radio-buttons__label" :for='`swapSize-${size}`'>
+              {{ size }} {{ currency }}
+            </label>
           </div>
         </div>
       </div>
-      <div class="minor">
-        <div class="full col">
-          <p>
-            Atomic Swaps
-          </p>
-        </div>
+      <button class="form__submit" @click="startClicked" :disabled="requestingSwap">
+        START
+      </button>
+    </div>
+    <div class="onethird">
+      <div class="pitch-box pitch-box--subdued">
+        <h2 class="pitch-box__header">
+          INFO
+        </h2>
+        <p class="pitch-box__text">
+          MirrorX does not need your Ethereum address for a deposit.
+        </p>
+        <p class="pitch-box__text">
+          Clicking START does not yet move your money.
+          It starts the process of looking for a withdrawer to exchange with.
+        </p>
       </div>
     </div>
   </div>
@@ -102,9 +103,17 @@
           })
         } catch (err) {
           const {response} = err
+          let title, text
+          if (response !== undefined) {
+            title = `HTTP ${response.status} Error`
+            text = response.data
+          } else {
+            title = 'Error'
+            text = err.message
+          }
           this.$modal.show('dialog', {
-            title: `HTTP ${response.status} Error`,
-            text: response.data,
+            title,
+            text,
             buttons: [{title: 'OK'}],
           })
         } finally {

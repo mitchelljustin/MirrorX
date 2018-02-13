@@ -3,7 +3,7 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import './assets/style.css'
+import './assets/style.scss'
 import ProgressLog from '@/components/ProgressLog'
 
 import Spinner from 'vue-simple-spinner'
