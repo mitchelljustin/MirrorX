@@ -12,20 +12,9 @@
           </label>
           <input type="text"
                  placeholder="GCQNGBNTMHDVKFY3KQ5CXBPICFUAWYLMDRCBEWWAJRWYC6VEEMEQ6NIQ"
-                 :disabled="swapStarted"
+                 :disabled="requestingSwap"
                  v-model="depositorAccount"
                  id="depositorAccount"
-          >
-        </div>
-        <div class="form-label">
-          <label for="ethAddress">
-            ETH Address
-          </label>
-          <input type="text"
-                 :disabled="swapStarted"
-                 placeholder="0x80022bf9c71bdcded7600c23df37eb55996d613356688d05edb2db71817a19dd"
-                 v-model="ethAddress"
-                 id="ethAddress"
           >
         </div>
         <div class="form-label">
@@ -40,7 +29,7 @@
                 <input :checked="i === 0"
                        :id='`swapSize-${size}`'
                        :value="size"
-                       :disabled="swapStarted"
+                       :disabled="requestingSwap"
                        v-model="swapSize"
                        name='swapSize'
                        type='radio'
@@ -53,7 +42,7 @@
           </div>
           <div class="minor">
             <div class="col">
-              <button class="big" @click="startClicked" :disabled="swapStarted">
+              <button class="big" @click="startClicked" :disabled="requestingSwap">
                 START
               </button>
             </div>
@@ -62,11 +51,9 @@
       </div>
       <div class="minor">
         <div class="full col">
-          <h2>STATUS</h2>
-          <progress-log
-            :currentStatus="swapStatusIndex"
-            :statusDescriptions="swapStatusDescriptions"
-          />
+          <p>
+            Atomic Swaps
+          </p>
         </div>
       </div>
     </div>
@@ -84,9 +71,7 @@
         currency: this.$route.params.currency,
         swapSize: swapSizes[0],
         depositorAccount: '',
-        ethAddress: '',
-        swapStatus: 'notStarted',
-        swapReqId: null,
+        requestingSwap: false,
       }
     },
     beforeRouteEnter(to, from, next) {
@@ -99,35 +84,10 @@
       swapSpec() {
         return SwapSpecs[this.currency]
       },
-      swapStarted() {
-        return this.swapStatus !== 'notStarted'
-      },
-      swapStatusIndex() {
-        return {
-          'notStarted': -1,
-          'requestingSwap': 0,
-          'waitingForMatch': 1,
-          'matched': 2,
-        }[this.swapStatus]
-      },
-      swapStatusDescriptions() {
-        return [
-          'Sending swap request..',
-          'Matching..',
-          'Waiting for withdrawer..',
-        ]
-      },
-      swapStatusMessage() {
-        return {
-          'requestingSwap': 'Sending swap request..',
-          'waitingForMatch': 'Matching..',
-          'matched': 'Waiting for withdrawer..',
-        }[this.swapStatus]
-      },
     },
     methods: {
       async startClicked() {
-        this.swapStatus = 'requestingSwap'
+        this.requestingSwap = true
         const {currency, swapSize, depositorAccount} = this
         try {
           const swapReqData = {
@@ -136,30 +96,20 @@
           }
           const {data} = await this.$client.post(`swap/${currency}/deposit`, swapReqData)
           const {swapReqId} = data
-          console.log(`Posted swap request: ${swapReqId}`)
-          this.swapReqId = swapReqId
+          this.$router.push({
+            name: 'complete-deposit',
+            query: {swapReqId},
+          })
         } catch (err) {
-          this.swapStatus = 'notStarted'
           const {response} = err
           this.$modal.show('dialog', {
             title: `HTTP ${response.status} Error`,
             text: response.data,
             buttons: [{title: 'OK'}],
           })
-          return
+        } finally {
+          this.requestingSwap = false
         }
-        this.swapStatus = 'waitingForMatch'
-        this._startPollingForMatch()
-      },
-      _startPollingForMatch() {
-        setInterval(async() => {
-          const {currency, swapReqId} = this
-          const {data} = await this.$client.get(`swap/${currency}/match/${swapReqId}`)
-          const {status} = data
-          if (status === 'matched') {
-            this.swapStatus = 'matched'
-          }
-        }, 2500)
       },
     },
   }

@@ -1,10 +1,10 @@
 <template>
-  <ul class="no-bullets">
+  <ul class="progress-log">
     <li v-for="(desc, i) in statusDescriptions"
         :key="i"
-        v-if="i <= currentStatus"
+        :class="i <= currentStatus ? '' : 'subdued'"
     >
-      <span class="row">
+      <span class="row icon-small">
         <icon name="check" class="happy" v-if="i < currentStatus"/>
         <icon name="spinner" v-if="i === currentStatus" pulse/>
       </span>

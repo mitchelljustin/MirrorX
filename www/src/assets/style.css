@@ -95,7 +95,7 @@ h3 {
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0,0,0,0);
+  clip: rect(0, 0, 0, 0);
   border: 0;
 }
 
@@ -159,7 +159,6 @@ input[type="text"] {
   border-radius: 4px;
 }
 
-
 input:focus {
   outline: none;
   border: 1px solid #2e1980;
@@ -219,15 +218,28 @@ label {
   align-items: flex-start;
 }
 
-ul.no-bullets {
+ul.progress-log {
   list-style: none;
+  font-weight: 600;
 }
 
 li {
   display: flex;
   align-items: center;
+  margin: 0.2em 0;
 }
 
 li > span {
   margin: 0 0.2em;
+}
+
+.subdued {
+  color: lightgray;
+}
+
+.icon-small {
+  width: 15px;
+  height: 15px;
+  display: flex;
+  justify-content: flex-end;
 }
