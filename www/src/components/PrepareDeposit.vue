@@ -21,24 +21,12 @@
         <label>
           Amount
         </label>
-        <div class="radio-buttons">
-          <div
-            class="radio-buttons__option"
-            v-for="(size, i) in swapSpec.swapSizes"
-            :key="i">
-            <input :checked="i === 0"
-                   :id='`swapSize-${size}`'
-                   :value="size"
-                   :disabled="requestingSwap"
-                   v-model="swapSize"
-                   name='swapSize'
-                   type='radio'
-            >
-            <label class="radio-buttons__label" :for='`swapSize-${size}`'>
-              {{ size }} {{ currency }}
-            </label>
-          </div>
-        </div>
+        <swap-size-select
+          :currency="currency"
+          :swapSizes="swapSpec.swapSizes"
+          :disabled="requestingSwap"
+          :selectedSize.sync="swapSize"
+          />
       </div>
       <button class="form__submit" @click="startClicked" :disabled="requestingSwap">
         START

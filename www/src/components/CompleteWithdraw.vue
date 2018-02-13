@@ -3,7 +3,7 @@
     <div class="half">
       <div class="big-info">
         <div class="big-info__header">
-          DEPOSIT
+          WITHDRAW
         </div>
         <div class="big-info__label">
           AMOUNT
@@ -12,10 +12,12 @@
           {{ swapSize || '..' }} {{ currency }}
         </div>
         <div class="big-info__label">
-          TO
+          FROM
         </div>
         <div class="big-info__stellar-account">
-          {{ depositorAccount.slice(0, 8) }}...{{depositorAccount.slice(depositorAccount.length - 8)}}
+          <span v-if="withdrawerAccount !== null">
+            {{ withdrawerAccount.slice(0, 8) }}...{{withdrawerAccount.slice(withdrawerAccount.length - 8)}}
+          </span>
         </div>
       </div>
     </div>
@@ -29,6 +31,8 @@
 </template>
 
 <script>
+  const {Stellar} = require('../../../lib/stellar.mjs')
+
   const WAITING_FOR_MATCH = 0
   const FUND_HOLDING = 1
   // const COMMIT_ETH = 2
@@ -41,9 +45,10 @@
       return {
         swapReqId: this.$route.query.swapReqId,
         currency: this.$route.params.currency,
+        holdingKeys: Stellar.Keypair.fromSecret(this.$route.query.holdingSecret),
         status: WAITING_FOR_MATCH,
         swapSize: null,
-        depositorAccount: null,
+        withdrawerAccount: null,
         checkMatchInterval: null,
       }
     },
@@ -52,9 +57,9 @@
         const {currency, swapReqId} = this
         const {data} = await this.$client.get(`/swap/${currency}/match/${swapReqId}`)
         const {status, swapInfo, reqInfo} = data
-        const {swapSize, depositorAccount} = reqInfo
+        const {swapSize, withdrawerAccount} = reqInfo
         this.swapSize = swapSize
-        this.depositorAccount = depositorAccount
+        this.withdrawerAccount = withdrawerAccount
         if (status === 'matched') {
           clearInterval(this.checkMatchInterval)
           this.swapInfo = swapInfo
@@ -74,10 +79,10 @@
       statusDescriptions() {
         return [
           'Match with counterparty',
-          'Commit XETH on Stellar',
-          'Commit ETH on Ethereum (You)',
-          'Claim ETH on Ethereum',
-          'Claim XETH on Stellar (You)',
+          'Commit XETH on Stellar (You)',
+          'Commit ETH on Ethereum',
+          'Claim ETH on Ethereum (You)',
+          'Claim XETH on Stellar',
           'Done!',
         ]
       },

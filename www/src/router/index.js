@@ -4,6 +4,7 @@ import Landing from '@/components/Landing'
 import PrepareWithdraw from '@/components/PrepareWithdraw'
 import PrepareDeposit from '@/components/PrepareDeposit'
 import CompleteDeposit from '@/components/CompleteDeposit'
+import CompleteWithdraw from '@/components/CompleteWithdraw'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/:currency/deposit/complete',
       name: 'complete-deposit',
       component: CompleteDeposit,
+    },
+    {
+      path: '/:currency/withdraw/complete',
+      name: 'complete-withdraw',
+      component: CompleteWithdraw,
     },
     {
       path: '*',
