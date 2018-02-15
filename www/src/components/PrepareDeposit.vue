@@ -6,11 +6,11 @@
         DEPOSIT {{currency}}
       </h1>
       <div class="form__group">
-        <label for="depositorAccount">
+        <label class="form__label" for="depositorAccount">
           Stellar Account
         </label>
         <input type="text"
-               placeholder="GCQNGBNTMHDVKFY3KQ5CXBPICFUAWYLMDRCBEWWAJRWYC6VEEMEQ6NIQ"
+               class="text-input"
                :disabled="requestingSwap"
                v-model="depositorAccount"
                id="depositorAccount"
@@ -18,7 +18,19 @@
         >
       </div>
       <div class="form__group">
-        <label>
+        <label class="form__label" for="depositorCryptoAddr">
+          {{ currency }} Address
+        </label>
+        <input type="text"
+               class="text-input"
+               :disabled="requestingSwap"
+               v-model="depositorCryptoAddr"
+               id="depositorCryptoAddr"
+               name="depositorCryptoAddr"
+        >
+      </div>
+      <div class="form__group">
+        <label class="form__label">
           Amount
         </label>
         <swap-size-select
@@ -28,7 +40,7 @@
           :selectedSize.sync="swapSize"
           />
       </div>
-      <button class="form__submit" @click="startClicked" :disabled="requestingSwap">
+      <button class="button form__submit" @click="startClicked" :disabled="requestingSwap">
         START
       </button>
     </div>
@@ -37,9 +49,6 @@
         <h2 class="pitch-box__header">
           INFO
         </h2>
-        <p class="pitch-box__text">
-          MirrorX does not need your Ethereum address for a deposit.
-        </p>
         <p class="pitch-box__text">
           Clicking START does not yet move your money.
           It starts the process of looking for a withdrawer to exchange with.
@@ -59,7 +68,8 @@
       return {
         currency: this.$route.params.currency,
         swapSize: swapSizes[0],
-        depositorAccount: '',
+        depositorAccount: null,
+        depositorCryptoAddr: null,
         requestingSwap: false,
       }
     },
@@ -77,11 +87,12 @@
     methods: {
       async startClicked() {
         this.requestingSwap = true
-        const {currency, swapSize, depositorAccount} = this
+        const {currency, swapSize, depositorAccount, depositorCryptoAddr} = this
         try {
           const swapReqData = {
             swapSize,
             depositorAccount,
+            depositorCryptoAddr,
           }
           const {data} = await this.$client.post(`swap/${currency}/deposit`, swapReqData)
           const {swapReqId} = data

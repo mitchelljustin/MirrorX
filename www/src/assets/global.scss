@@ -1,0 +1,82 @@
+@import "utils";
+@import "colors";
+
+body, h1, h2, h3, p {
+  @include flex;
+}
+
+h1, h2, h3 {
+  align-items: center;
+}
+
+body {
+  background-color: $theme-background;
+  color: $theme-text;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*:focus {
+  outline: none;
+}
+
+* {
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+}
+
+h1 {
+  font-weight: 400;
+}
+
+h2 {
+  font-size: 1.2em;
+  font-weight: 300;
+}
+
+h3 {
+  font-size: 1.3em;
+  font-weight: 400;
+}
+
+
+
+input:focus {
+  outline: none;
+  border: 1px solid $theme-focus;
+}
+
+a {
+  color: $theme-link;
+  text-decoration: none;
+}
+
+hr {
+  width: 100%;
+  border: 0;
+  height: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  margin: 10px 0 0;
+}
+
+label {
+  font-weight: 600;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+select {
+  border: none;
+  font-size: 1em;
+}

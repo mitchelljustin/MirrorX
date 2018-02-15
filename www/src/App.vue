@@ -8,7 +8,7 @@
         </span>
       </h1>
       <h2>
-        Secure Deposits & Withdrawals on the Stellar DEX
+        Trustless Deposits & Withdrawals on the Stellar DEX
       </h2>
     </div>
     <hr>

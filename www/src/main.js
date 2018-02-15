@@ -3,20 +3,22 @@
 import Vue from 'vue'
 
 import router from './router'
-import './assets/style.scss'
+import './assets/all.scss'
 import App from './App'
 
 import Spinner from 'vue-simple-spinner'
 import Icon from 'vue-awesome'
-import ProgressLog from '@/components/ProgressLog'
+import SwapProgressLog from '@/components/SwapProgressLog'
 import SwapSizeSelect from '@/components/SwapSizeSelect'
+import SignTransactionDialog from '@/components/SignTransactionDialog'
 import Axios from 'axios'
 import VModal from 'vue-js-modal'
 
 Vue.component('spinner', Spinner)
 Vue.component('icon', Icon)
-Vue.component('progress-log', ProgressLog)
+Vue.component('swap-progress-log', SwapProgressLog)
 Vue.component('swap-size-select', SwapSizeSelect)
+Vue.component('sign-transaction-dialog', SignTransactionDialog)
 
 Vue.config.productionTip = false
 

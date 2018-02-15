@@ -1,61 +1,9 @@
-$theme-primary: #159dbf;
-$theme-link: #151686;
-$theme-happy: #5cbf6f;
-$theme-border: #dbdbdb;
-$theme-focus: #2e1980;
-$theme-background: #fbfbfb;
-$theme-text: #2c3e50;
-$theme-text-light: #f0f8ff;
-$theme-inactive: #d7d7d7;
-
-@mixin flex(
-  $flex-direction: row,
-  $justify-content: flex-start,
-  $align-items: flex-start,
-  $flex-wrap: wrap
-) {
-  display: flex;
-  flex-direction: $flex-direction;
-  justify-content: $justify-content;
-  align-items: $align-items;
-  flex-wrap: $flex-wrap;
-}
-
-@mixin dynamicColor($prop, $color) {
-  #{$prop}: $color;
-
-  &:hover {
-    #{$prop}: lighten($color, 5%);
-  }
-
-  &:active {
-    #{$prop}: lighten($color, 12%);
-  }
-
-  &:disabled {
-    #{$prop}: desaturate(darken($color, 10%), 20%);
-  }
-}
-
-body, h1, h2, h3, p {
-  @include flex;
-}
-
-h1, h2, h3 {
-  align-items: center;
-}
-
-body {
-  background-color: $theme-background;
-  color: $theme-text;
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@import "colors.scss";
+@import "utils.scss";
 
 #app {
   @include flex($flex-direction: column, $justify-content: flex-start, $flex-wrap: nowrap);
-  box-shadow: 1px 1px 5px $theme-border;
+  box-shadow: 1px 1px 5px $theme-gray;
   width: 80%;
   min-width: 300px;
   margin: auto;
@@ -79,54 +27,15 @@ body {
   }
 }
 
-*:focus {
-  outline: none;
-}
-
-* {
-  -webkit-margin-before: 0;
-  -webkit-margin-after: 0;
-}
-
-h1 {
-  font-weight: 400;
-}
-
-h2 {
-  font-size: 1.2em;
-  font-weight: 300;
-}
-
-h3 {
-  font-size: 1.3em;
-  font-weight: 400;
-}
-
-.twothird {
-  width: 65%;
-}
-
-.onethird {
-  width: 32%;
-}
-
-.half {
-  width: 49%;
-}
-
-.full {
-  width: 100%;
-}
-
 .pitch-box {
   @include flex(column, $align-items: center);
-  border: 1px solid $theme-border;
+  border: 1px solid $theme-gray;
   min-height: 210px;
   padding: 20px 0;
 
   &--subdued {
     border: none;
-    border-left: 1px solid lighten($theme-border, 10%);
+    border-left: 1px solid lighten($theme-gray, 10%);
   }
 
   &__header {
@@ -139,88 +48,45 @@ h3 {
   }
 }
 
-.row-spaced {
-  @include flex($justify-content: space-between);
-  width: 100%;
-}
-
-.row {
-  @include flex;
-}
-
-.row-centered {
-  @include flex($justify-content: center);
-}
-
-.col-spaced {
-  @include flex($flex-direction: column, $justify-content: space-between);
-}
-
-.center-col {
-  @include flex($align-items: center);
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-
-select {
-  border: none;
-  font-size: 1em;
-}
-
-button {
-  @include dynamicColor(background, $theme-primary);
+.button {
+  @include dynamicColor($theme-primary);
   color: $theme-text-light;
-  font-size: 1em;
+  font-size: 1.3em;
   margin: 0;
   padding: 0.15em 0.75em;
+  width: 5em;
   border: none;
   border-radius: 3px;
   cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &--happy {
+    @include dynamicColor($theme-happy);
+  }
 }
 
-.happy {
-  color: $theme-happy;
-}
-
-input[type="text"] {
+.text-input {
   font-size: 1em;
   padding: 0.4em 0.2em;
   margin: 0.3em 0;
-  width: 100%;
-  border: 1px solid $theme-border;
+  color: $theme-text;
+  border: 1px solid $theme-gray;
   border-radius: 4px;
-}
 
-input:focus {
-  outline: none;
-  border: 1px solid $theme-focus;
-}
+  &:disabled {
+    background: $theme-gray;
+  }
 
-a {
-  @include dynamicColor(color, $theme-link);
-  text-decoration: none;
-}
+  &--angry {
+    border-color: $theme-angry;
+  }
 
-hr {
-  width: 100%;
-  border: 0;
-  height: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 10px 0 0;
-}
-
-label {
-  font-weight: 600;
+  &--happy {
+    border-color: $theme-happy;
+  }
 }
 
 .form {
@@ -231,10 +97,18 @@ label {
     margin: 0.3em 0;
   }
 
+  &__label {
+    width: 100%;
+  }
+
   &__group {
-    @include flex($flex-direction: column);
+    @include flex;
     width: 100%;
     margin: 0.5em 0;
+
+    input {
+      flex-grow: 1;
+    }
   }
 
   &__submit {
@@ -258,12 +132,6 @@ label {
   }
 }
 
-.content {
-  justify-content: space-around;
-  width: 100%;
-  margin: 4em 0;
-}
-
 .landing-cta {
   @include flex($align-items: center);
   font-size: 1.7em;
@@ -280,15 +148,8 @@ label {
 
   &__submit {
     margin-left: 0.3em;
+    font-size: 0.8em;
   }
-}
-
-.justify-left {
-  justify-content: space-around;
-}
-
-.align-left {
-  align-items: flex-start;
 }
 
 .progress-log {
@@ -297,22 +158,22 @@ label {
   font-weight: 500;
   padding: 0;
 
-  &--inactive {
-    color: $theme-inactive;
-  }
-
   &__icon {
     width: 15px;
     height: 15px;
+
+    &--happy {
+      color: $theme-happy;
+    }
   }
 
-  &__description {
-
-  }
-
-  li {
+  &__item {
     @include flex($align-items: center);
     margin: 0.2em 0;
+
+    &--inactive {
+      color: $theme-inactive;
+    }
 
     span {
       margin-right: 0.4em;
@@ -321,9 +182,9 @@ label {
 }
 
 .router-view {
+  width: 100%;
   padding: 15px 0;
 }
-
 
 .big-info {
   @include flex($flex-direction: column);
@@ -335,7 +196,7 @@ label {
   }
 
   &__label {
-    margin-top: 0.5em;
+    margin: 0.5em 0 0.25em;
     font-weight: 300;
     font-size: 1.2em;
   }
@@ -345,11 +206,68 @@ label {
   }
 
   &__swap-size {
-    font-size: 1.7em;
+    font-size: 1.5em;
   }
 
-  &__stellar-account {
-    font-size: 1.4em;
+  &__account {
+    font-size: 1.1em;
   }
 }
 
+.sign-dialog {
+  @include flex;
+  width: 100%;
+
+  &__header {
+    background: easyGradient($theme-happy);
+    color: $theme-text-light;
+    width: 100%;
+    padding: 10px;
+    font-size: 1.2em;
+    font-weight: 600;
+  }
+
+  &__body {
+    @include flex($flex-direction: column);
+    margin-top: 0;
+    padding: 10px;
+    width: 100%;
+
+    p {
+      margin: 0.2em 0;
+    }
+  }
+
+  &__line {
+    width: 100%;
+    margin-top: 1em;
+  }
+
+  &__stellar {
+    @include flex($align-items: center);
+    width: 100%;
+  }
+
+  &__input {
+    flex-grow: 1;
+    margin-right: 5px;
+  }
+
+  &__submit {
+    font-size: 1.5em;
+    align-self: flex-end;
+    margin: 5px;
+    background: easyGradient($theme-primary);
+  }
+}
+
+.text {
+  &--angry {
+    color: $theme-angry;
+  }
+}
+
+.modal {
+  background: easyGradient(#efefef);
+  height: 100%;
+}

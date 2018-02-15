@@ -1,43 +1,62 @@
 <template>
-  <div class="full row-spaced">
-    <div class="half">
-      <div class="big-info">
-        <div class="big-info__header">
-          WITHDRAW
-        </div>
-        <div class="big-info__label">
-          AMOUNT
-        </div>
-        <div class="big-info__swap-size">
-          {{ swapSize || '..' }} {{ currency }}
-        </div>
-        <div class="big-info__label">
-          FROM
-        </div>
-        <div class="big-info__stellar-account">
-          <span v-if="withdrawerAccount !== null">
+  <div>
+    <v-dialog />
+    <sign-transaction-dialog modalName="commit-xeth" network="stellar">
+      <span slot="title">
+        COMMIT XETH
+      </span>
+      <div slot="description">
+        <p>
+          MirrorX needs your signature to commit your XETH on Stellar.
+        </p>
+      </div>
+    </sign-transaction-dialog>
+    <div class="full row-spaced">
+      <div class="half">
+        <div class="big-info">
+          <div class="big-info__header">
+            WITHDRAW
+          </div>
+          <div class="big-info__label">
+            AMOUNT
+          </div>
+          <div class="big-info__swap-size">
+            {{ swapSize || '..' }} {{ currency }}
+          </div>
+          <div class="big-info__label">
+            FROM
+          </div>
+          <span v-if="withdrawerAccount !== null" class="big-info__account">
             {{ withdrawerAccount.slice(0, 8) }}...{{withdrawerAccount.slice(withdrawerAccount.length - 8)}}
           </span>
+          <div class="big-info__label">
+            TO
+          </div>
+          <div v-if="withdrawerCryptoAddr !== null" class="big-info__account">
+            {{ withdrawerCryptoAddr }}
+          </div>
+          <div class="big-info__label">
+            TRANSACTION IDS
+          </div>
+          <p>
+            ---
+          </p>
         </div>
       </div>
-    </div>
-    <div class="half">
-      <h3>Progress</h3>
-      <progress-log :currentStatus="status"
-                    :statusDescriptions="statusDescriptions"
-      />
+      <div class="half">
+        <h3>Progress</h3>
+        <swap-progress-log :status="status" side="withdraw"/>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-  const {Stellar} = require('../../../lib/stellar.mjs')
-
-  const WAITING_FOR_MATCH = 0
-  const FUND_HOLDING = 1
-  // const COMMIT_ETH = 2
-  // const CLAIM_ETH = 3
-  // const CLAIM_HOLDING = 4
+  /* eslint-disable no-unused-vars */
+  import {COMMIT_XETH, WAITING_FOR_MATCH, CLAIM_ETH, CLAIM_HOLDING, COMMIT_ETH} from '../util/swapState'
+  import {Stellar} from '../../../lib/stellar.mjs'
+  import SwapSpecs from '../../../lib/swapSpecs.mjs'
+  import Crypto from 'crypto'
 
   export default {
     name: 'complete-deposit',
@@ -46,7 +65,10 @@
         swapReqId: this.$route.query.swapReqId,
         currency: this.$route.params.currency,
         holdingKeys: Stellar.Keypair.fromSecret(this.$route.query.holdingSecret),
+        preimage: Buffer.from(this.$route.query.preimage, 'hex'),
         status: WAITING_FOR_MATCH,
+        depositorAccount: null,
+        withdrawerCryptoAddr: null,
         swapSize: null,
         withdrawerAccount: null,
         checkMatchInterval: null,
@@ -57,13 +79,27 @@
         const {currency, swapReqId} = this
         const {data} = await this.$client.get(`/swap/${currency}/match/${swapReqId}`)
         const {status, swapInfo, reqInfo} = data
-        const {swapSize, withdrawerAccount} = reqInfo
-        this.swapSize = swapSize
-        this.withdrawerAccount = withdrawerAccount
+        const {swapSize, withdrawerAccount, withdrawerCryptoAddr} = reqInfo
+        Object.assign(this, {swapSize, withdrawerAccount, withdrawerCryptoAddr})
         if (status === 'matched') {
           clearInterval(this.checkMatchInterval)
-          this.swapInfo = swapInfo
-          this.status = FUND_HOLDING
+          const {depositorAccount} = swapInfo
+          const holdingAccount = this.holdingAccount
+          Object.assign(this, {depositorAccount})
+          let info
+          try {
+            info = await this.swapSpec.findHoldingTx({swapSize, depositorAccount, holdingAccount, wait: false})
+          } catch (e) {
+            this.$modal.show('dialog', {
+              title: 'Error',
+              text: JSON.stringify(e),
+            })
+          }
+          if (!info) {
+            this.status = COMMIT_XETH
+          } else {
+            this.status = COMMIT_ETH
+          }
         }
       }
       this.checkMatchInterval = setInterval(checkMatch, 10000)
@@ -75,16 +111,65 @@
       }
       next()
     },
+    methods: {
+      async promptCommitXethSignature() {
+        const {
+          hashlock,
+          swapSize,
+          holdingAccount,
+          depositorAccount,
+          withdrawerAccount,
+          withdrawerCryptoAddr,
+        } = this
+        const {holdingTx} = await this.swapSpec.genFundHoldingTx({
+          hashlock,
+          swapSize,
+          holdingAccount,
+          depositorAccount,
+          withdrawerAccount,
+          withdrawerEthAddr: withdrawerCryptoAddr,
+        })
+        holdingTx.sign(this.holdingKeys)
+        const envelope = holdingTx.toEnvelope()
+        this.$modal.show('commit-xeth', {
+          transactionXdr: envelope.toXDR('base64'),
+        })
+        this.swapSpec.findHoldingTx({holdingAccount, depositorAccount, wait: true})
+          .then(() => {
+            this.status = COMMIT_ETH
+          })
+          .catch((e) => {
+            this.$modal.show('dialog', {
+              title: 'Error',
+              text: JSON.stringify(e),
+            })
+          })
+      },
+    },
     computed: {
-      statusDescriptions() {
-        return [
-          'Match with counterparty',
-          'Commit XETH on Stellar (You)',
-          'Commit ETH on Ethereum',
-          'Claim ETH on Ethereum (You)',
-          'Claim XETH on Stellar',
-          'Done!',
-        ]
+      swapSpec() {
+        return SwapSpecs[this.currency]
+      },
+      holdingAccount() {
+        return this.holdingKeys.publicKey()
+      },
+      hashlock() {
+        const h = Crypto.createHash('sha256')
+        h.update(this.preimage)
+        return h.digest()
+      },
+    },
+    watch: {
+      status(newStatus, oldStatus) {
+        if (oldStatus === newStatus) {
+          return
+        }
+        if (oldStatus === WAITING_FOR_MATCH && newStatus === COMMIT_XETH) {
+          return this.promptCommitXethSignature()
+        }
+        if (oldStatus === COMMIT_XETH && newStatus === COMMIT_ETH) {
+          this.$modal.hide('commit-xeth')
+        }
       },
     },
   }

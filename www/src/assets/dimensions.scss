@@ -1,0 +1,61 @@
+@import "utils";
+
+.twothird {
+  width: 65%;
+}
+
+.onethird {
+  width: 32%;
+}
+
+.half {
+  width: 49%;
+}
+
+@media only screen and (max-width: 768px) {
+  .half {
+    width: 100%;
+  }
+
+  .twothird {
+    width: 100%;
+  }
+
+  .onethird {
+    width: 100%;
+  }
+}
+
+.full {
+  width: 100%;
+}
+
+.row-spaced {
+  @include flex($justify-content: space-between);
+  width: 100%;
+}
+
+.row {
+  @include flex;
+}
+
+.row-centered {
+  @include flex($justify-content: center);
+}
+
+.col-spaced {
+  @include flex($flex-direction: column, $justify-content: space-between);
+}
+
+.center-col {
+  @include flex($align-items: center);
+}
+
+
+.justify-left {
+  justify-content: space-around;
+}
+
+.align-left {
+  align-items: flex-start;
+}

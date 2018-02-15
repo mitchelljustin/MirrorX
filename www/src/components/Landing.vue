@@ -20,9 +20,11 @@
             {{cur}}
           </option>
         </select>
-        <button class="landing-cta__submit" @click="goClicked">
-          GO
-        </button>
+        <div class="landing-cta__submit">
+          <button class="button" @click="goClicked">
+            GO
+          </button>
+        </div>
       </div>
     </div>
     <div class="row-spaced">

@@ -1,0 +1,32 @@
+@mixin flex(
+  $flex-direction: row,
+  $justify-content: flex-start,
+  $align-items: flex-start,
+  $flex-wrap: wrap
+) {
+  display: flex;
+  flex-direction: $flex-direction;
+  justify-content: $justify-content;
+  align-items: $align-items;
+  flex-wrap: $flex-wrap;
+}
+
+@function easyGradient($color) {
+  @return linear-gradient(lighten($color, 2.5%), darken($color, 2.5%))
+}
+
+@mixin dynamicColor($color) {
+  background: easyGradient($color);
+
+  &:hover {
+    background: easyGradient(lighten($color, 2%));
+  }
+
+  &:active {
+    background: easyGradient(lighten($color, 9%));
+  }
+
+  &:disabled {
+    background: easyGradient(desaturate($color, 20%));
+  }
+}

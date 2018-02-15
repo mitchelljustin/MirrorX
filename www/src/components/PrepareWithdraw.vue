@@ -6,11 +6,11 @@
         WITHDRAW {{currency}}
       </h1>
       <div class="form__group">
-        <label for="withdrawerAccount">
+        <label class="form__label" for="withdrawerAccount">
           Stellar Account
         </label>
         <input type="text"
-               placeholder="GCQNGBNTMHDVKFY3KQ5CXBPICFUAWYLMDRCBEWWAJRWYC6VEEMEQ6NIQ"
+               class="text-input"
                :disabled="requestingSwap"
                v-model="withdrawerAccount"
                id="withdrawerAccount"
@@ -18,7 +18,19 @@
         >
       </div>
       <div class="form__group">
-        <label>
+        <label class="form__label" for="withdrawerCryptoAddr">
+          {{ currency }} Address
+        </label>
+        <input type="text"
+               class="text-input"
+               :disabled="requestingSwap"
+               v-model="withdrawerCryptoAddr"
+               id="withdrawerCryptoAddr"
+               name="withdrawerCryptoAddr"
+        >
+      </div>
+      <div class="form__group">
+        <label class="form__label">
           Amount
         </label>
         <swap-size-select
@@ -28,7 +40,7 @@
           :selectedSize.sync="swapSize"
           />
       </div>
-      <button class="form__submit" @click="startClicked" :disabled="requestingSwap">
+      <button class="button form__submit" @click="startClicked" :disabled="requestingSwap">
         START
       </button>
     </div>
@@ -37,9 +49,6 @@
         <h2 class="pitch-box__header">
           INFO
         </h2>
-        <p class="pitch-box__text">
-          MirrorX does not need your Ethereum address for a withdrawal.
-        </p>
         <p class="pitch-box__text">
           Clicking START does not yet move your money.
           It starts the process of looking for a withdrawor to exchange with.
@@ -59,7 +68,8 @@
       return {
         currency: this.$route.params.currency,
         swapSize: swapSizes[0],
-        withdrawerAccount: '',
+        withdrawerAccount: null,
+        withdrawerCryptoAddr: null,
         requestingSwap: false,
       }
     },
@@ -77,15 +87,18 @@
     methods: {
       async startClicked() {
         this.requestingSwap = true
-        const {currency, swapSize, withdrawerAccount} = this
+        const {currency, swapSize, withdrawerAccount, withdrawerCryptoAddr} = this
         try {
           const {holdingKeys} = this.swapSpec.makeHoldingKeys()
+          let {preimage} = this.swapSpec.makeHashlock()
+          preimage = preimage.toString('hex')
           const holdingAccount = holdingKeys.publicKey()
           const holdingSecret = holdingKeys.secret()
           const swapReqData = {
             swapSize,
             holdingAccount,
             withdrawerAccount,
+            withdrawerCryptoAddr,
           }
           const {data} = await this.$client.post(`swap/${currency}/withdraw`, swapReqData)
           const {swapReqId} = data
@@ -94,6 +107,7 @@
             query: {
               swapReqId,
               holdingSecret,
+              preimage,
             },
           })
         } catch (err) {
