@@ -14,13 +14,17 @@
                :disabled="requestingSwap"
                v-model="withdrawerAccount"
                id="withdrawerAccount"
-               name="withdrawerAccount"
-        >
+               name="withdrawerAccount">
       </div>
       <div class="form__group">
-        <label class="form__label" for="withdrawerCryptoAddr">
-          {{ currency }} Address
-        </label>
+        <span class="form__label">
+          <label for="withdrawerCryptoAddr">
+            {{ currency }} Address
+          </label>
+          <button class="button button--link" @click="loadFromMetamaskClicked">
+            Load from Metamask
+          </button>
+        </span>
         <input type="text"
                class="text-input"
                :disabled="requestingSwap"
@@ -59,6 +63,7 @@
 </template>
 
 <script>
+  import web3 from '../util/web3'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
 
   export default {
@@ -85,6 +90,9 @@
       },
     },
     methods: {
+      async loadFromMetamaskClicked() {
+        this.withdrawerCryptoAddr = (await web3.eth.getAccounts())[0]
+      },
       async startClicked() {
         this.requestingSwap = true
         const {currency, swapSize, withdrawerAccount, withdrawerCryptoAddr} = this

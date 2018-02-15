@@ -53,7 +53,7 @@
 
 <script>
   /* eslint-disable no-unused-vars */
-  import {COMMIT_XETH, WAITING_FOR_MATCH, CLAIM_ETH, CLAIM_HOLDING, COMMIT_ETH} from '../util/swapState'
+  import {COMMIT_STELLAR, WAITING_FOR_MATCH, CLAIM_ETH, CLAIM_STELLAR, COMMIT_ETH} from '../util/swapState'
   import {Stellar} from '../../../lib/stellar.mjs'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
   import Crypto from 'crypto'
@@ -71,24 +71,32 @@
         withdrawerCryptoAddr: null,
         swapSize: null,
         withdrawerAccount: null,
-        checkMatchInterval: null,
+        checkMatchTimeout: null,
       }
     },
     mounted() {
-      const checkMatch = async() => {
+      this.checkMatch()
+    },
+    beforeRouteLeave(to, from, next) {
+      if (this.checkMatchTimeout !== null) {
+        clearTimeout(this.checkMatchTimeout)
+      }
+      next()
+    },
+    methods: {
+      async checkMatch() {
         const {currency, swapReqId} = this
         const {data} = await this.$client.get(`/swap/${currency}/match/${swapReqId}`)
         const {status, swapInfo, reqInfo} = data
         const {swapSize, withdrawerAccount, withdrawerCryptoAddr} = reqInfo
         Object.assign(this, {swapSize, withdrawerAccount, withdrawerCryptoAddr})
         if (status === 'matched') {
-          clearInterval(this.checkMatchInterval)
           const {depositorAccount} = swapInfo
           const holdingAccount = this.holdingAccount
           Object.assign(this, {depositorAccount})
           let info
           try {
-            info = await this.swapSpec.findHoldingTx({swapSize, depositorAccount, holdingAccount, wait: false})
+            info = await this.swapSpec.findHoldingTx({swapSize, withdrawerAccount, depositorAccount, holdingAccount, wait: false})
           } catch (e) {
             this.$modal.show('dialog', {
               title: 'Error',
@@ -96,22 +104,14 @@
             })
           }
           if (!info) {
-            this.status = COMMIT_XETH
+            this.status = COMMIT_STELLAR
           } else {
             this.status = COMMIT_ETH
           }
+        } else {
+          this.checkMatchTimeout = setTimeout(this.checkMatch.bind(this), 5 * 1000)
         }
-      }
-      this.checkMatchInterval = setInterval(checkMatch, 10000)
-      checkMatch()
-    },
-    beforeRouteLeave(to, from, next) {
-      if (this.checkMatchInterval !== null) {
-        clearInterval(this.checkMatchInterval)
-      }
-      next()
-    },
-    methods: {
+      },
       async promptCommitXethSignature() {
         const {
           hashlock,
@@ -132,9 +132,9 @@
         holdingTx.sign(this.holdingKeys)
         const envelope = holdingTx.toEnvelope()
         this.$modal.show('commit-xeth', {
-          transactionXdr: envelope.toXDR('base64'),
+          envelopeXdr: envelope.toXDR('base64'),
         })
-        this.swapSpec.findHoldingTx({holdingAccount, depositorAccount, wait: true})
+        this.swapSpec.findHoldingTx({swapSize, withdrawerAccount, holdingAccount, depositorAccount, wait: true})
           .then(() => {
             this.status = COMMIT_ETH
           })
@@ -161,13 +161,14 @@
     },
     watch: {
       status(newStatus, oldStatus) {
+        console.log(`Withdraw status: ${oldStatus} -> ${newStatus}`)
         if (oldStatus === newStatus) {
           return
         }
-        if (oldStatus === WAITING_FOR_MATCH && newStatus === COMMIT_XETH) {
+        if (oldStatus === WAITING_FOR_MATCH && newStatus === COMMIT_STELLAR) {
           return this.promptCommitXethSignature()
         }
-        if (oldStatus === COMMIT_XETH && newStatus === COMMIT_ETH) {
+        if (oldStatus === COMMIT_STELLAR && newStatus === COMMIT_ETH) {
           this.$modal.hide('commit-xeth')
         }
       },

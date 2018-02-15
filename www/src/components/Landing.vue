@@ -2,28 +2,15 @@
   <div>
     <div class="row-centered">
       <div class="landing-cta">
-        <span class="landing-action__text">
-          I want to
-        </span>
-        <label for="action" class="sr-only">
-          Action
-        </label>
-        <select class="landing-cta__input" name="action" id="action" v-model="action">
-          <option value="deposit">Deposit</option>
-          <option value="withdraw">Withdraw</option>
-        </select>
-        <label for="currency" class="sr-only">
-          Currency
-        </label>
-        <select class="landing-cta__input" name="currency" id="currency" v-model="currency">
-          <option v-for="cur in supportedCurrencies" :key="cur" :value="cur">
-            {{cur}}
-          </option>
-        </select>
         <div class="landing-cta__submit">
-          <button class="button" @click="goClicked">
-            GO
-          </button>
+          <router-link :to="{name: 'prepare-deposit', params: {currency}}"
+                       class="button button--long button--happy">
+            SELL ETH
+          </router-link>
+          <router-link :to="{name: 'prepare-withdraw', params: {currency}}"
+                       class="button button--long">
+            BUY ETH
+          </router-link>
         </div>
       </div>
     </div>
@@ -72,10 +59,17 @@
       }
     },
     methods: {
-      goClicked() {
-        const {action, currency} = this
+      withdrawClicked() {
+        const {currency} = this
         this.$router.push({
-          name: `prepare-${action}`,
+          name: 'prepare-withdraw',
+          params: {currency},
+        })
+      },
+      depositClicked() {
+        const {currency} = this
+        this.$router.push({
+          name: 'prepare-deposit',
           params: {currency},
         })
       },

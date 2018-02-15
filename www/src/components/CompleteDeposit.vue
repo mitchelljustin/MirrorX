@@ -1,6 +1,16 @@
 <template>
   <div class="full row-spaced">
     <v-dialog />
+    <sign-transaction-dialog modalName="commit-eth">
+      <span slot="title">
+        COMMIT ETH
+      </span>
+      <div slot="description">
+        <p>
+          MirrorX needs your signature to commit your Ether on Ethereum.
+        </p>
+      </div>
+    </sign-transaction-dialog>
     <div class="half">
       <div class="big-info">
         <div class="big-info__header">
@@ -35,7 +45,7 @@
 
 <script>
   /* eslint-disable no-unused-vars */
-  import {COMMIT_XETH, WAITING_FOR_MATCH, CLAIM_ETH, CLAIM_HOLDING, COMMIT_ETH} from '../util/swapState'
+  import {COMMIT_STELLAR, WAITING_FOR_MATCH, CLAIM_ETH, CLAIM_STELLAR, COMMIT_ETH} from '../util/swapState'
 
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
 
@@ -49,8 +59,10 @@
         swapSize: null,
         depositorAccount: null,
         holdingAccount: null,
+        withdrawerAccount: null,
+        withdrawerCryptoAddr: null,
         depositorCryptoAddr: null,
-        checkMatchInterval: null,
+        checkMatchTimeout: null,
       }
     },
     mounted() {
@@ -61,25 +73,27 @@
         const {swapSize, depositorAccount, depositorCryptoAddr} = reqInfo
         Object.assign(this, {swapSize, depositorAccount, depositorCryptoAddr})
         if (status === 'matched') {
-          clearInterval(this.checkMatchInterval)
-          const {holdingAccount} = swapInfo
-          Object.assign(this, {holdingAccount})
-          this.status = COMMIT_XETH
+          clearInterval(this.checkMatchTimeout)
+          const {withdrawerAccount, holdingAccount, withdrawerCryptoAddr} = swapInfo
+          Object.assign(this, {withdrawerAccount, holdingAccount, withdrawerCryptoAddr})
+          this.status = COMMIT_STELLAR
         }
       }
-      this.checkMatchInterval = setInterval(checkMatch, 10000)
+      this.checkMatchTimeout = setInterval(checkMatch, 10000)
       checkMatch()
     },
     beforeRouteLeave(to, from, next) {
-      if (this.checkMatchInterval !== null) {
-        clearInterval(this.checkMatchInterval)
+      if (this.checkMatchTimeout !== null) {
+        clearInterval(this.checkMatchTimeout)
       }
       next()
     },
     methods: {
       async waitForHoldingTx() {
-        const {holdingAccount, depositorAccount, swapSize} = this
-        const {hashlock} = await this.swapSpec.findHoldingTx({swapSize, holdingAccount, depositorAccount, wait: true})
+        const {holdingAccount, withdrawerAccount, depositorAccount, swapSize} = this
+        const {hashlock} = await this.swapSpec.findHoldingTx({
+          withdrawerAccount, swapSize, holdingAccount, depositorAccount, wait: true,
+        })
         Object.assign(this, {hashlock})
         this.status = COMMIT_ETH
       },
@@ -94,8 +108,13 @@
         if (oldStatus === newStatus) {
           return
         }
-        if (oldStatus === WAITING_FOR_MATCH && newStatus === COMMIT_XETH) {
+        if (oldStatus === WAITING_FOR_MATCH && newStatus === COMMIT_STELLAR) {
           this.waitForHoldingTx()
+        } else if (oldStatus === COMMIT_STELLAR && newStatus === COMMIT_ETH) {
+          const {hashlock, withdrawerCryptoAddr} = this
+          this.$modal.show('commit-eth', {
+            hashlock, withdrawerCryptoAddr,
+          })
         }
       },
     },

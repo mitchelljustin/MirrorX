@@ -20,6 +20,9 @@
       <div class="form__group">
         <label class="form__label" for="depositorCryptoAddr">
           {{ currency }} Address
+          <button class="button button--link" @click="loadFromMetamaskClicked">
+            Load from Metamask
+          </button>
         </label>
         <input type="text"
                class="text-input"
@@ -59,6 +62,7 @@
 </template>
 
 <script>
+  import web3 from '../util/web3'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
 
   export default {
@@ -85,6 +89,9 @@
       },
     },
     methods: {
+      async loadFromMetamaskClicked() {
+        this.depositorCryptoAddr = (await web3.eth.getAccounts())[0]
+      },
       async startClicked() {
         this.requestingSwap = true
         const {currency, swapSize, depositorAccount, depositorCryptoAddr} = this

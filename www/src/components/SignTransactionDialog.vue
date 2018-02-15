@@ -13,13 +13,16 @@
         <div class="sign-dialog__body">
           <slot name="description"/>
           <div class="sign-dialog__stellar" v-if="network === 'stellar'">
-            <label class="sign-dialog__line" for="transactionXdr">
+            <label class="sign-dialog__line" for="envelopeXdr">
               Raw Transaction
+              <a :href="`https://www.stellar.org/laboratory/#xdr-viewer?input=${encodeURIComponent(envelopeXdr)}&type=TransactionEnvelope&network=test`">
+                Inspect
+              </a>
             </label>
             <input type="text"
                    class="sign-dialog__input text-input"
-                   v-model="transactionXdr"
-                   id="transactionXdr"
+                   v-model="envelopeXdr"
+                   id="envelopeXdr"
                    disabled
             >
             <label for="stellarPrivateKey" class="sign-dialog__line">
@@ -35,7 +38,7 @@
             </button>
             <span class="sign-dialog__line">
               <a
-                :href="`https://www.stellar.org/laboratory/#txsigner?xdr=${encodeURIComponent(transactionXdr)}&network=test`">
+                :href="`https://www.stellar.org/laboratory/#txsigner?xdr=${encodeURIComponent(envelopeXdr)}&network=test`">
                 Sign on Stellar.org
               </a>
             </span>
@@ -77,7 +80,7 @@
       return {
         stellarPrivateKey: null,
         stellarSignedTx: null,
-        transactionXdr: null,
+        envelopeXdr: null,
         stellarSignedTxValid: null,
         errorText: null,
         submitting: false,
@@ -85,14 +88,14 @@
     },
     methods: {
       beforeModalOpen(event) {
-        const {transactionXdr} = event.params
-        if (!transactionXdr && this.network === 'stellar') {
+        const {envelopeXdr} = event.params
+        if (!envelopeXdr && this.network === 'stellar') {
           return this.$router.back()
         }
-        this.transactionXdr = transactionXdr
+        this.envelopeXdr = envelopeXdr
       },
       stellarSignClicked() {
-        const tx = new Stellar.Transaction(this.transactionXdr)
+        const tx = new Stellar.Transaction(this.envelopeXdr)
         const keypair = Stellar.Keypair.fromSecret(this.stellarPrivateKey)
         tx.sign(keypair)
         this.stellarSignedTx = tx.toEnvelope().toXDR('base64')
