@@ -53,7 +53,7 @@
 
 <script>
   /* eslint-disable no-unused-vars */
-  import {COMMIT_STELLAR, WAITING_FOR_MATCH, CLAIM_ETH, CLAIM_STELLAR, COMMIT_ETH} from '../util/swapState'
+  import {COMMIT_STELLAR, WAITING_FOR_MATCH, CLAIM_ETH, CLAIM_STELLAR, COMMIT_ETH} from '../util/swapStatus'
   import {Stellar} from '../../../lib/stellar.mjs'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
   import Crypto from 'crypto'

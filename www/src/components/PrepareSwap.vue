@@ -3,34 +3,33 @@
     <v-dialog/>
     <div class="twothird form">
       <h1 class="form__header">
-        WITHDRAW {{currency}}
+        {{side.toUpperCase()}} {{currency}}
       </h1>
       <div class="form__group">
-        <label class="form__label" for="withdrawerAccount">
+        <label class="form__label" for="stellarAccount">
           Stellar Account
         </label>
         <input type="text"
                class="text-input"
                :disabled="requestingSwap"
-               v-model="withdrawerAccount"
-               id="withdrawerAccount"
-               name="withdrawerAccount">
+               v-model="stellarAccount"
+               id="stellarAccount"
+               name="stellarAccount"
+        >
       </div>
       <div class="form__group">
-        <span class="form__label">
-          <label for="withdrawerCryptoAddr">
-            {{ currency }} Address
-          </label>
+        <label class="form__label" for="cryptoAddress">
+          {{ currency }} Address
           <button class="button button--link" @click="loadFromMetamaskClicked">
             Load from Metamask
           </button>
-        </span>
+        </label>
         <input type="text"
                class="text-input"
                :disabled="requestingSwap"
-               v-model="withdrawerCryptoAddr"
-               id="withdrawerCryptoAddr"
-               name="withdrawerCryptoAddr"
+               v-model="cryptoAddress"
+               id="cryptoAddress"
+               name="cryptoAddress"
         >
       </div>
       <div class="form__group">
@@ -55,7 +54,7 @@
         </h2>
         <p class="pitch-box__text">
           Clicking START does not yet move your money.
-          It starts the process of looking for a withdrawor to exchange with.
+          It starts the process of looking for a withdrawer to exchange with.
         </p>
       </div>
     </div>
@@ -67,14 +66,17 @@
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
 
   export default {
-    name: 'prepare-withdraw',
+    name: 'prepare-deposit',
+    props: {
+      currency: String,
+      side: String,
+    },
     data() {
-      const {swapSizes} = SwapSpecs[this.$route.params.currency]
+      const {swapSizes} = SwapSpecs[this.currency]
       return {
-        currency: this.$route.params.currency,
         swapSize: swapSizes[0],
-        withdrawerAccount: null,
-        withdrawerCryptoAddr: null,
+        stellarAccount: null,
+        cryptoAddress: null,
         requestingSwap: false,
       }
     },
@@ -91,32 +93,40 @@
     },
     methods: {
       async loadFromMetamaskClicked() {
-        this.withdrawerCryptoAddr = (await web3.eth.getAccounts())[0]
+        const address = (await web3.eth.getAccounts())[0]
+        if (address === undefined) {
+          return this.$modal.show('dialog', {
+            title: 'Metamask',
+            text: 'Please unlock your Metamask to use your Ethereum account.',
+          })
+        }
+        this.cryptoAddress = address
       },
       async startClicked() {
         this.requestingSwap = true
-        const {currency, swapSize, withdrawerAccount, withdrawerCryptoAddr} = this
+        const {side, currency, swapSize, stellarAccount, cryptoAddress} = this
         try {
-          const {holdingKeys} = this.swapSpec.makeHoldingKeys()
-          let {preimage} = this.swapSpec.makeHashlock()
-          preimage = preimage.toString('hex')
-          const holdingAccount = holdingKeys.publicKey()
-          const holdingSecret = holdingKeys.secret()
+          const query = {}
           const swapReqData = {
             swapSize,
-            holdingAccount,
-            withdrawerAccount,
-            withdrawerCryptoAddr,
+            stellarAccount,
+            cryptoAddress,
           }
-          const {data} = await this.$client.post(`swap/${currency}/withdraw`, swapReqData)
-          const {swapReqId} = data
+          if (side === 'withdraw') {
+            const {holdingKeys} = this.swapSpec.makeHoldingKeys()
+            let {preimage} = this.swapSpec.makeHashlock()
+            preimage = preimage.toString('hex')
+            const holdingAccount = holdingKeys.publicKey()
+            const holdingSecret = holdingKeys.secret()
+            Object.assign(swapReqData, {holdingAccount})
+            Object.assign(query, {holdingSecret, preimage})
+          }
+          const {data: {swapReqId}} = await this.$client.post(`swap/${currency}/${side}`, swapReqData)
+          query.swapReqId = swapReqId
           this.$router.push({
-            name: 'complete-withdraw',
-            query: {
-              swapReqId,
-              holdingSecret,
-              preimage,
-            },
+            name: 'complete-swap',
+            params: {side, currency},
+            query,
           })
         } catch (err) {
           const {response} = err

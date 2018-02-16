@@ -3,13 +3,13 @@
     <div class="row-centered">
       <div class="landing-cta">
         <div class="landing-cta__submit">
-          <router-link :to="{name: 'prepare-deposit', params: {currency}}"
+          <router-link :to="{name: 'prepare-swap', params: {currency, side: 'deposit'}}"
                        class="button button--long button--happy">
-            SELL ETH
+            DEPOSIT ETH
           </router-link>
-          <router-link :to="{name: 'prepare-withdraw', params: {currency}}"
+          <router-link :to="{name: 'prepare-swap', params: {currency, side: 'withdraw'}}"
                        class="button button--long">
-            BUY ETH
+            WITHDRAW ETH
           </router-link>
         </div>
       </div>

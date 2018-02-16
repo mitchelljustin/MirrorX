@@ -8,6 +8,7 @@
     <div class="modal">
       <div class="sign-dialog">
         <div class="sign-dialog__header">
+          <icon v-if="submitting" name="spinner" pulse/>
           <slot name="title"/>
         </div>
         <div class="sign-dialog__body">
@@ -69,6 +70,7 @@
 
 <script>
   import {stellar, Stellar} from '../../../lib/stellar.mjs'
+  import EthSwapContract from '../../../lib/ethSwapContract.mjs'
 
   export default {
     name: 'sign-transaction-dialog',
@@ -88,11 +90,22 @@
     },
     methods: {
       beforeModalOpen(event) {
-        const {envelopeXdr} = event.params
-        if (!envelopeXdr && this.network === 'stellar') {
-          return this.$router.back()
+        if (this.network === 'stellar') {
+          const {envelopeXdr} = event.params
+          if (!envelopeXdr) {
+            return this.$router.back()
+          }
+          this.envelopeXdr = envelopeXdr
         }
-        this.envelopeXdr = envelopeXdr
+
+        if (this.network === 'ethereum') {
+          const {funcName, params} = event.params
+          if (!funcName || !params) {
+            return this.$router.back()
+          }
+          Object.assign(this, {funcName, params})
+          this.callEthereumContract()
+        }
       },
       stellarSignClicked() {
         const tx = new Stellar.Transaction(this.envelopeXdr)
@@ -108,11 +121,18 @@
         this.submitting = true
         const tx = new Stellar.Transaction(this.stellarSignedTx)
         try {
-          const stellarRes = await stellar.submitTransaction(tx)
-          console.log(stellarRes)
+          await stellar.submitTransaction(tx)
         } catch (e) {
           this.errorText = JSON.stringify(e.data.extras.result_codes, null, 2)
+          this.submitting = false
         }
+      },
+      async callEthereumContract() {
+        const {funcName, params} = this
+        const contract = await EthSwapContract.deployed()
+        const contractFunc = contract[funcName]
+        const ethResult = await contractFunc(...params)
+        console.log(ethResult)
       },
     },
     watch: {
