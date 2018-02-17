@@ -66,7 +66,7 @@ contract XMSwap {
     }
 
     event SwapPrepared(
-        bytes32 hashlock,
+        bytes32 indexed hashlock,
         address sender,
         address recipient,
         uint256 value,
@@ -74,11 +74,11 @@ contract XMSwap {
     );
 
     event SwapFulfilled(
-        bytes32 hashlock,
+        bytes32 indexed hashlock,
         bytes32 preimage
     );
 
     event SwapRefunded(
-        bytes32 hashlock
+        bytes32 indexed hashlock
     );
 }

@@ -21,6 +21,26 @@
         </p>
       </div>
     </sign-transaction-dialog>
+    <sign-transaction-dialog modalName="claim-on-ethereum" network="ethereum">
+      <span slot="title">
+        CLAIM ETHEREUM
+      </span>
+      <div slot="description">
+        <p>
+          MirrorX wants to claim your Ether on Ethereum.
+        </p>
+      </div>
+    </sign-transaction-dialog>
+    <sign-transaction-dialog modalName="claim-on-stellar" network="stellar">
+      <span slot="title">
+        CLAIM ON STELLAR
+      </span>
+      <div slot="description">
+        <p>
+          MirrorX needs your signature to claim your ETH tokens on Stellar.
+        </p>
+      </div>
+    </sign-transaction-dialog>
     <div class="half">
       <div class="big-info">
         <div class="big-info__header">
@@ -78,20 +98,22 @@
     },
     data() {
       let hashlock = null
-      if (this.preimage !== undefined) {
+      if (this.preimage) {
         const h = createHash('sha256')
-        h.update(this.preimage)
+        h.update(Buffer.from(this.preimage, 'hex'))
         hashlock = h.digest()
+        console.log(`Hashlock=${hashlock.toString('hex')}, preimage=${this.preimage} `)
       }
       return {
-        status: Status.RequestingSwapInfo,
+        status: null,
         reqInfo: null,
         matchedInfo: null,
+        preimageBuf: this.preimage || null,
         hashlock,
       }
     },
     mounted() {
-      this.checkMatch()
+      this.status = Status.RequestingSwapInfo
     },
     beforeRouteLeave(to, from, next) {
       if (this.checkMatchTimeout !== null) {
@@ -100,88 +122,62 @@
       next()
     },
     methods: {
-      transitionDepositor({newStatus, oldStatus}) {
-        if (newStatus === Status.CommitOnStellar) {
-          this.waitForHoldingTx()
-        } else if (newStatus === Status.CommitOnEthereum) {
-          this.findExistingEthereumCommit()
-          this.signEthereumCommit()
-          this.waitForEthereumCommit()
-        } else if (newStatus === Status.ClaimOnEthereum) {
-          this.$modal.hide('commit-on-ethereum')
-        }
-      },
-      transitionWithdrawer({newStatus, oldStatus}) {
-        if (newStatus === Status.CommitOnStellar) {
-          this.signStellarCommit()
-          this.waitForHoldingTx()
-        } else if (newStatus === Status.CommitOnEthereum) {
-          this.$modal.hide('commit-on-stellar')
-          this.waitForEthereumCommit()
-        } else if (newStatus === Status.ClaimOnEthereum) {
-
-        }
-      },
-      async checkMatch() {
+      async requestSwapInfo() {
         const {currency, swapReqId} = this
         const {data: {status, matchedInfo, reqInfo}} =
           await this.$client.get(`/swap/${currency}/match/${swapReqId}`)
-        this.status = Status.WaitingForMatch
         Object.assign(this, {reqInfo, matchedInfo})
         if (status !== 'matched') {
-          this.checkMatchTimeout = setTimeout(this.checkMatch.bind(this), 5 * 1000)
+          this.status = Status.WaitingForMatch
+          this.checkMatchTimeout = setTimeout(this.requestSwapInfo.bind(this), 5 * 1000)
           return
         }
         const {holdingAccount} = this.withdrawer
         Object.assign(this, {holdingAccount})
-        this.checkHoldingTx()
+        this.status = Status.CommitOnStellar
       },
-      async checkHoldingTx() {
-        let holdingTxInfo
-        const {stellarAccount: withdrawerAccount} = this.withdrawer
-        const {stellarAccount: depositorAccount} = this.depositor
+      displayError(e) {
+        this.$modal.show('dialog', {
+          title: 'Error',
+          text: e.message || JSON.stringify(e),
+        })
+      },
+      async findHoldingTx({wait}) {
         const {
-          holdingAccount,
           swapSize,
+          holdingAccount,
+          withdrawer: {stellarAccount: withdrawerAccount},
+          depositor: {stellarAccount: depositorAccount},
         } = this
         try {
-          holdingTxInfo = await this.swapSpec.findHoldingTx({
+          return await this.swapSpec.findStellarHoldingTx({
             swapSize,
             withdrawerAccount,
             depositorAccount,
             holdingAccount,
-            wait: false,
+            wait,
           })
         } catch (e) {
-          this.$modal.show('dialog', {
-            title: 'Error',
-            text: JSON.stringify(e),
-          })
-          return
+          this.displayError(e)
+          throw e
         }
+      },
+      async findStellarCommitment() {
+        let holdingTxInfo = await this.findHoldingTx({wait: false})
         if (!holdingTxInfo) {
-          this.status = Status.CommitOnStellar
-        } else {
+          if (this.isWithdrawer) {
+            await this.signStellarCommitment()
+          }
+          holdingTxInfo = await this.findHoldingTx({wait: true})
+        }
+        if (!this.hashlock) {
           const {hashlock} = holdingTxInfo
           Object.assign(this, {hashlock})
-          this.findExistingEthereumCommit()
+          console.log(`Found hashlock: ${hashlock.toString('hex')}`)
         }
+        this.status = Status.CommitOnEthereum
       },
-      async waitForHoldingTx() {
-        const {
-          holdingAccount,
-          withdrawer: {stellarAccount: withdrawerAccount},
-          depositor: {stellarAccount: depositorAccount},
-          swapSize,
-        } = this
-        const {hashlock} = await this.swapSpec.findHoldingTx({
-          withdrawerAccount, swapSize, holdingAccount, depositorAccount, wait: true,
-        })
-        console.log(`Hashlock: ${hashlock.toString('hex')}`)
-        Object.assign(this, {hashlock})
-        this.findExistingEthereumCommit()
-      },
-      async signStellarCommit() {
+      async signStellarCommitment() {
         const {
           hashlock,
           swapSize,
@@ -189,7 +185,7 @@
           depositor: {stellarAccount: depositorAccount},
           withdrawer: {stellarAccount: withdrawerAccount},
         } = this
-        const {holdingTx} = await this.swapSpec.genFundHoldingTx({
+        const {holdingTx} = await this.swapSpec.genStellarHoldingTx({
           hashlock,
           swapSize,
           holdingAccount,
@@ -201,6 +197,17 @@
         const envelopeXdr = envelope.toXDR('base64')
         this.$modal.show('commit-on-stellar', {envelopeXdr})
       },
+      async findEthereumCommitment() {
+        this.$modal.hide('commit-on-stellar')
+        let eventLog = await this.findPrepareSwapCall({wait: false})
+        if (!eventLog) {
+          if (this.isDepositor) {
+            this.signEthereumCommit()
+          }
+          eventLog = await this.findPrepareSwapCall({wait: true})
+        }
+        this.status = Status.ClaimOnEthereum
+      },
       signEthereumCommit() {
         const {
           hashlock,
@@ -208,37 +215,91 @@
           withdrawer: {cryptoAddress: withdrawerEthAddress},
           depositor: {cryptoAddress: depositorEthAddress},
         } = this
-
-        const {funcName, params} = this.swapSpec.commitEthereumParams({
+        const {funcName, params} = this.swapSpec.prepareSwapParams({
           swapSize, hashlock, withdrawerEthAddress, depositorEthAddress,
         })
         this.$modal.show('commit-on-ethereum', {funcName, params})
       },
-      async findExistingEthereumCommit() {
+      async findPrepareSwapCall({wait}) {
+        this.$modal.hide('commit-on-ethereum')
         const {
           hashlock,
           swapSize,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
         } = this
-        const eventLog = await this.swapSpec.findEtherCommitment({
-          hashlock, swapSize, withdrawerEthAddress, wait: false,
-        })
-        if (eventLog === null) {
-          this.status = Status.CommitOnEthereum
-        } else {
-          this.status = Status.ClaimOnEthereum
+        try {
+          return await this.swapSpec.findPrepareSwap({
+            hashlock, swapSize, withdrawerEthAddress, wait,
+          })
+        } catch (e) {
+          this.displayError(e)
+          throw e
         }
       },
-      async waitForEthereumCommit() {
+      async findEthereumClaim() {
+        let eventLog = await this.findFulfillSwapCall({wait: false})
+        if (!eventLog) {
+          if (this.isWithdrawer) {
+            this.signEthereumClaim()
+          }
+          eventLog = await this.findFulfillSwapCall({wait: true})
+        }
+        if (!this.preimageBuf) {
+          let {preimage} = eventLog
+          preimage = Buffer.from(preimage.slice(2), 'hex')
+          this.preimageBuf = preimage
+          console.log(`Found preimage: ${preimage.toString('hex')}`)
+        }
+        this.status = Status.ClaimOnStellar
+      },
+      async findFulfillSwapCall({wait}) {
+        const {hashlock} = this
+        try {
+          return await this.swapSpec.findFulfillSwap({
+            hashlock, wait,
+          })
+        } catch (e) {
+          this.displayError(e)
+          throw e
+        }
+      },
+      async signEthereumClaim() {
         const {
-          hashlock,
-          swapSize,
+          preimage,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
         } = this
-        await this.swapSpec.findEtherCommitment({
-          hashlock, swapSize, withdrawerEthAddress, wait: true,
-        })
-        this.status = Status.ClaimOnEthereum
+        const {funcName, params} = this.swapSpec.fulfillSwapParams({preimage, withdrawerEthAddress})
+        this.$modal.show('claim-on-ethereum', {funcName, params})
+      },
+      async findStellarClaim() {
+        this.$modal.hide('claim-on-ethereum')
+        let claimTx = await this.findStellarClaimTx({wait: false})
+        if (!claimTx) {
+          if (this.isDepositor) {
+            await this.signStellarClaim()
+          }
+          claimTx = await this.findStellarClaimTx({wait: true})
+        }
+        this.status = Status.Done
+      },
+      async findStellarClaimTx({wait}) {
+        const {holdingAccount, preimage} = this
+        try {
+          return await this.swapSpec.findStellarClaimTx({holdingAccount, preimage, wait})
+        } catch (e) {
+          this.displayError(e)
+          throw e
+        }
+      },
+      async signStellarClaim() {
+        const {
+          preimageBuf: preimage,
+          depositor: {stellarAccount: depositorAccount},
+          holdingAccount,
+        } = this
+        const {claimTx} = await this.swapSpec.genStellarClaimTx({preimage, depositorAccount, holdingAccount})
+        const envelopeXdr = claimTx.toEnvelope().toXDR('base64')
+        this.$modal.show('claim-on-stellar', {envelopeXdr})
       },
     },
     computed: {
@@ -253,24 +314,30 @@
         return `${account.slice(0, 12)}...${account.slice(account.length - 12)}`
       },
       depositor() {
-        if (this.side === 'withdraw') {
+        if (this.isWithdrawer) {
           return this.matchedInfo || {}
         } else {
           return this.reqInfo || {}
         }
       },
       withdrawer() {
-        if (this.side === 'withdraw') {
+        if (this.isWithdrawer) {
           return this.reqInfo || {}
         } else {
           return this.matchedInfo || {}
         }
       },
+      isWithdrawer() {
+        return this.side === 'withdraw'
+      },
+      isDepositor() {
+        return this.side === 'deposit'
+      },
       holdingKeys() {
-        if (this.holdingSecret !== undefined) {
-          return Stellar.Keypair.fromSecret(this.holdingSecret)
+        if (!this.holdingSecret) {
+          throw new Error('No holding secret')
         }
-        return Stellar.Keypair.fromPublicKey(this.holdingAccount)
+        return Stellar.Keypair.fromSecret(this.holdingSecret)
       },
     },
     watch: {
@@ -279,10 +346,18 @@
           return
         }
         console.log(`${this.side} status: ${oldStatus} -> ${newStatus}`)
-        if (this.side === 'withdraw') {
-          this.transitionWithdrawer({newStatus, oldStatus})
-        } else {
-          this.transitionDepositor({newStatus, oldStatus})
+        if (newStatus === Status.RequestingSwapInfo) {
+          this.requestSwapInfo()
+        } else if (newStatus === Status.CommitOnStellar) {
+          this.findStellarCommitment()
+        } else if (newStatus === Status.CommitOnEthereum) {
+          this.findEthereumCommitment()
+        } else if (newStatus === Status.ClaimOnEthereum) {
+          this.findEthereumClaim()
+        } else if (newStatus === Status.ClaimOnStellar) {
+          this.findStellarClaim()
+        } else if (newStatus === Status.Done) {
+          console.log('Done!')
         }
       },
     },

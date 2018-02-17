@@ -23,7 +23,7 @@ module.exports = {
   rules: {
     // allow async-await
     'generator-star-spacing': 'off',
-    'comma-dangle': ['error', 'always-multiline'],
+    'comma-dangle': 'off',
     'space-before-function-paren': ['error', 'never'],
     'indent': 'off',
     // allow debugger during development
