@@ -5,8 +5,10 @@
         class="progress-log__item"
         :class="{'progress-log__item--inactive': i > status}">
       <span class="progress-log__icon">
-        <icon name="check" class="progress-log__icon--happy" v-if="i < status"/>
-        <icon name="spinner" v-if="i == status" pulse/>
+        <icon name="check"
+              class="progress-log__icon--happy"
+              v-if="i < status || isDone"/>
+        <icon name="spinner" v-else-if="i == status" pulse/>
       </span>
       <span class="progress-log__description">
         <span v-if="i < status">
@@ -85,6 +87,9 @@
           [Status.Done]: '7. Done',
         }
       },
+      isDone() {
+        return this.status === Status.Done
+      }
     },
   }
 </script>

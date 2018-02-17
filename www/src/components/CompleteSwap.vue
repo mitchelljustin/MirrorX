@@ -281,11 +281,16 @@
           claimTx = await this.findStellarClaimTx({wait: true})
         }
         this.status = Status.Done
+        this.$modal.hide('claim-on-stellar')
       },
       async findStellarClaimTx({wait}) {
-        const {holdingAccount, preimage} = this
+        const {
+          holdingAccount,
+          preimage,
+          depositor: {stellarAccount: depositorAccount},
+        } = this
         try {
-          return await this.swapSpec.findStellarClaimTx({holdingAccount, preimage, wait})
+          return await this.swapSpec.findStellarClaimTx({depositorAccount, holdingAccount, preimage, wait})
         } catch (e) {
           this.displayError(e)
           throw e
