@@ -1,5 +1,18 @@
 # MirrorX - Atomic Swaps between Stellar and Ethereum
 
+Table of contents
+=================
+
+<!--ts-->
+   * [Table of contents](#table-of-contents)
+   * [Motivation](#motivation)
+   * [Setup](#setup)
+   * [Usage](#usage)
+<!--te-->
+
+Motivation
+============
+
 I plan to build a frontend-only Web application that enables atomic swaps between Ethereum and Stellar. The first version will be really simple, only supporting ETH and swaps of size exactly 0.25ETH. If this works out, I plan to add many more swaps for other currencies such as ZEC, ERC20s, BTC. 
 
 For those that don't know, an atomic swap is an exchange of money between two different cryptocurrency networks that happens atomically i.e. either it all happens or none of it happens. This enables currency exchange without a trusted third party such as an exchange or a broker.
@@ -31,3 +44,50 @@ Let's say Alice wants to swap 0.25 ETH into Stellar, and Bob wants to swap 0.25 
 Additionally, both parties can refund their part of the swap after a certain (long) time period. This prevents malicious actors from stealing money, and other errors that would cause swaps to fail. For security reasons, the swap initiator (Bob) will have to wait longer to claim their refund than the swap fulfiller. Read more here: https://blog.lightning.engineering/announcement/2017/11/16/ln-swap.html
 
 Please let me know if I have overlooked anything, or if you have suggestions. Thanks!
+
+
+Setup
+============
+
+## Prerequisites
+* `Docker`
+* `docker-compose`
+* `yarn`
+* `npm`
+* `node >= 9.3.x`
+
+
+## Environment Setup
+```bash
+# Clone the project
+git clone https://github.com/mvanderh/MirrorX.git
+cd MirrorX
+
+# Install yarn dependencies
+yarn install
+
+# Install client dependencies
+cd www
+yarn install
+```
+
+Usage
+============
+
+```bash
+cd MirrorX
+
+# Start docker container
+docker-compose up -d
+
+# Start MirrorX API
+./api.js
+
+# Start matching engine
+./match.mjs 0.01 ETH
+
+cd www
+
+# Start client
+yarn run dev
+```
