@@ -1,4 +1,4 @@
-#!/usr/local/bin/node --experimental-modules
+#!/usr/bin/env node --experimental-modules
 import Argparse from "argparse"
 
 import MatchingEngine from './lib/api/matchingEngine.mjs'
