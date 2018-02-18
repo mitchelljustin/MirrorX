@@ -1,4 +1,4 @@
-#!/usr/local/bin/node --experimental-modules
+#!/usr/bin/env node --experimental-modules
 
 import connectRedis from './lib/api/createRedisClient.mjs'
 import ApiServer from './lib/api/server.mjs'
