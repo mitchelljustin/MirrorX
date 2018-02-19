@@ -10,6 +10,6 @@ services:
       - "80:80"
   match_0_01_eth:
     build: .
-    command: node --experimental-modules api.mjs
+    command: node --experimental-modules match.mjs 0.01 ETH
     environment:
       REDIS_URI: redis://mirrorx.bj2a6y.0001.use1.cache.amazonaws.com
