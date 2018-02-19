@@ -5,15 +5,20 @@ Table of contents
 
 <!--ts-->
    * [Table of contents](#table-of-contents)
+   * [Explanation](#explanation)
    * [Motivation](#motivation)
    * [Setup](#setup)
    * [Usage](#usage)
 <!--te-->
 
+Explanation
+===========
+
+
 Motivation
 ============
 
-I plan to build a frontend-only Web application that enables atomic swaps between Ethereum and Stellar. The first version will be really simple, only supporting ETH and swaps of size exactly 0.25ETH. If this works out, I plan to add many more swaps for other currencies such as ZEC, ERC20s, BTC. 
+I plan to build a frontend Web application that enables atomic swaps between Ethereum and Stellar. The first version will be really simple, only supporting ETH and swaps of size exactly 0.25ETH. If this works out, I plan to add many more swaps for other currencies such as ZEC, ERC20s, BTC. 
 
 For those that don't know, an atomic swap is an exchange of money between two different cryptocurrency networks that happens atomically i.e. either it all happens or none of it happens. This enables currency exchange without a trusted third party such as an exchange or a broker.
 
@@ -91,3 +96,8 @@ cd www
 # Start client
 yarn run dev
 ```
+
+Example Swap
+===============
+
+In this example, Alice and Bob will swap 0.01 ETH.  

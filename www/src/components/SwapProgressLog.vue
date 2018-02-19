@@ -11,9 +11,6 @@
         <icon name="spinner" v-else-if="i === status" pulse/>
       </span>
       <span class="progress-log__description">
-
-      </span>
-      <span class="progress-log__description">
         {{statusDescriptionForStatus(i)}}
       </span>
     </li>
@@ -49,7 +46,7 @@
       },
       statusDescriptionForStatus(status) {
         if (status === Status.RequestingSwapInfo) {
-          const textRequest = this.textForStatus(status, 'Request', 'Requesting', 'Requested');
+          const textRequest = this.textForStatus(status, 'Request', 'Requesting', 'Requested')
           return `1. ${textRequest} swap info`
         }
         if (status === Status.WaitingForMatch) {

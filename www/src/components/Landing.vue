@@ -7,13 +7,13 @@
           MirrorX is your gateway to it.
         </p>
         <div class="landing-cta__actions">
-          <router-link :to="{name: 'prepare-swap', params: {currency, side: 'deposit'}}"
+          <router-link :to="{name: 'prepare-swap', params: {currency: 'ETH', side: 'deposit'}}"
                        class="button button--big button--long button--happy">
             <span class="button--long__item">ETH</span>
             <icon class="button--long__item" name="arrow-circle-right" scale="1.5"/>
             <span class="button--long__item">XLM</span>
           </router-link>
-          <router-link :to="{name: 'prepare-swap', params: {currency, side: 'withdraw'}}"
+          <router-link :to="{name: 'prepare-swap', params: {currency: 'ETH', side: 'withdraw'}}"
                        class="button button--big button--normal button--long">
             <span class="button--long__item">XLM</span>
             <icon class="button--long__item" name="arrow-circle-right" scale="1.5"/>

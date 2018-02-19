@@ -1,3 +1,4 @@
+#!/usr/bin/env node --experimental-modules
 "use strict"
 
 import Argparse from 'argparse'

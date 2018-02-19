@@ -1,0 +1,15 @@
+version: "2.3"
+services:
+  api:
+    build: .
+    command: node --experimental-modules api.mjs
+    environment:
+      REDIS_URI: mirrorx.bj2a6y.0001.use1.cache.amazonaws.com
+      API_PORT: 80
+    ports:
+      - "80:80"
+  match_0_01_eth:
+    build: .
+    command: node --experimental-modules api.mjs
+    environment:
+      REDIS_URI: mirrorx.bj2a6y.0001.use1.cache.amazonaws.com
