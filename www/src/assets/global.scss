@@ -1,8 +1,9 @@
 @import "utils";
 @import "colors";
 
-body, h1, h2, h3, p {
+body, h1, h2, h3, p, div {
   @include flex;
+  line-height: 1.7em;
 }
 
 h1, h2, h3 {
@@ -40,8 +41,6 @@ h3 {
   font-weight: 400;
 }
 
-
-
 input:focus {
   outline: none;
   border: 1px solid $theme-focus;
@@ -50,6 +49,10 @@ input:focus {
 a {
   color: $theme-link;
   text-decoration: none;
+
+  &:hover {
+    color: lighten($theme-link, 25%);
+  }
 }
 
 hr {

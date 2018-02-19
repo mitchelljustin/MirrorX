@@ -44,13 +44,21 @@
     <div class="half">
       <div class="big-info">
         <div class="big-info__header">
-          {{ side.toUpperCase() }}
+          CONVERTING
         </div>
-        <div v-if="reqInfo" class="big-info__swap-size">
-          {{ swapSize || '..' }} {{ currency }}
-        </div>
+        <span v-if="reqInfo" class="big-info__swap-size">
+          <span v-if="isWithdrawer">
+            ?? XLM TO
+          </span>
+          <span>
+            {{ swapSize || '..' }} {{ currency }}
+          </span>
+          <span v-if="isDepositor">
+            TO ?? XLM
+          </span>
+        </span>
         <div class="big-info__label">
-          {{ this.side === 'withdrawer' ? 'TO' : 'FROM' }}
+          {{ this.isWithdrawer ? 'TO' : 'FROM' }}:
         </div>
         <div class="big-info__account">
           <span v-if="reqInfo">
@@ -61,7 +69,7 @@
           </span>
         </div>
         <div class="big-info__label">
-          {{ this.side === 'withdrawer' ? 'FROM' : 'TO' }}
+          {{ this.isWithdrawer ? 'FROM' : 'TO' }}:
         </div>
         <div class="big-info__account">
           <span v-if="reqInfo">
@@ -73,7 +81,7 @@
         </div>
       </div>
     </div>
-    <div class="half">
+    <div class="half col-spaced">
       <h3>Progress</h3>
       <swap-progress-log :status="status" :side="side"/>
     </div>

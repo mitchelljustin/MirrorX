@@ -2,13 +2,19 @@
   <div id="app">
     <div class="site-header">
       <h1>
-        <img src="./assets/MirrorX.png" alt="" class="site-header__logo">
+        <span class="site-header__logo">
+          <router-link to="/">
+            <img src="./assets/MirrorX.png" alt="">
+          </router-link>
+        </span>
         <span class="site-header__title">
-          <router-link to="/">MirrorX</router-link>
+          <router-link to="/">
+            MirrorX
+          </router-link>
         </span>
       </h1>
-      <h2>
-        Trustless Deposits & Withdrawals on the Stellar DEX
+      <h2 class="exclude-small">
+        Convert Digital Currencies using Atomic Swaps
       </h2>
     </div>
     <hr>

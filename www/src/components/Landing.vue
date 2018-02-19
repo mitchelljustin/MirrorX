@@ -2,45 +2,71 @@
   <div>
     <div class="row-centered">
       <div class="landing-cta">
-        <div class="landing-cta__submit">
+        <p class="landing-cta__text">
+          Stellar is a decentralized currency exchange and payment network.
+          MirrorX is your gateway to it.
+        </p>
+        <div class="landing-cta__actions">
           <router-link :to="{name: 'prepare-swap', params: {currency, side: 'deposit'}}"
-                       class="button button--long button--happy">
-            DEPOSIT ETH
+                       class="button button--big button--long button--happy">
+            <span class="button--long__item">ETH</span>
+            <icon class="button--long__item" name="arrow-circle-right" scale="1.5"/>
+            <span class="button--long__item">XLM</span>
           </router-link>
           <router-link :to="{name: 'prepare-swap', params: {currency, side: 'withdraw'}}"
-                       class="button button--long">
-            WITHDRAW ETH
+                       class="button button--big button--normal button--long">
+            <span class="button--long__item">XLM</span>
+            <icon class="button--long__item" name="arrow-circle-right" scale="1.5"/>
+            <span class="button--long__item">ETH</span>
           </router-link>
         </div>
+        <p class="landing-cta__footer">
+          More currency pairs coming soon
+        </p>
       </div>
     </div>
     <div class="row-spaced">
-      <div class="onethird pitch-box">
+      <div class="one-third pitch-box">
         <icon class="pitch-box__header" name="bar-chart" scale="2"/>
         <p class="pitch-box__text">
-          Stellar is a secure, production-grade Decentralized Exchange for cryptocurrencies and fiat.
+          Stellar is a Decentralized Exchange for cryptocurrencies and fiat, with Lumens (XLM) as the native currency.
         </p>
         <p class="pitch-box__text">
-          That means that it looks and feels just like a normal exchange,
-          but no one except you ever holds your money.
+          MirrorX allows you to trade on Stellar using currencies you already own, such as Ether.
+        </p>
+        <p class="pitch-box__footer">
+          <a target="_blank" href="https://stellar.org">
+            More about Stellar
+          </a>
         </p>
       </div>
-      <div class="onethird pitch-box">
-        <icon class="pitch-box__header" name="lock" scale="2"/>
+      <div class="one-third pitch-box">
+        <icon class="pitch-box__header" name="exchange" scale="2"/>
         <p class="pitch-box__text">
-          MirrorX uses a technology called Atomic Swaps to ensure maximum security.
+          MirrorX uses Atomic Swaps to enable currency conversions without an intermediary.
         </p>
         <p class="pitch-box__text">
-          This allows for fast, peer-to-peer deposits & withdrawals that don't require trust.
+          No third party ever holds your funds. This means no risk of getting hacked and no limits.
+        </p>
+        <p class="pitch-box__footer">
+          <router-link target="_blank" :to="{name: 'about'}">
+            Learn More
+          </router-link>
         </p>
       </div>
-      <div class="onethird pitch-box">
+      <div class="one-third pitch-box">
         <icon class="pitch-box__header" name="magic" scale="2"/>
         <p class="pitch-box__text">
-          MirrorX was built to make deposits and withdrawals feel like a breeze.
+          MirrorX was built to make trustless currency conversions as easy & safe as possible.
+          However, please be aware it is still very much a work in progress.
         </p>
         <p class="pitch-box__text">
-          Combined with the power of Stellar, trading cryptocurrencies has never been easier & safer.
+          If you have suggestions or would like to contribute, please reach out on GitHub.
+        </p>
+        <p class="pitch-box__footer">
+          <a target="_blank" href="https://github.com/mvanderh/MirrorX">
+            Source on GitHub
+          </a>
         </p>
       </div>
     </div>
@@ -48,36 +74,7 @@
 </template>
 
 <script>
-  import SwapSpecs from '../../../lib/swapSpecs.mjs'
-
   export default {
     name: 'landing',
-    data() {
-      return {
-        action: 'deposit',
-        currency: 'ETH',
-      }
-    },
-    methods: {
-      withdrawClicked() {
-        const {currency} = this
-        this.$router.push({
-          name: 'prepare-withdraw',
-          params: {currency},
-        })
-      },
-      depositClicked() {
-        const {currency} = this
-        this.$router.push({
-          name: 'prepare-deposit',
-          params: {currency},
-        })
-      },
-    },
-    computed: {
-      supportedCurrencies() {
-        return Object.keys(SwapSpecs)
-      },
-    },
   }
 </script>

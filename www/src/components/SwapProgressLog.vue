@@ -1,6 +1,6 @@
 <template>
   <ul class="progress-log">
-    <li v-for="(_, i) in incompleteStatusDescriptions"
+    <li v-for="(_, i) in numStatuses"
         :key="i"
         class="progress-log__item"
         :class="{'progress-log__item--inactive': i > status}">
@@ -8,18 +8,13 @@
         <icon name="check"
               class="progress-log__icon--happy"
               v-if="i < status || isDone"/>
-        <icon name="spinner" v-else-if="i == status" pulse/>
+        <icon name="spinner" v-else-if="i === status" pulse/>
       </span>
       <span class="progress-log__description">
-        <span v-if="i < status">
-          {{completedStatusDescriptions[i]}}
-        </span>
-        <span v-if="i == status">
-          {{ongoingStatusDescriptions[i]}}
-        </span>
-        <span v-if="i > status">
-          {{incompleteStatusDescriptions[i]}}
-        </span>
+
+      </span>
+      <span class="progress-log__description">
+        {{statusDescriptionForStatus(i)}}
       </span>
     </li>
   </ul>
@@ -34,59 +29,66 @@
       status: Number,
       side: String,
     },
-    computed: {
-      counterparty() {
-        if (this.side === 'withdraw') {
-          return 'depositor'
-        } else {
-          return 'withdrawer'
+    data() {
+      const numStatuses = Status.Count
+      return {
+        numStatuses,
+      }
+    },
+    methods: {
+      textForStatus(targetStatus, incomplete, ongoing, completed) {
+        if (this.status < targetStatus) {
+          return incomplete
+        }
+        if (this.status === targetStatus) {
+          return ongoing
+        }
+        if (this.status > targetStatus) {
+          return completed
         }
       },
-      depositStep() {
+      statusDescriptionForStatus(status) {
+        if (status === Status.RequestingSwapInfo) {
+          const textRequest = this.textForStatus(status, 'Request', 'Requesting', 'Requested');
+          return `1. ${textRequest} swap info`
+        }
+        if (status === Status.WaitingForMatch) {
+          const textMatch = this.textForStatus(status, 'Match', 'Matching', 'Matched')
+          return `2. ${textMatch} with counterparty`
+        }
+        const textCommit = this.textForStatus(status, 'Commit', 'Committing', 'Commit')
+        if (status === Status.CommitOnStellar) {
+          return `3. ${textCommit} XLM on Stellar ${this.withdrawerStep}`
+        }
+        if (status === Status.CommitOnEthereum) {
+          return `4. ${textCommit} ETH on Ethereum ${this.depositorStep}`
+        }
+        const textClaim = this.textForStatus(status, 'Claim', 'Claiming', 'Claimed')
+        if (status === Status.ClaimOnEthereum) {
+          return `5. ${textClaim} ETH on Ethereum ${this.withdrawerStep}`
+        }
+        if (status === Status.ClaimOnStellar) {
+          return `6. ${textClaim} XLM on Stellar ${this.depositorStep}`
+        }
+        if (status === Status.Done) {
+          return `Done!`
+        }
+      },
+    },
+    computed: {
+      depositorStep() {
         if (this.side === 'deposit') {
           return '(You)'
         }
-        return '(Depositor)'
+        return ''
       },
-      withdrawStep() {
+      withdrawerStep() {
         if (this.side === 'withdraw') {
           return '(You)'
         }
-        return '(Withdrawer)'
+        return ''
       },
-      incompleteStatusDescriptions() {
-        return {
-          [Status.RequestingSwapInfo]: '1. Request swap info',
-          [Status.WaitingForMatch]: `2. Match with ${this.counterparty}`,
-          [Status.CommitOnStellar]: `3. Commit ETH tokens on Stellar ${this.withdrawStep}`,
-          [Status.CommitOnEthereum]: `4. Commit ETH on Ethereum ${this.depositStep}`,
-          [Status.ClaimOnEthereum]: `5. Claim ETH on Ethereum ${this.withdrawStep}`,
-          [Status.ClaimOnStellar]: `6. Claim ETH tokens on Stellar ${this.depositStep}`,
-          [Status.Done]: '7. Done',
-        }
-      },
-      ongoingStatusDescriptions() {
-        return {
-          [Status.RequestingSwapInfo]: '1. Requesting swap info',
-          [Status.WaitingForMatch]: `2. Matching with ${this.counterparty}`,
-          [Status.CommitOnStellar]: `3. Committing ETH tokens on Stellar ${this.withdrawStep}`,
-          [Status.CommitOnEthereum]: `4. Committing ETH on Ethereum ${this.depositStep}`,
-          [Status.ClaimOnEthereum]: `5. Claiming ETH on Ethereum ${this.withdrawStep}`,
-          [Status.ClaimOnStellar]: `6. Claiming ETH tokens on Stellar ${this.depositStep}`,
-          [Status.Done]: '7. Done',
-        }
-      },
-      completedStatusDescriptions() {
-        return {
-          [Status.RequestingSwapInfo]: '1. Requested swap info',
-          [Status.WaitingForMatch]: `2. Matched with ${this.counterparty}`,
-          [Status.CommitOnStellar]: `3. Committed ETH tokens on Stellar ${this.withdrawStep}`,
-          [Status.CommitOnEthereum]: `4. Committed ETH on Ethereum ${this.depositStep}`,
-          [Status.ClaimOnEthereum]: `5. Claimed ETH on Ethereum ${this.withdrawStep}`,
-          [Status.ClaimOnStellar]: `6. Claimed ETH tokens on Stellar ${this.depositStep}`,
-          [Status.Done]: '7. Done',
-        }
-      },
+
       isDone() {
         return this.status === Status.Done
       }

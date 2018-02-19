@@ -1,10 +1,14 @@
 @import "utils";
 
-.twothird {
+.two-thirds {
   width: 65%;
 }
 
-.onethird {
+.three-quarters {
+  width: 75%;
+}
+
+.one-third {
   width: 32%;
 }
 
@@ -17,12 +21,12 @@
     width: 100%;
   }
 
-  .twothird {
+  .two-thirds, .one-third, .three-quarters {
     width: 100%;
   }
 
-  .onethird {
-    width: 100%;
+  .exclude-small {
+    display: none;
   }
 }
 
@@ -41,6 +45,7 @@
 
 .row-centered {
   @include flex($justify-content: center);
+  width: 100%;
 }
 
 .col-spaced {

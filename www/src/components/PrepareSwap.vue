@@ -1,13 +1,16 @@
 <template>
-  <div class="row-spaced">
+  <div class="row-centered">
     <v-dialog/>
-    <div class="twothird form">
+    <div class="three-quarters form">
       <h1 class="form__header">
-        {{side.toUpperCase()}} {{currency}}
+        {{side === 'deposit' ? 'SELL' : 'BUY'}} {{currency}}
       </h1>
       <div class="form__group">
         <label class="form__label" for="stellarAccount">
-          Stellar Account
+          Stellar Account ID
+          <a class="button button--link" target="_blank" href="https://stellarterm.com/#signup">
+            Don't have an account?
+          </a>
         </label>
         <input type="text"
                class="text-input"
@@ -43,18 +46,12 @@
           :selectedSize.sync="swapSize"
           />
       </div>
-      <button class="button form__submit" @click="startClicked" :disabled="requestingSwap">
-        START
-      </button>
-    </div>
-    <div class="onethird">
-      <div class="pitch-box pitch-box--subdued">
-        <h2 class="pitch-box__header">
-          INFO
-        </h2>
-        <p class="pitch-box__text">
-          Clicking START does not yet move your money.
-          It starts the process of looking for a withdrawer to exchange with.
+      <div class="form__submit">
+        <button class="button button--big button--normal" @click="startClicked" :disabled="requestingSwap">
+          START
+        </button>
+        <p class="form__subtext">
+          Pressing START does not yet move your funds.
         </p>
       </div>
     </div>
@@ -93,16 +90,24 @@
     },
     methods: {
       async loadFromMetamaskClicked() {
+        this.cryptoAddress = await this.loadEthAddressFromMetamask()
+      },
+      async loadEthAddressFromMetamask() {
         const address = (await web3.eth.getAccounts())[0]
         if (address === undefined) {
-          return this.$modal.show('dialog', {
+          this.$modal.show('dialog', {
             title: 'Metamask',
             text: 'Please unlock your Metamask to use your Ethereum account.',
           })
+          return null
         }
-        this.cryptoAddress = address
+        return address
       },
       async startClicked() {
+        const addr = await this.loadEthAddressFromMetamask()
+        if (addr === null) {
+          return
+        }
         this.requestingSwap = true
         const {side, currency, swapSize, stellarAccount, cryptoAddress} = this
         try {

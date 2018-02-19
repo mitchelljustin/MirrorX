@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-scripts/withdraw.mjs 0.001 ETH \
-    --stellar-preparer  SDYE34F3QVIZOJWMG74HWOBAPSGR6HA336TFR2YMKZZQXHC7PSCSIUOP \
-    --stellar-fulfiller GCBV2JVDEBEDEVPQ7S5M2K7HD4E6TY3MXJSEBNTIQZ63KPBBFF76EUJL \
-    --outside-preparer  0x00B0E5b543E53516Eda87c29172dC8FFcf7FDD2e \
-    --outside-fulfiller 0x005816E76D513d4ADa6939fB969D7EBf4d6ed6a8 \
-

@@ -23,7 +23,7 @@
   }
 
   &:active {
-    background: easyGradient(lighten($color, 9%));
+    background: easyGradient(darken($color, 9%));
   }
 
   &:disabled {

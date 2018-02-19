@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Landing from '@/components/Landing'
+import About from '@/components/About'
 import SwapContainer from '@/components/SwapContainer'
 import PrepareSwap from '@/components/PrepareSwap'
 import CompleteSwap from '@/components/CompleteSwap'
@@ -13,6 +14,11 @@ export default new Router({
       path: '/',
       name: 'landing',
       component: Landing,
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: About,
     },
     {
       path: '/:currency/:side',
