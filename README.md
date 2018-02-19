@@ -1,4 +1,4 @@
-# MirrorX - Atomic Swaps between Stellar and Ethereum
+# MirrorX - Atomic Swaps for Stellar
 
 Table of contents
 =================
@@ -6,30 +6,34 @@ Table of contents
 <!--ts-->
    * [Table of contents](#table-of-contents)
    * [Explanation](#explanation)
-   * [Motivation](#motivation)
+   * [How it Works](#how-it-works)
+   * [Example](#example)
    * [Setup](#setup)
    * [Usage](#usage)
+   * [Running Example](#running-example)
 <!--te-->
 
 Explanation
 ===========
+MirrorX is an application that enables users to easily execute [Atomic Swaps](https://themerkle.com/what-is-an-atomic-swap/) between one another.
+In particular, MirrorX enables swaps into and out of [Stellar](https://www.stellar.org/), a decentralized currency exchange and payment network.
 
+Stellar enables users to create custom assets (e.g. AliceCoin) that can then be traded against any other asset (e.g. BobCoin).
+MirrorX leverages this ability to swap "mirrored assets" with real assets on other networks (such as Bitcoin or Ethereum). 
+If the user prefers, MirrorX can immediately sell this mirrored asset for another asset on Stellar such as Lumens, the native currency. 
 
-Motivation
+I prepend the letter "X" to the name of a crypto-asset to mean the mirrored asset on Stellar. 
+For instance, "XETH" is what I call the mirrored asset for ETH (Ethereum).
+
+How it Works
 ============
+MirrorX is a frontend Web application first and foremost. All the signing is done in the browser to preserve security of private keys.
 
-I plan to build a frontend Web application that enables atomic swaps between Ethereum and Stellar. The first version will be really simple, only supporting ETH and swaps of size exactly 0.25ETH. If this works out, I plan to add many more swaps for other currencies such as ZEC, ERC20s, BTC. 
+The only interaction MirrorX needs to use a server application for is to match users who want to swap with one another. 
+Once a swap is started between two users, the server application plays a minimal role. 
 
-For those that don't know, an atomic swap is an exchange of money between two different cryptocurrency networks that happens atomically i.e. either it all happens or none of it happens. This enables currency exchange without a trusted third party such as an exchange or a broker.
-
-I've already successfully been able to execute an atomic swap of 0.001 ETH and 0.001 XETH (an asset on Stellar). This was done on testnet for both currencies. Transactions:
-
-cc8e25fb3fbd972324cb8f78cac55feccf83b951855cad85af5554009c9c070b (Prepare Swap on Stellar)
-0x9846b509847d6aab95c3da78ec1d7968d28106647b1c1e907bce04a98d3d8a1f (Prepare Swap on Ethereum)
-0x0da72412f39a6abc3c9c7a63c3935bc93ca01c09264fe7284eafee1704cf1ed8 (Fulfill Swap on Ethereum)
-da57ee93eada9e8738c76cd1709222d3cf229a6ed3c6a2ce8aa1ec0e683cd5b2 (Fulfill Swap on Stellar)
-
-Screenshot: https://www.dropbox.com/s/p1mfpzrnt47uayg/first-atomic-swap-stellar-eth.png?dl=0
+Example
+============
 
 Let's say Alice wants to swap 0.25 ETH into Stellar, and Bob wants to swap 0.25 XETH out of Stellar. They agree to an atomic swap. The mechanism is as follows:
 
@@ -46,10 +50,7 @@ Let's say Alice wants to swap 0.25 ETH into Stellar, and Bob wants to swap 0.25 
 8. Alice watches the Ethereum contract and sees that Bob has claimed the ETH using the preimage. She can now use the preimage to claim her own XETH.
 9. Alice submits a Stellar transaction that claims the XETH funds in the Swap account using the preimage that is know public knowledge.
 
-Additionally, both parties can refund their part of the swap after a certain (long) time period. This prevents malicious actors from stealing money, and other errors that would cause swaps to fail. For security reasons, the swap initiator (Bob) will have to wait longer to claim their refund than the swap fulfiller. Read more here: https://blog.lightning.engineering/announcement/2017/11/16/ln-swap.html
-
-Please let me know if I have overlooked anything, or if you have suggestions. Thanks!
-
+Additionally, both parties can refund their part of the swap after a certain (long) time period. This prevents malicious actors from stealing money, and other errors that would cause swaps to fail. For security reasons, the swap initiator (Bob) will have to wait longer to claim their refund than the swap fulfiller. [Read more here](https://blog.lightning.engineering/announcement/2017/11/16/ln-swap.html).
 
 Setup
 ============
@@ -82,7 +83,7 @@ Usage
 ```bash
 cd MirrorX
 
-# Start docker container
+# Start Redis in docker
 docker-compose up -d
 
 # Start MirrorX API
@@ -97,7 +98,19 @@ cd www
 yarn run dev
 ```
 
-Example Swap
+Then navigate to `http://localhost:8080` to see MirrorX running locally.
+
+Running Example
 ===============
 
-In this example, Alice and Bob will swap 0.01 ETH.  
+
+Alice wants to convert 0.01 XETH into 0.01 ETH on Ethereum, and Bob wants to convert 0.01 ETH into 0.01 XETH on Stellar.
+
+1. Run `./scripts/createTestAccounts.mjs` to create Stellar accounts for Alice, Bob and the Asset Issuer.
+1. Download & run [Ganache](truffleframework.com/ganache/) to simulate the Ethereum network.
+1. Install [Metamask](metamask.io). Once installed, point it at Ganache by selecting "Custom RPC" from the Network dropdown and 
+entering `http://localhost:7545`. Add the top two accounts in Ganache to Metamask.
+1. Follow the instructions in the [Usage](#usage) section to run MirrorX locally.
+1. Navigate to `http://localhost:8080` and initiate two swaps: one deposit and one withdrawal.
+ Use the secret keys from config/keys.json. Remember to switch the Metamask account you're using between swaps.
+1. Follow the instructions in the swap.

@@ -3,7 +3,7 @@
 
 import Argparse from 'argparse'
 import {stellar, Stellar} from '../lib/stellar'
-import config from '../config/config'
+import KEYS from '../config/keys'
 
 const parser = new Argparse.ArgumentParser()
 
@@ -24,7 +24,7 @@ run(args)
     })
 
 async function run({amount, xAsset, destination}) {
-    const issuerKeys = Stellar.Keypair.fromSecret(config.stellar.keys.issuer)
+    const issuerKeys = Stellar.Keypair.fromSecret(KEYS.stellar.issuer.secret)
 
     const asset = new Stellar.Asset(xAsset, issuerKeys.publicKey())
     const issuer = await stellar.loadAccount(issuerKeys.publicKey())
