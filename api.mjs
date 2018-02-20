@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
+import './lib/loadSecrets'
 import connectRedis from './lib/api/createRedisClient.mjs'
 import ApiServer from './lib/api/server.mjs'
-import loadSecrets from "./lib/loadSecrets";
 
-
-loadSecrets()
 
 const port = process.env.API_PORT || 9080
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import Argparse from "argparse"
 
+import './lib/loadSecrets'
+
 import MatchingEngine from './lib/api/matchingEngine.mjs'
 import connectRedis from './lib/api/createRedisClient.mjs'
-import loadSecrets from "./lib/loadSecrets";
 
-loadSecrets()
 const parser = new Argparse.ArgumentParser()
 
 parser.addArgument(['swapSize'])

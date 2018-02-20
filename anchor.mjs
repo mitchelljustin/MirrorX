@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import Argparse from "argparse"
 
-import loadSecrets from "./lib/loadSecrets"
+import './lib/loadSecrets'
 import Anchor from './lib/anchor.mjs'
 import {Stellar} from './lib/stellar.mjs'
 
