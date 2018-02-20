@@ -1,15 +1,28 @@
-version: "2.3"
+version: "3.1"
+secrets:
+  secrets.env:
+    file: ./config/secrets.env
+
 services:
   api:
     build: .
+    image: mirrorx_node
     command: node --experimental-modules api.mjs
     environment:
-      REDIS_URI: redis://mirrorx.bj2a6y.0001.use1.cache.amazonaws.com
       API_PORT: 80
     ports:
       - "80:80"
+    secrets:
+      - secrets.env
   match_0_01_eth:
     build: .
+    image: mirrorx_node
     command: node --experimental-modules match.mjs 0.01 ETH
-    environment:
-      REDIS_URI: redis://mirrorx.bj2a6y.0001.use1.cache.amazonaws.com
+    secrets:
+      - secrets.env
+  eth_anchor:
+    build: .
+    image: mirrorx_node
+    command: node --experimental-modules anchor.mjs XETH XLMETH
+    secrets:
+      - secrets.env
