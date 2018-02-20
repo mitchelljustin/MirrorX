@@ -12,8 +12,6 @@ parser.addArgument(['currencyPair'])
 
 const {assetCode, currencyPair} = parser.parseArgs()
 
-loadSecrets()
-
 const keypair = Stellar.Keypair.fromSecret(process.env.DISTRIBUTOR_SECRET)
 const asset = new Stellar.Asset(assetCode, process.env.ISSUER)
 
