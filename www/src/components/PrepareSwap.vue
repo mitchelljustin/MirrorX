@@ -2,9 +2,12 @@
   <div class="row-centered">
     <v-dialog/>
     <div class="three-quarters form">
-      <h1 class="form__header">
-        {{side === 'deposit' ? 'SELL' : 'BUY'}} {{currency}}
-      </h1>
+      <div class="form__header">
+        CONVERT
+        {{side === 'deposit' ? currency : 'XLM'}}
+        <icon class="form__header__icon" name="long-arrow-right" scale="2"/>
+        {{side === 'deposit' ? 'XLM' : currency}}
+      </div>
       <div class="form__group">
         <label class="form__label" for="stellarAccount">
           Stellar Account ID

@@ -34,7 +34,7 @@
               type="text"
               id="stellarPrivateKey"
               v-model="stellarPrivateKey">
-            <button class="button" @click="stellarSignClicked">
+            <button class="button button--normal" @click="stellarSignClicked">
               SIGN
             </button>
             <span class="sign-dialog__line">
