@@ -10,6 +10,7 @@ async function run() {
 
     await Promise.all([
         createAccount('issuer'),
+        createAccount('distributor'),
         createAccount('alice'),
         createAccount('bob'),
     ])
@@ -45,24 +46,39 @@ async function run() {
                 limit: '100.0',
                 source: keys.stellar.alice.publicKey,
             }))
-            .addOperation(Stellar.Operation.changeTrust({
-                asset: XETH,
-                limit: '100.0',
-                source: keys.stellar.bob.publicKey,
-            }))
             .addOperation(Stellar.Operation.payment({
                 destination: keys.stellar.alice.publicKey,
                 asset: XETH,
                 amount: '100.0',
                 source: issuerAccount,
             }))
+            .addOperation(Stellar.Operation.changeTrust({
+                asset: XETH,
+                limit: '100.0',
+                source: keys.stellar.distributor.publicKey,
+            }))
+            .addOperation(Stellar.Operation.payment({
+                destination: keys.stellar.distributor.publicKey,
+                asset: XETH,
+                amount: '100.0',
+                source: issuerAccount,
+            }))
+            .addOperation(Stellar.Operation.changeTrust({
+                asset: XETH,
+                limit: '100.0',
+                source: keys.stellar.bob.publicKey,
+            }))
             .build()
         for (const account of Object.values(keys.stellar)) {
             const keypair = Stellar.Keypair.fromSecret(account.secret)
             tx.sign(keypair)
         }
-        await stellar.submitTransaction(tx)
-        console.log('Funded Alice\'s account with 100 XETH')
+        try {
+            await stellar.submitTransaction(tx)
+            console.log('Funded Alice\'s account and Distributor account with 100 XETH')
+        } catch (e) {
+            console.error(e)
+        }
     }
 }
 
