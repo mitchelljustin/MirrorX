@@ -36,10 +36,11 @@
 }
 
 .pitch-box {
-  @include flex(column, $align-items: center);
+  @include flex(column, $justify-content: flex-start, $align-items: center);
   border: 1px solid $theme-gray;
-  min-height: 280px;
+  min-height: 260px;
   padding: 20px 0;
+  margin: 0.2em 0;
 
   &--subdued {
     border: none;
@@ -48,6 +49,7 @@
 
   &__header {
     margin-bottom: 0.5em;
+    height: 30px;
   }
 
   &__text {
@@ -155,8 +157,8 @@
   height: 100%;
   background: $theme-background;
   border: 1px solid darken($theme-background, 7.5%);
-  padding: 15px;
-  margin: 15px;
+  padding: 0 15px 15px;
+  margin-top: 15px;
 
   &__header {
     margin: 0.3em 0;
