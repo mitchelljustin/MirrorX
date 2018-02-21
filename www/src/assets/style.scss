@@ -209,6 +209,11 @@
     font-size: 20px;
     margin-left: 0.3em;
   }
+
+  &__label-subtitle {
+    color: $theme-text-subdued;
+    font-size: 17px;
+  }
 }
 
 .landing-cta {

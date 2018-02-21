@@ -14,12 +14,17 @@
       >
       <label class="radio-buttons__label" :for='`swapSize-${size}`'>
         {{ size }} {{ currency }}
+        <span v-if="!!xlmPerUnit" class="radio-buttons__label-subtitle">
+          ({{xlmPerUnit.times(size).toFixed(2)}} XLM)
+        </span>
       </label>
     </div>
   </div>
 </template>
 
 <script>
+  import BigNumber from 'bignumber.js'
+
   export default {
     name: 'swap-size-select',
     props: {
@@ -27,10 +32,7 @@
       currency: String,
       swapSizes: Array,
       selectedSize: String,
-    },
-    data() {
-      return {
-      }
+      xlmPerUnit: BigNumber,
     },
     watch: {
       selectedSize(val) {

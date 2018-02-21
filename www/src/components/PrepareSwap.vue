@@ -11,7 +11,11 @@
       <div class="form__group">
         <label class="form__label" for="stellarAccount">
           Stellar Account ID
-          <a class="button button--link" target="_blank" href="https://stellarterm.com/#signup">
+          <a
+            v-if="side === 'deposit'"
+            class="button button--link"
+            target="_blank"
+            href="https://stellarterm.com/#signup">
             Don't have an account?
           </a>
         </label>
@@ -46,6 +50,7 @@
           :currency="currency"
           :swapSizes="swapSpec.swapSizes"
           :disabled="requestingSwap"
+          :xlmPerUnit="xlmPerUnit"
           :selectedSize.sync="swapSize"
           />
       </div>
@@ -64,6 +69,7 @@
 <script>
   import web3 from '../util/web3'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
+  import {getAssetPrice} from '../util/prices.mjs'
 
   export default {
     name: 'prepare-deposit',
@@ -78,7 +84,11 @@
         stellarAccount: null,
         cryptoAddress: null,
         requestingSwap: false,
+        xlmPerUnit: null,
       }
+    },
+    mounted() {
+      this.populateXlmPerUnit()
     },
     beforeRouteEnter(to, from, next) {
       if (SwapSpecs[to.params.currency] === undefined) {
@@ -92,6 +102,10 @@
       },
     },
     methods: {
+      async populateXlmPerUnit() {
+        const {side, currency} = this
+        this.xlmPerUnit = await getAssetPrice({side, currency})
+      },
       async loadFromMetamaskClicked() {
         this.cryptoAddress = await this.loadEthAddressFromMetamask()
       },

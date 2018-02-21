@@ -48,13 +48,13 @@
         </div>
         <span v-if="reqInfo" class="big-info__swap-size">
           <span v-if="isWithdrawer">
-            ?? XLM TO
+            <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM TO
           </span>
           <span>
             {{ swapSize || '..' }} {{ currency }}
           </span>
           <span v-if="isDepositor">
-            TO ?? XLM
+            TO <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM
           </span>
         </span>
         <div class="big-info__label">
@@ -95,6 +95,7 @@
   import {createHash} from 'crypto'
 
   import Status from '../util/swapStatus'
+  import {getAssetPrice} from '../util/prices.mjs'
 
   export default {
     name: 'complete-swap',
@@ -119,10 +120,12 @@
         matchedInfo: null,
         preimageBuf: this.preimage || null,
         networkId: 4, // Rinkeby
+        xlmPerUnit: null,
         hashlock,
       }
     },
     mounted() {
+      this.populateXlmPerUnit()
       this.status = Status.RequestingSwapInfo
     },
     beforeRouteLeave(to, from, next) {
@@ -132,6 +135,10 @@
       next()
     },
     methods: {
+      async populateXlmPerUnit() {
+        const {side, currency} = this
+        this.xlmPerUnit = await getAssetPrice({side, currency})
+      },
       async requestSwapInfo() {
         const {currency, swapReqId} = this
         const {data: {status, matchedInfo, reqInfo}} =
@@ -389,6 +396,15 @@
         } else if (newStatus === Status.Done) {
           console.log('Done!')
         }
+      },
+    },
+    components: {
+      'price': {
+        props: ['size', 'xlmPerUnit'],
+        template:
+        '<span>' +
+        "{{(xlmPerUnit && size) ? xlmPerUnit.times(size).toFixed(2) : '??'}}" +
+        '</span>',
       },
     },
   }
