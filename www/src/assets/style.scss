@@ -19,8 +19,13 @@
   width: 100%;
 
   &__title {
-    @include flex;
-    align-items: center;
+    @include flex($align-items: center);
+  }
+
+  &__version {
+    margin-left: 5px;
+    font-weight: 600;
+    font-size: 16px;
   }
 
   &__logo {
@@ -163,6 +168,7 @@
     @include flex($align-items: center);
     font-size: 36px;
     font-weight: 400;
+    margin: 0.3em 0;
 
     &__icon {
       margin: 0 0.15em;
@@ -176,7 +182,7 @@
   &__group {
     @include flex;
     width: 100%;
-    margin: 0.5em 0;
+    margin: 1em 0;
 
     input {
       flex-grow: 1;
@@ -207,6 +213,11 @@
     font-weight: 400;
     font-size: 20px;
     margin-left: 0.3em;
+  }
+
+  &__label-subtitle {
+    color: $theme-text-subdued;
+    font-size: 17px;
   }
 }
 

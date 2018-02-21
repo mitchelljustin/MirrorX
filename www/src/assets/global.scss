@@ -3,7 +3,9 @@
 
 body, h1, h2, h3, p {
   @include flex;
-  line-height: 1.6em;
+}
+body, h1, h2, h3, p, div {
+  line-height: 1.5em;
 }
 
 h1, h2, h3 {

@@ -3,41 +3,41 @@
     <v-dialog/>
     <sign-transaction-dialog modalName="commit-on-stellar" network="stellar">
       <span slot="title">
-        COMMIT ON STELLAR
+        COMMIT XLM
       </span>
       <div slot="description">
         <p>
-          MirrorX needs your signature to commit your ETH tokens on Stellar.
+          MirrorX needs your signature to commit your XLM on Stellar.
         </p>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="commit-on-ethereum" network="ethereum">
       <span slot="title">
-        COMMIT ON ETHEREUM
+        COMMIT ETH
       </span>
       <div slot="description">
         <p>
-          MirrorX wants to commit your Ether on Ethereum.
+          MirrorX needs your signature to commit your ETH on Ethereum.
         </p>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="claim-on-ethereum" network="ethereum">
       <span slot="title">
-        CLAIM ETHEREUM
+        CLAIM ETH
       </span>
       <div slot="description">
         <p>
-          MirrorX wants to claim your Ether on Ethereum.
+          MirrorX needs your signature to claim your ETH on Ethereum.
         </p>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="claim-on-stellar" network="stellar">
       <span slot="title">
-        CLAIM ON STELLAR
+        CLAIM XLM
       </span>
       <div slot="description">
         <p>
-          MirrorX needs your signature to claim your ETH tokens on Stellar.
+          MirrorX needs your signature to claim your XLM on Stellar.
         </p>
       </div>
     </sign-transaction-dialog>
@@ -48,13 +48,13 @@
         </div>
         <span v-if="reqInfo" class="big-info__swap-size">
           <span v-if="isWithdrawer">
-            ?? XLM TO
+            <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM TO
           </span>
           <span>
             {{ swapSize || '..' }} {{ currency }}
           </span>
           <span v-if="isDepositor">
-            TO ?? XLM
+            TO <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM
           </span>
         </span>
         <div class="big-info__label">
@@ -89,11 +89,13 @@
 </template>
 
 <script>
+  import Web3 from '../util/web3'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
   import {Stellar} from '../../../lib/stellar.mjs'
   import {createHash} from 'crypto'
 
   import Status from '../util/swapStatus'
+  import {getAssetPrice} from '../util/prices.mjs'
 
   export default {
     name: 'complete-swap',
@@ -117,10 +119,13 @@
         reqInfo: null,
         matchedInfo: null,
         preimageBuf: this.preimage || null,
+        networkId: 4, // Rinkeby
+        xlmPerUnit: null,
         hashlock,
       }
     },
     mounted() {
+      this.populateXlmPerUnit()
       this.status = Status.RequestingSwapInfo
     },
     beforeRouteLeave(to, from, next) {
@@ -130,6 +135,10 @@
       next()
     },
     methods: {
+      async populateXlmPerUnit() {
+        const {side, currency} = this
+        this.xlmPerUnit = await getAssetPrice({side, currency})
+      },
       async requestSwapInfo() {
         const {currency, swapReqId} = this
         const {data: {status, matchedInfo, reqInfo}} =
@@ -172,6 +181,10 @@
       },
       async findStellarCommitment() {
         let holdingTxInfo = await this.findHoldingTx({wait: false})
+        console.log()
+        console.log()
+        console.log()
+        console.log()
         if (!holdingTxInfo) {
           if (this.isWithdrawer) {
             await this.signStellarCommitment()
@@ -216,7 +229,18 @@
         }
         this.status = Status.ClaimOnEthereum
       },
-      signEthereumCommit() {
+      async checkMetamaskNetworkId() {
+        const networkId = await Web3.eth.net.getId()
+        if (String(this.networkId) !== String(networkId)) {
+          this.displayError({message: 'Metamask network ID does not match.'})
+          return false
+        }
+        return true
+      },
+      async signEthereumCommit() {
+        if (!(await this.checkMetamaskNetworkId())) {
+          return
+        }
         const {
           hashlock,
           swapSize,
@@ -229,15 +253,15 @@
         this.$modal.show('commit-on-ethereum', {funcName, params})
       },
       async findPrepareSwapCall({wait}) {
-        this.$modal.hide('commit-on-ethereum')
         const {
+          networkId,
           hashlock,
           swapSize,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
         } = this
         try {
           return await this.swapSpec.findPrepareSwap({
-            hashlock, swapSize, withdrawerEthAddress, wait,
+            networkId, hashlock, swapSize, withdrawerEthAddress, wait,
           })
         } catch (e) {
           this.displayError(e)
@@ -245,6 +269,7 @@
         }
       },
       async findEthereumClaim() {
+        this.$modal.hide('commit-on-ethereum')
         let eventLog = await this.findFulfillSwapCall({wait: false})
         if (!eventLog) {
           if (this.isWithdrawer) {
@@ -261,10 +286,10 @@
         this.status = Status.ClaimOnStellar
       },
       async findFulfillSwapCall({wait}) {
-        const {hashlock} = this
+        const {networkId, hashlock} = this
         try {
           return await this.swapSpec.findFulfillSwap({
-            hashlock, wait,
+            networkId, hashlock, wait,
           })
         } catch (e) {
           this.displayError(e)
@@ -272,6 +297,9 @@
         }
       },
       async signEthereumClaim() {
+        if (!(await this.checkMetamaskNetworkId())) {
+          return
+        }
         const {
           preimage,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
@@ -372,6 +400,16 @@
         } else if (newStatus === Status.Done) {
           console.log('Done!')
         }
+      },
+    },
+    components: {
+      'price': {
+        props: ['size', 'xlmPerUnit'],
+        template: `
+            <span>
+                {{(xlmPerUnit && size) ? xlmPerUnit.times(size).toFixed(2) : '??'}}
+            </span>
+        `,
       },
     },
   }
