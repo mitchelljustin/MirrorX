@@ -12,7 +12,7 @@ services:
       API_PORT: 80
       REDIS_URI: redis://redis
     ports:
-    - "80:80"
+    - "9080:80"
     secrets:
     - secrets.env
     links:

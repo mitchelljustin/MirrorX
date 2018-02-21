@@ -16,7 +16,8 @@
           <div class="sign-dialog__stellar" v-if="network === 'stellar'">
             <label class="sign-dialog__line" for="envelopeXdr">
               Raw Transaction
-              <a :href="`https://www.stellar.org/laboratory/#xdr-viewer?input=${encodeURIComponent(envelopeXdr)}&type=TransactionEnvelope&network=test`">
+              <a target="_blank"
+                 :href="`https://www.stellar.org/laboratory/#xdr-viewer?input=${encodeURIComponent(envelopeXdr)}&type=TransactionEnvelope&network=test`">
                 Inspect
               </a>
             </label>

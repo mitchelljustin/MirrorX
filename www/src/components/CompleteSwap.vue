@@ -89,6 +89,7 @@
 </template>
 
 <script>
+  import Web3 from '../util/web3'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
   import {Stellar} from '../../../lib/stellar.mjs'
   import {createHash} from 'crypto'
@@ -117,6 +118,7 @@
         reqInfo: null,
         matchedInfo: null,
         preimageBuf: this.preimage || null,
+        networkId: 4, // Rinkeby
         hashlock,
       }
     },
@@ -216,7 +218,18 @@
         }
         this.status = Status.ClaimOnEthereum
       },
-      signEthereumCommit() {
+      async checkMetamaskNetworkId() {
+        const networkId = await Web3.eth.net.getId()
+        if (String(this.networkId) !== String(networkId)) {
+          this.displayError({message: 'Metamask network ID does not match.'})
+          return false
+        }
+        return true
+      },
+      async signEthereumCommit() {
+        if (!(await this.checkMetamaskNetworkId())) {
+          return
+        }
         const {
           hashlock,
           swapSize,
@@ -231,13 +244,14 @@
       async findPrepareSwapCall({wait}) {
         this.$modal.hide('commit-on-ethereum')
         const {
+          networkId,
           hashlock,
           swapSize,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
         } = this
         try {
           return await this.swapSpec.findPrepareSwap({
-            hashlock, swapSize, withdrawerEthAddress, wait,
+            networkId, hashlock, swapSize, withdrawerEthAddress, wait,
           })
         } catch (e) {
           this.displayError(e)
@@ -261,10 +275,10 @@
         this.status = Status.ClaimOnStellar
       },
       async findFulfillSwapCall({wait}) {
-        const {hashlock} = this
+        const {networkId, hashlock} = this
         try {
           return await this.swapSpec.findFulfillSwap({
-            hashlock, wait,
+            networkId, hashlock, wait,
           })
         } catch (e) {
           this.displayError(e)
@@ -272,6 +286,9 @@
         }
       },
       async signEthereumClaim() {
+        if (!(await this.checkMetamaskNetworkId())) {
+          return
+        }
         const {
           preimage,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
