@@ -53,7 +53,7 @@
           const textMatch = this.textForStatus(status, 'Match', 'Matching', 'Matched')
           return `2. ${textMatch} with counterparty`
         }
-        const textCommit = this.textForStatus(status, 'Commit', 'Committing', 'Commit')
+        const textCommit = this.textForStatus(status, 'Commit', 'Committing', 'Committed')
         if (status === Status.CommitOnStellar) {
           return `3. ${textCommit} XLM on Stellar ${this.withdrawerStep}`
         }

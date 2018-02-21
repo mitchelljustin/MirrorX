@@ -3,41 +3,41 @@
     <v-dialog/>
     <sign-transaction-dialog modalName="commit-on-stellar" network="stellar">
       <span slot="title">
-        COMMIT ON STELLAR
+        COMMIT XLM
       </span>
       <div slot="description">
         <p>
-          MirrorX needs your signature to commit your ETH tokens on Stellar.
+          MirrorX needs your signature to commit your XLM on Stellar.
         </p>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="commit-on-ethereum" network="ethereum">
       <span slot="title">
-        COMMIT ON ETHEREUM
+        COMMIT ETH
       </span>
       <div slot="description">
         <p>
-          MirrorX wants to commit your Ether on Ethereum.
+          MirrorX needs your signature to commit your ETH on Ethereum.
         </p>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="claim-on-ethereum" network="ethereum">
       <span slot="title">
-        CLAIM ETHEREUM
+        CLAIM ETH
       </span>
       <div slot="description">
         <p>
-          MirrorX wants to claim your Ether on Ethereum.
+          MirrorX needs your signature to claim your ETH on Ethereum.
         </p>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="claim-on-stellar" network="stellar">
       <span slot="title">
-        CLAIM ON STELLAR
+        CLAIM XLM
       </span>
       <div slot="description">
         <p>
-          MirrorX needs your signature to claim your ETH tokens on Stellar.
+          MirrorX needs your signature to claim your XLM on Stellar.
         </p>
       </div>
     </sign-transaction-dialog>
@@ -181,6 +181,10 @@
       },
       async findStellarCommitment() {
         let holdingTxInfo = await this.findHoldingTx({wait: false})
+        console.log()
+        console.log()
+        console.log()
+        console.log()
         if (!holdingTxInfo) {
           if (this.isWithdrawer) {
             await this.signStellarCommitment()
@@ -249,7 +253,6 @@
         this.$modal.show('commit-on-ethereum', {funcName, params})
       },
       async findPrepareSwapCall({wait}) {
-        this.$modal.hide('commit-on-ethereum')
         const {
           networkId,
           hashlock,
@@ -266,6 +269,7 @@
         }
       },
       async findEthereumClaim() {
+        this.$modal.hide('commit-on-ethereum')
         let eventLog = await this.findFulfillSwapCall({wait: false})
         if (!eventLog) {
           if (this.isWithdrawer) {
@@ -401,10 +405,11 @@
     components: {
       'price': {
         props: ['size', 'xlmPerUnit'],
-        template:
-        '<span>' +
-        "{{(xlmPerUnit && size) ? xlmPerUnit.times(size).toFixed(2) : '??'}}" +
-        '</span>',
+        template: `
+            <span>
+                {{(xlmPerUnit && size) ? xlmPerUnit.times(size).toFixed(2) : '??'}}
+            </span>
+        `,
       },
     },
   }
