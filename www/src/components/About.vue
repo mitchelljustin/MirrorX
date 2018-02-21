@@ -1,6 +1,14 @@
 <template>
-  <div>
-    <h1>About MirrorX</h1>
+  <div class="article">
+    <h1 class="article__heading">
+      About
+    </h1>
+    <h4 class="article__heading">
+      Atomic Swaps
+    </h4>
+    <p>
+      Swaps that are Atomic
+    </p>
   </div>
 </template>
 

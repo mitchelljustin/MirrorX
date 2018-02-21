@@ -351,3 +351,14 @@
   background: easyGradient(#efefef);
   height: 100%;
 }
+
+.article {
+  @include flex;
+
+  &__heading {
+    width: 100%;
+  }
+
+  &__split {
+  }
+}

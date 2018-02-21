@@ -1,7 +1,7 @@
 @import "utils";
 @import "colors";
 
-body, h1, h2, h3, p, div {
+body, h1, h2, h3, p {
   @include flex;
   line-height: 1.6em;
 }
@@ -37,8 +37,8 @@ h2 {
 }
 
 h3 {
-  font-size: 1.3em;
-  font-weight: 400;
+  font-size: 1.1em;
+  font-weight: 600;
 }
 
 input:focus {
