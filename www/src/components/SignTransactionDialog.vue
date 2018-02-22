@@ -12,7 +12,13 @@
           <slot name="title"/>
         </div>
         <div class="sign-dialog__body">
-          <slot name="description"/>
+          <div class="sign-dialog__description">
+            <slot name="description"/>
+          </div>
+          <p>
+            Please sign and submit the transaction.
+            You can sign on-site using this dialog, or off-site using your own wallet.
+          </p>
           <div class="sign-dialog__stellar" v-if="network === 'stellar'">
             <label class="sign-dialog__line" for="envelopeXdr">
               Raw Transaction
@@ -63,6 +69,11 @@
             </button>
           </div>
           <pre class="text--angry" v-if="errorText">{{ errorText }}</pre>
+          <div class="sign-dialog__footer">
+            <p>
+              This dialog will disappear once the transaction is confirmed.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -84,6 +95,7 @@
         stellarPrivateKey: null,
         stellarSignedTx: null,
         envelopeXdr: null,
+        refundXdr: null,
         stellarSignedTxValid: null,
         errorText: null,
         submitting: false,
@@ -94,9 +106,9 @@
         if (this.network === 'stellar') {
           const {envelopeXdr} = event.params
           if (!envelopeXdr) {
-            return this.$router.back()
+            return event.stop()
           }
-          this.envelopeXdr = envelopeXdr
+          Object.assign(this, {envelopeXdr})
         }
 
         if (this.network === 'ethereum') {

@@ -8,6 +8,7 @@
         <icon name="check"
               class="progress-log__icon--happy"
               v-if="i < status || isDone"/>
+        <icon name="close" class="text--angry" v-else-if="i === status && failed"/>
         <icon name="spinner" v-else-if="i === status" pulse/>
       </span>
       <span class="progress-log__description">
@@ -25,6 +26,7 @@
     props: {
       status: Number,
       side: String,
+      failed: Boolean,
     },
     data() {
       const numStatuses = Status.Count
@@ -51,7 +53,7 @@
         }
         if (status === Status.WaitingForMatch) {
           const textMatch = this.textForStatus(status, 'Match', 'Matching', 'Matched')
-          return `2. ${textMatch} with counterparty`
+          return `2. ${textMatch} with peer`
         }
         const textCommit = this.textForStatus(status, 'Commit', 'Committing', 'Committed')
         if (status === Status.CommitOnStellar) {
@@ -77,13 +79,13 @@
         if (this.side === 'deposit') {
           return '(You)'
         }
-        return ''
+        return '(Peer)'
       },
       withdrawerStep() {
         if (this.side === 'withdraw') {
           return '(You)'
         }
-        return ''
+        return '(Peer)'
       },
 
       isDone() {

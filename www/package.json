@@ -13,6 +13,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "asn1": "^0.2.3",
     "axios": "^0.17.1",
     "node-sass": "^4.7.2",
     "normalize-scss": "^7.0.1",
