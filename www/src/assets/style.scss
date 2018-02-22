@@ -107,6 +107,18 @@
     line-height: 1.5em;
   }
 
+  &--small {
+    font-size: 1em;
+    line-height: 1em;
+    width: auto;
+  }
+
+  &--light {
+    border: 1px $theme-gray solid;
+    color: lighten($theme-text, 15%);
+    background: none;
+  }
+
   &--long {
     @include flex($justify-content: space-around, $align-items: center);
     width: 7em;
@@ -264,12 +276,20 @@
   }
 
   &__item {
-    @include flex($align-items: center);
+    @include flex;
     margin: 0.2em 0;
 
     &--inactive {
       color: $theme-inactive;
     }
+  }
+
+  &__description {
+    @include flex;
+  }
+
+  &__rank {
+    margin: 0 0.2em;
   }
 }
 
