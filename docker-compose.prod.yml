@@ -25,7 +25,7 @@ services:
     image: mirrorx_node
     command: node --experimental-modules match.mjs 0.1 ETH
     secrets:
-      - secrets.envz
+      - secrets.env
   eth_anchor:
     build: .
     image: mirrorx_node
