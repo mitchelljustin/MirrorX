@@ -14,16 +14,17 @@
   }
 }
 
+.app-container {
+  width: 100%;
+}
+
 .site-header {
-  @include flex($justify-content: space-between, $align-items: center, $flex-wrap: nowrap);
   width: 100%;
 
   &__title {
-    @include flex($align-items: center);
   }
 
   &__version {
-    margin-left: 5px;
     font-weight: 600;
     font-size: 16px;
   }
@@ -40,12 +41,35 @@
   }
 }
 
+.site-footer {
+  margin: 0.6em auto;
+  color: $theme-text-subdued;
+  width: 80%;
+
+  &__link {
+    margin: 0 0.3em;
+    color: mix($theme-text-subdued, $theme-link, 40%);
+
+    &:hover {
+      color: $theme-link;
+    }
+  }
+
+  &__text {
+    font-size: 13px;
+    margin-left: -15px;
+  }
+}
+
 .pitch-box {
   @include flex(column, $justify-content: flex-start, $align-items: center);
   border: 1px solid $theme-gray;
-  min-height: 260px;
-  padding: 20px 0;
+  border-radius: 2px;
+  min-height: 180px;
+  padding: 10px 0;
+
   margin: 0.2em 0;
+  background: $theme-background-light;
 
   &--subdued {
     border: none;
@@ -57,13 +81,18 @@
     height: 30px;
   }
 
+  &__title {
+    font-weight: 600;
+  }
+
   &__text {
     text-align: center;
-    padding: 0.3em 1.0em;
+    padding: 1.3em 1.5em;
   }
 
   &__footer {
     margin-top: auto;
+    margin-bottom: 0.3em;
   }
 }
 
@@ -234,19 +263,18 @@
 }
 
 .landing-cta {
-  @include flex($flex-direction: column, $align-items: center);
   font-size: 1.4em;
   font-weight: 400;
-  margin-bottom: 25px;
+  margin: 25px 0;
 
   &__text {
     width: 80%;
     max-width: 900px;
     text-align: center;
+    line-height: 1.6em;
   }
 
   &__actions {
-    @include flex($flex-direction: column);
     margin: 0.75em 0;
     text-align: center;
     font-size: 0.8em;
@@ -388,6 +416,10 @@
   &--angry {
     color: $theme-angry;
   }
+
+  &--right {
+    text-align: end;
+  }
 }
 
 .modal {
@@ -396,12 +428,15 @@
 }
 
 .article {
-  @include flex;
+  margin: 0.5em 0;
 
   &__heading {
-    width: 100%;
+    margin: 0.5em 0;
+    font-size: 36px;
   }
 
-  &__split {
+  &__content {
+    margin: 0.5em 0;
+    line-height: 1.6em;
   }
 }

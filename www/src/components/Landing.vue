@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="row-centered">
-      <div class="landing-cta">
+    <div class="row justify-center">
+      <div class="landing-cta col align-center">
         <p class="landing-cta__text">
           Stellar is a decentralized currency exchange and payment network.
           MirrorX is your gateway to it.
@@ -20,54 +20,119 @@
             <span class="button--long__item">ETH</span>
           </router-link>
         </div>
-        <p class="landing-cta__footer">
-          More currency pairs coming soon
+        <div class="landing-cta__footer">
+          <p>
+            More currency pairs coming soon.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-spaced">
+      <div class="one-third pitch-box">
+        <div class="pitch-box__header">
+          <icon name="lock" scale="2"/>
+        </div>
+        <p class="pitch-box__title">
+          Secure
+        </p>
+        <p class="pitch-box__text">
+         We never hold your funds or your private keys.
+        </p>
+        <p class="pitch-box__footer">
+          <a href="#security">
+            How it works
+          </a>
+        </p>
+      </div>
+      <div class="one-third pitch-box">
+        <div class="pitch-box__header">
+          <icon name="exchange" scale="2"/>
+        </div>
+        <p class="pitch-box__title">
+          Atomic Swaps
+        </p>
+        <p class="pitch-box__text">
+          Currency conversions without an intermediary means no KYC and no limits.
+        </p>
+        <p class="pitch-box__footer">
+          <a href="#atomic-swaps">
+            Learn More
+          </a>
+        </p>
+      </div>
+      <div class="one-third pitch-box">
+        <icon class="pitch-box__header" label="No Fees">
+          <icon name="dollar" />
+          <icon name="ban" scale="2" />
+        </icon>
+        <p class="pitch-box__title">
+          Cheap
+        </p>
+        <p class="pitch-box__text">
+          We take no exchange transaction fees, and a minimal spread fee.
+        </p>
+        <p class="pitch-box__footer">
+          <a href="#fees">
+            Why?
+          </a>
         </p>
       </div>
     </div>
-    <div class="row-spaced">
-      <div class="one-third pitch-box">
-        <icon class="pitch-box__header" name="bar-chart" scale="2"/>
-        <p class="pitch-box__text">
-          Stellar is a Decentralized Exchange for cryptocurrencies and fiat, with Lumens (XLM) as the native currency.
-        </p>
-        <p class="pitch-box__text">
-          MirrorX allows you to trade on Stellar using currencies you already own, such as Ether.
-        </p>
-        <p class="pitch-box__footer">
-          <a target="_blank" href="https://stellar.org">
-            More about Stellar
-          </a>
-        </p>
-      </div>
-      <div class="one-third pitch-box">
-        <icon class="pitch-box__header" name="exchange" scale="2"/>
-        <p class="pitch-box__text">
-          MirrorX uses Atomic Swaps to enable currency conversions without an intermediary.
-        </p>
-        <p class="pitch-box__text">
-          No third party ever holds your funds. This means no risk of getting hacked and no limits.
-        </p>
-        <p class="pitch-box__footer">
-          <router-link target="_blank" :to="{name: 'about'}">
-            Learn More
-          </router-link>
-        </p>
-      </div>
-      <div class="one-third pitch-box">
-        <icon class="pitch-box__header" name="magic" scale="2"/>
-        <p class="pitch-box__text">
-          MirrorX was built to make trustless currency conversions as easy & safe as possible.
-          However, please be aware it is still very much a work in progress.
-        </p>
-        <p class="pitch-box__text">
-          If you have suggestions or would like to contribute, please reach out on GitHub.
-        </p>
-        <p class="pitch-box__footer">
-          <a target="_blank" href="https://github.com/mvanderh/MirrorX">
-            Source on GitHub
-          </a>
-        </p>
+    <div class="full col align-center">
+      <div class="three-quarters row">
+        <div class="article">
+          <h2 class="article__heading" id="security">
+            Security
+          </h2>
+          <p class="article__content">
+            MirrorX never holds your private keys.
+            This is achieved by forcing all the signing to be done in the browser or even off-site.
+          </p>
+          <p class="article__content">
+            When you start a currency swap, MirrorX matches you on a First-In-First-Out basis
+            with a peer who wants to the opposite swap. When a match is found, the rest of the swap
+            is executed in the browser simply by reading from the respective public blockchains.
+          </p>
+          <p class="article__content">
+            This means that there's no way for MirrorX or anyone else to steal your funds or private keys.
+          </p>
+        </div>
+        <div class="article">
+          <h2 class="article__heading" id="atomic-swaps">
+            Atomic swaps
+          </h2>
+          <p class="article__content">
+            Atomic swaps are exchanges of currencies on different blockchains that
+            don't rely on an intermediary.
+            There are two phases: the commitment phase and the claim phase.
+          </p>
+          <p class="article__content">
+            <strong>Commitment Phase</strong>
+            In the commitment phase, the two parties commit funds to a cryptographically locked escrow account.
+            These funds are meant for the other party, but require an extra piece of information called the "hash preimage" to unlock.
+            This hash preimage is generated by one of the parties and kept secret for the time being.
+            Once both sides see the other party's commitment and verify that it is valid, they can move on to the claim phase.
+          </p>
+          <p class="article__content">
+            <strong>Claim Phase</strong>
+            The claim phase is initiated by the party that holds the hash preimage.
+            They use it to unlock the funds that were committed by the counterparty.
+            The action of unlocking this account simultaneously publishes the hash preimage on a public blockchain.
+            The other party then uses this to unlock their own funds.
+          </p>
+        </div>
+        <div class="article">
+          <h2 class="article__heading" id="fees">
+            Fees
+          </h2>
+          <p class="article__content">
+            MirrorX takes no exchange transaction fees. Currency swaps are and always will be free.
+          </p>
+          <p class="article__content">
+            However, there is a very small spread fee that is required to protect against market manipulation.
+            This fee is used to pay for transactions on Stellar to maintain a stable exchange rate.
+          </p>
+        </div>
       </div>
     </div>
   </div>

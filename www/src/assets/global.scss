@@ -4,12 +4,17 @@
 body, h1, h2, h3, p {
   @include flex;
 }
-body, h1, h2, h3, p, div {
-  line-height: 1.5em;
-}
 
 h1, h2, h3 {
   align-items: center;
+}
+
+p {
+  line-height: 1.4em;
+}
+
+strong {
+  font-weight: 500;
 }
 
 body {

@@ -34,33 +34,41 @@
   width: 100%;
 }
 
-.row-spaced {
-  @include flex($justify-content: space-between);
-  width: 100%;
-}
-
 .row {
-  @include flex;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
 }
 
-.row-centered {
-  @include flex($justify-content: center);
-  width: 100%;
+.col {
+  display: flex;
+  flex-direction: column;
 }
-
-.col-spaced {
-  @include flex($flex-direction: column, $justify-content: space-between);
-}
-
-.center-col {
-  @include flex($align-items: center);
-}
-
 
 .justify-left {
-  justify-content: space-around;
+  justify-content: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-right {
+  justify-content: flex-end;
+}
+
+.justify-spaced {
+  justify-content: space-between
 }
 
 .align-left {
   align-items: flex-start;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.align-right {
+  align-items: flex-end;
 }

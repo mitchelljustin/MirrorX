@@ -1,5 +1,5 @@
 <template>
-  <div class="row-centered">
+  <div class="row justify-center">
     <v-dialog/>
     <div class="three-quarters form">
       <div class="form__header">
