@@ -121,7 +121,6 @@
         reqInfo: null,
         matchedInfo: null,
         preimageBuf: this.preimage || null,
-        networkId: 4, // Rinkeby
         xlmPerUnit: null,
         failed: false,
         refundTx: null,
@@ -159,7 +158,7 @@
       },
       displayError(e) {
         this.$modal.show('dialog', {
-          title: 'Error',
+          title: e.title || 'Error',
           text: e.message || JSON.stringify(e),
         })
       },
@@ -260,8 +259,13 @@
       },
       async checkMetamaskNetworkId() {
         const networkId = await Web3.eth.net.getId()
-        if (String(this.networkId) !== String(networkId)) {
-          this.displayError({message: 'Metamask network ID does not match.'})
+        const expectedNetworkId = process.env.ETHEREUM_NETWORK_ID
+        const expectedNetwork = {1: 'Main', 3: 'Rinkeby'}[expectedNetworkId] || 'different'
+        if (String(expectedNetworkId) !== String(networkId)) {
+          this.displayError({
+            title: 'Metamask Error',
+            message: `Your metamask is using the wrong network. Please switch to ${expectedNetwork} network.`
+          })
           return false
         }
         return true
@@ -283,14 +287,13 @@
       },
       async findPrepareSwapCall({wait}) {
         const {
-          networkId,
           hashlock,
           swapSize,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
         } = this
         try {
           return await this.swapSpec.findPrepareSwap({
-            networkId, hashlock, swapSize, withdrawerEthAddress, wait,
+            hashlock, swapSize, withdrawerEthAddress, wait,
           })
         } catch (e) {
           this.displayError(e)
@@ -315,10 +318,10 @@
         this.status = Status.ClaimOnStellar
       },
       async findFulfillSwapCall({wait}) {
-        const {networkId, hashlock} = this
+        const {hashlock} = this
         try {
           return await this.swapSpec.findFulfillSwap({
-            networkId, hashlock, wait,
+            hashlock, wait,
           })
         } catch (e) {
           this.displayError(e)
