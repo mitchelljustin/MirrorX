@@ -13,7 +13,7 @@ parser.addArgument(['currencyPair'])
 const {assetCode, currencyPair} = parser.parseArgs()
 
 const keypair = Stellar.Keypair.fromSecret(process.env.DISTRIBUTOR_SECRET)
-const asset = new Stellar.Asset(assetCode, process.env.ISSUER)
+const asset = new Stellar.Asset(assetCode, process.env.STELLAR_ISSUER)
 
 const anchor = new Anchor({keypair, asset, currencyPair})
 anchor.runForever()
