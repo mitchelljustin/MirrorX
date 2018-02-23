@@ -107,6 +107,18 @@
     line-height: 1.5em;
   }
 
+  &--small {
+    font-size: 1em;
+    line-height: 1em;
+    width: auto;
+  }
+
+  &--light {
+    border: 1px $theme-gray solid;
+    color: lighten($theme-text, 15%);
+    background: none;
+  }
+
   &--long {
     @include flex($justify-content: space-around, $align-items: center);
     width: 7em;
@@ -254,6 +266,7 @@
   padding: 0;
 
   &__icon {
+    @include flex($justify-content: center, $align-items: center);
     width: 25px;
     height: 25px;
 
@@ -263,12 +276,20 @@
   }
 
   &__item {
-    @include flex($align-items: center);
+    @include flex;
     margin: 0.2em 0;
 
     &--inactive {
       color: $theme-inactive;
     }
+  }
+
+  &__description {
+    @include flex;
+  }
+
+  &__rank {
+    margin: 0 0.2em;
   }
 }
 
@@ -349,6 +370,17 @@
     align-self: flex-end;
     margin: 5px;
     background: easyGradient($theme-primary);
+  }
+
+  &__footer {
+    @include flex($justify-content: center);
+    width: 100%;
+    margin-top: 20px;
+    font-weight: 500;
+    border-top: 1px solid $theme-gray;
+  }
+
+  &__description {
   }
 }
 

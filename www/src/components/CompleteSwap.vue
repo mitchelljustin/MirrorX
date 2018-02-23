@@ -83,7 +83,9 @@
     </div>
     <div class="half col-spaced">
       <h3>Progress</h3>
-      <swap-progress-log :status="status" :side="side"/>
+      <swap-progress-log :failed="failed"
+                         :status="status"
+                         :side="side"/>
     </div>
   </div>
 </template>
@@ -121,6 +123,8 @@
         preimageBuf: this.preimage || null,
         networkId: 4, // Rinkeby
         xlmPerUnit: null,
+        failed: false,
+        refundTx: null,
         hashlock,
       }
     },
@@ -181,22 +185,33 @@
       },
       async findStellarCommitment() {
         let holdingTxInfo = await this.findHoldingTx({wait: false})
-        console.log()
-        console.log()
-        console.log()
-        console.log()
         if (!holdingTxInfo) {
           if (this.isWithdrawer) {
             await this.signStellarCommitment()
           }
           holdingTxInfo = await this.findHoldingTx({wait: true})
         }
+        const {hashlock, refundTxHash} = holdingTxInfo
         if (!this.hashlock) {
-          const {hashlock} = holdingTxInfo
           Object.assign(this, {hashlock})
           console.log(`Found hashlock: ${hashlock.toString('hex')}`)
         }
+        const refundTx = await this.verifyRefundTx({refundTxHash})
+        if (!refundTx) {
+          this.displayError({message: 'Invalid refund transaction, cannot continue swap. '})
+          this.failed = true
+          return
+        }
+        this.refundTx = refundTx
         this.status = Status.CommitOnEthereum
+      },
+      async verifyRefundTx({refundTxHash}) {
+        const hash = refundTxHash.toString('hex')
+        const {data: {xdr}} = await this.$client.get(`refundTx/${hash}`)
+        if (xdr === null) {
+          return null
+        }
+        return this.swapSpec.verifyStellarRefundTx({xdr, hash})
       },
       async signStellarCommitment() {
         const {
@@ -206,17 +221,31 @@
           depositor: {stellarAccount: depositorAccount},
           withdrawer: {stellarAccount: withdrawerAccount},
         } = this
+        const {refundTx} = await this.swapSpec.genStellarRefundTx({
+          hashlock,
+          holdingAccount,
+          depositorAccount,
+          withdrawerAccount,
+        })
+        this.refundTx = refundTx
         const {holdingTx} = await this.swapSpec.genStellarHoldingTx({
           hashlock,
+          refundTx,
           swapSize,
           holdingAccount,
           depositorAccount,
           withdrawerAccount,
         })
         holdingTx.sign(this.holdingKeys)
-        const envelope = holdingTx.toEnvelope()
-        const envelopeXdr = envelope.toXDR('base64')
+        await this.uploadRefundXdr()
+        const envelopeXdr = holdingTx.toEnvelope().toXDR('base64')
         this.$modal.show('commit-on-stellar', {envelopeXdr})
+      },
+      async uploadRefundXdr() {
+        const {refundTx} = this
+        const xdr = refundTx.toEnvelope().toXDR('base64')
+        const {data: {hash}} = await this.$client.post('refundTx', {xdr})
+        console.log(`Uploaded refund xdr: ${hash}`)
       },
       async findEthereumCommitment() {
         this.$modal.hide('commit-on-stellar')

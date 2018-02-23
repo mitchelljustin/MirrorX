@@ -27,6 +27,16 @@ services:
     - secrets.env
     links:
     - redis
+  match_0_1_eth:
+    build: .
+    image: mirrorx_node
+    command: node --experimental-modules match.mjs 0.1 ETH
+    environment:
+      REDIS_URI: redis://redis
+    secrets:
+    - secrets.env
+    links:
+    - redis
   eth_anchor:
     build: .
     image: mirrorx_node
