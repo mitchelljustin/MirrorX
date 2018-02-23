@@ -10,40 +10,25 @@ services:
     command: node --experimental-modules api.mjs
     environment:
       API_PORT: 80
-      REDIS_URI: redis://redis
     ports:
-    - "9080:80"
+      - "80:80"
     secrets:
-    - secrets.env
-    links:
-    - redis
+      - secrets.env
   match_0_01_eth:
     build: .
     image: mirrorx_node
     command: node --experimental-modules match.mjs 0.01 ETH
-    environment:
-      REDIS_URI: redis://redis
     secrets:
-    - secrets.env
-    links:
-    - redis
+      - secrets.env
   match_0_1_eth:
     build: .
     image: mirrorx_node
     command: node --experimental-modules match.mjs 0.1 ETH
-    environment:
-      REDIS_URI: redis://redis
     secrets:
-    - secrets.env
-    links:
-    - redis
+      - secrets.env
   eth_anchor:
     build: .
     image: mirrorx_node
     command: node --experimental-modules anchor.mjs XETH XLMETH
     secrets:
-    - secrets.env
-  redis:
-    image: redis:4.0.8
-    ports:
-    - "6379:6379"
+      - secrets.env
