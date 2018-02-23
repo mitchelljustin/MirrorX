@@ -37,7 +37,7 @@ services:
     - secrets.env
     links:
     - redis
-  eth_anchor:
+  anchor_xeth:
     build: .
     image: mirrorx_node
     command: node --experimental-modules anchor.mjs XETH XLMETH
