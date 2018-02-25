@@ -27,7 +27,39 @@
         </div>
       </div>
     </div>
-    <div class="row justify-spaced">
+    <div class="pitch-box-container row justify-spaced">
+      <div class="one-third pitch-box">
+        <div class="pitch-box__header">
+          <icon name="user-secret" scale="2"/>
+        </div>
+        <p class="pitch-box__title">
+          Anonymous
+        </p>
+        <p class="pitch-box__text">
+          No KYC and no exchange limits.
+        </p>
+        <p class="pitch-box__footer">
+          <a href="#anonymous">
+            How it works
+          </a>
+        </p>
+      </div>
+      <div class="one-third pitch-box">
+        <div class="pitch-box__header">
+          <icon name="dollar" scale="2"/>
+        </div>
+        <p class="pitch-box__title">
+          Cheap
+        </p>
+        <p class="pitch-box__text">
+          Zero transaction fees and a very small spread.
+        </p>
+        <p class="pitch-box__footer">
+          <a href="#cheap">
+            Fees
+          </a>
+        </p>
+      </div>
       <div class="one-third pitch-box">
         <div class="pitch-box__header">
           <icon name="lock" scale="2"/>
@@ -36,101 +68,58 @@
           Secure
         </p>
         <p class="pitch-box__text">
-         We never hold your funds or your private keys.
+          We never hold your funds or your private keys.
         </p>
         <p class="pitch-box__footer">
           <a href="#security">
-            How it works
-          </a>
-        </p>
-      </div>
-      <div class="one-third pitch-box">
-        <div class="pitch-box__header">
-          <icon name="exchange" scale="2"/>
-        </div>
-        <p class="pitch-box__title">
-          Atomic Swaps
-        </p>
-        <p class="pitch-box__text">
-          Currency conversions without an intermediary means no KYC and no limits.
-        </p>
-        <p class="pitch-box__footer">
-          <a href="#atomic-swaps">
-            Learn More
-          </a>
-        </p>
-      </div>
-      <div class="one-third pitch-box">
-        <icon class="pitch-box__header" label="No Fees">
-          <icon name="dollar" />
-          <icon name="ban" scale="2" />
-        </icon>
-        <p class="pitch-box__title">
-          Cheap
-        </p>
-        <p class="pitch-box__text">
-          We take no exchange transaction fees, and a minimal spread fee.
-        </p>
-        <p class="pitch-box__footer">
-          <a href="#fees">
-            Why?
+            How?
           </a>
         </p>
       </div>
     </div>
     <div class="full col align-center">
-      <div class="three-quarters row">
+      <div class="full row">
         <div class="article">
-          <h2 class="article__heading" id="security">
-            Security
+          <h2 class="article__heading" id="anonymous">
+            Anonymous
           </h2>
           <p class="article__content">
-            MirrorX never holds your private keys.
-            This is achieved by forcing all the signing to be done in the browser or even off-site.
+            MirrorX does not require you to disclose personal information, and it doesn't enforce a trading limit.
+            It achieves this by levaraging Atomic Swaps, which are peer-to-peer currency swaps without an intermediary.
+          </p>
+          <p class="article__content">
+            Atomic swaps have two phases: the commitment phase and the claim phase.
+            In the commitment phase, two parties commit funds to a cryptographically locked escrow account.
+            In the claim phase, one party claims the funds intended for them and by doing so automatically
+            releases the funds intended for the counterparty.
+          </p>
+          <p class="article__content">
+            A more thorough explanation can be found <a target="_blank" href="https://github.com/mvanderh/MirrorX">here</a>.
+          </p>
+        </div>
+        <div class="article">
+          <h2 class="article__heading" id="cheap">
+            Cheap
+          </h2>
+          <p class="article__content">
+            MirrorX doesn't and will never take exchange transaction fees.
+          </p>
+          <p class="article__content">
+            There is a small spread between swaps that is used to prevent market manipulation.
+          </p>
+        </div>
+        <div class="article">
+          <h2 class="article__heading" id="security">
+            Secure
+          </h2>
+          <p class="article__content">
+            MirrorX never holds your private keys or your funds.
+            This is achieved by enabling all the signing to be done in the browser (you can even sign transactions off-site).
           </p>
           <p class="article__content">
             When you start a currency swap, MirrorX matches you on a First-In-First-Out basis
             with a peer who wants to the opposite swap. When a match is found, the rest of the swap
             is executed in the browser simply by reading from the respective public blockchains.
-          </p>
-          <p class="article__content">
-            This means that there's no way for MirrorX or anyone else to steal your funds or private keys.
-          </p>
-        </div>
-        <div class="article">
-          <h2 class="article__heading" id="atomic-swaps">
-            Atomic swaps
-          </h2>
-          <p class="article__content">
-            Atomic swaps are exchanges of currencies on different blockchains that
-            don't rely on an intermediary.
-            There are two phases: the commitment phase and the claim phase.
-          </p>
-          <p class="article__content">
-            <strong>Commitment Phase</strong>
-            In the commitment phase, the two parties commit funds to a cryptographically locked escrow account.
-            These funds are meant for the other party, but require an extra piece of information called the "hash preimage" to unlock.
-            This hash preimage is generated by one of the parties and kept secret for the time being.
-            Once both sides see the other party's commitment and verify that it is valid, they can move on to the claim phase.
-          </p>
-          <p class="article__content">
-            <strong>Claim Phase</strong>
-            The claim phase is initiated by the party that holds the hash preimage.
-            They use it to unlock the funds that were committed by the counterparty.
-            The action of unlocking this account simultaneously publishes the hash preimage on a public blockchain.
-            The other party then uses this to unlock their own funds.
-          </p>
-        </div>
-        <div class="article">
-          <h2 class="article__heading" id="fees">
-            Fees
-          </h2>
-          <p class="article__content">
-            MirrorX takes no exchange transaction fees. Currency swaps are and always will be free.
-          </p>
-          <p class="article__content">
-            However, there is a very small spread fee that is required to protect against market manipulation.
-            This fee is used to pay for transactions on Stellar to maintain a stable exchange rate.
           </p>
         </div>
       </div>

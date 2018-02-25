@@ -1,7 +1,7 @@
 <template>
   <div class="row justify-center">
     <v-dialog/>
-    <div class="three-quarters form">
+    <div class="full col form">
       <div class="form__header">
         CONVERT
         {{side === 'deposit' ? currency : 'XLM'}}

@@ -20,9 +20,9 @@
         <h2 class="half exclude-small row justify-right">
           Atomic swap Stellar & other currencies with no fees
         </h2>
-        <hr>
       </div>
-      <router-view class="router-view"/>
+      <hr>
+      <router-view class="router-view row justify-center"/>
     </div>
     <div class="site-footer row justify-center">
       <p class="site-footer__text">

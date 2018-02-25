@@ -1,12 +1,9 @@
 @import "utils";
 @import "colors";
 
-body, h1, h2, h3, p {
-  @include flex;
-}
-
 h1, h2, h3 {
-  align-items: center;
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
 }
 
 p {
@@ -29,7 +26,7 @@ body {
   outline: none;
 }
 
-* {
+p {
   -webkit-margin-before: 0;
   -webkit-margin-after: 0;
 }
@@ -68,7 +65,7 @@ hr {
   height: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  margin: 10px 0 0;
+  margin: 10px 0;
 }
 
 label {
