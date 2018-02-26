@@ -12,11 +12,11 @@
         <label class="form__label" for="stellarAccount">
           Stellar Account ID
           <a
-            v-if="side === 'deposit'"
             class="button button--link"
+            v-if="side === 'deposit'"
             target="_blank"
             href="https://stellarterm.com/#signup">
-            Don't have an account?
+              Don't have an account?
           </a>
         </label>
         <input type="text"
@@ -52,7 +52,7 @@
           :disabled="requestingSwap"
           :xlmPerUnit="xlmPerUnit"
           :selectedSize.sync="swapSize"
-          />
+        />
       </div>
       <div class="form__submit">
         <button class="button button--big button--normal" @click="startClicked" :disabled="requestingSwap">

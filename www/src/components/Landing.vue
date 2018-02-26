@@ -1,10 +1,11 @@
 <template>
   <div>
-    <div class="row justify-center">
+    <div class="full row justify-center">
       <div class="landing-cta col align-center">
+        <h1>MirrorX</h1>
+        <img class="landing-cta__logo" src="../assets/MirrorX.png" alt="logo">
         <p class="landing-cta__text">
-          Stellar is a decentralized currency exchange and payment network.
-          MirrorX is your gateway to it.
+          Convert between cryptocurrencies without an intermediary
         </p>
         <div class="landing-cta__actions">
           <router-link :to="{name: 'prepare-swap', params: {currency: 'ETH', side: 'deposit'}}"
@@ -22,7 +23,9 @@
         </div>
         <div class="landing-cta__footer">
           <p>
-            More currency pairs coming soon.
+            <a href="#">
+              Which coins should be added next?
+            </a>
           </p>
         </div>
       </div>
@@ -36,7 +39,7 @@
           Anonymous
         </p>
         <p class="pitch-box__text">
-          No KYC and no exchange limits.
+          No sign up required.
         </p>
         <p class="pitch-box__footer">
           <a href="#anonymous">
@@ -52,11 +55,11 @@
           Cheap
         </p>
         <p class="pitch-box__text">
-          Zero transaction fees and a very small spread.
+          Zero transaction fees.
         </p>
         <p class="pitch-box__footer">
           <a href="#cheap">
-            Fees
+            Fee Structure
           </a>
         </p>
       </div>
@@ -68,7 +71,7 @@
           Secure
         </p>
         <p class="pitch-box__text">
-          We never hold your funds or your private keys.
+          No one can steal your money.
         </p>
         <p class="pitch-box__footer">
           <a href="#security">
@@ -79,22 +82,15 @@
     </div>
     <div class="full col align-center">
       <div class="full row">
+        <h1>Why use MirrorX?</h1>
         <div class="article">
           <h2 class="article__heading" id="anonymous">
             Anonymous
           </h2>
           <p class="article__content">
-            MirrorX does not require you to disclose personal information, and it doesn't enforce a trading limit.
-            It achieves this by levaraging Atomic Swaps, which are peer-to-peer currency swaps without an intermediary.
-          </p>
-          <p class="article__content">
-            Atomic swaps have two phases: the commitment phase and the claim phase.
-            In the commitment phase, two parties commit funds to a cryptographically locked escrow account.
-            In the claim phase, one party claims the funds intended for them and by doing so automatically
-            releases the funds intended for the counterparty.
-          </p>
-          <p class="article__content">
-            A more thorough explanation can be found <a target="_blank" href="https://github.com/mvanderh/MirrorX">here</a>.
+            We don't require your personal information, and we don't impose trading limits.
+            We achieve this by levaraging Atomic Swaps: peer-to-peer cryptocurrency swaps without an intermediary.
+            <a target="_blank" href="https://github.com/mvanderh/MirrorX">Learn more..</a>
           </p>
         </div>
         <div class="article">
@@ -102,10 +98,8 @@
             Cheap
           </h2>
           <p class="article__content">
-            MirrorX doesn't and will never take exchange transaction fees.
-          </p>
-          <p class="article__content">
-            There is a small spread between swaps that is used to prevent market manipulation.
+            MirrorX does not take transaction fees and never will.
+            There is only a small spread between swaps that is used to prevent market manipulation.
           </p>
         </div>
         <div class="article">
@@ -113,13 +107,8 @@
             Secure
           </h2>
           <p class="article__content">
-            MirrorX never holds your private keys or your funds.
-            This is achieved by enabling all the signing to be done in the browser (you can even sign transactions off-site).
-          </p>
-          <p class="article__content">
-            When you start a currency swap, MirrorX matches you on a First-In-First-Out basis
-            with a peer who wants to the opposite swap. When a match is found, the rest of the swap
-            is executed in the browser simply by reading from the respective public blockchains.
+            By enabling all the signing to be done in the browser, MirrorX never holds your private keys or your funds.
+            This means your money can never get stolen.
           </p>
         </div>
       </div>

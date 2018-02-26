@@ -18,7 +18,7 @@
         </span>
         </h1>
         <h2 class="half exclude-small row justify-right">
-          Atomic swap Stellar & other currencies with no fees
+          Peer-to-peer coin swaps built on Stellar
         </h2>
       </div>
       <hr>
@@ -30,7 +30,7 @@
         <a target="blank"
            class="site-footer__link"
            href="https://github.com/mvanderh/MirrorX">
-          Source
+          Source Code
         </a>
       </p>
     </div>
