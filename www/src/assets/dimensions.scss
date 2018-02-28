@@ -16,7 +16,11 @@
   width: 49%;
 }
 
-@media only screen and (max-width: 768px) {
+.exclude-small {
+
+}
+
+@include mobile {
   .half {
     width: 100%;
   }
@@ -59,6 +63,10 @@
 
 .justify-spaced {
   justify-content: space-between
+}
+
+.justify-around {
+  justify-content: space-around;
 }
 
 .align-left {

@@ -2,7 +2,7 @@
   <div class="app-container">
     <div id="app">
       <div class="site-header row justify-spaced align-center">
-        <h1 class="site-header__title row align-center half">
+        <h1 class="site-header__title row align-center one-third">
           <span class="site-header__logo">
             <router-link to="/">
               <img src="./assets/MirrorX.png" alt="">
@@ -17,8 +17,10 @@
           </span>
         </span>
         </h1>
-        <h2 class="half exclude-small row justify-right">
-          Peer-to-peer coin swaps built on Stellar
+        <h2 class="two-thirds row justify-right">
+          <span class="exclude-small">
+            Convert between Stellar & Ethereum for free. No sign-up required.
+          </span>
         </h2>
       </div>
       <hr>
@@ -26,11 +28,10 @@
     </div>
     <div class="site-footer row justify-center">
       <p class="site-footer__text">
-        <span>MirrorX is experimental software. Don't use it with large amounts of money.</span>
+        <span>MirrorX is in Alpha. Project is hosted on </span>
         <a target="blank"
-           class="site-footer__link"
            href="https://github.com/mvanderh/MirrorX">
-          Source Code
+          GitHub
         </a>
       </p>
     </div>

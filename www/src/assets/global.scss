@@ -20,6 +20,11 @@ body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  margin: 1vh;
+
+  @include mobile {
+    margin: 0;
+  }
 }
 
 *:focus {
@@ -36,12 +41,11 @@ h1 {
 }
 
 h2 {
-  font-size: 1.2em;
+  font-size: 22px;
   font-weight: 300;
 }
 
 h3 {
-  font-size: 1.1em;
   font-weight: 600;
 }
 

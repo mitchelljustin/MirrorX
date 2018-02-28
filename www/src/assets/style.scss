@@ -9,8 +9,8 @@
   padding: 15px;
   background-color: $theme-app-background;
 
-  @media screen and (max-width: 500px) {
-    width: 100%;
+  @include mobile {
+    width: auto;
   }
 }
 
@@ -20,6 +20,7 @@
 
 .site-header {
   width: 100%;
+  height: 7.5%;
 
   &__title {
   }
@@ -63,7 +64,7 @@
 
 .pitch-box-container {
   width: 100%;
-  margin: 20px 0;
+  margin: 1.5vh 0;
 }
 
 .pitch-box {
@@ -271,18 +272,17 @@
   width: 100%;
   font-size: 1.4em;
   font-weight: 400;
-  margin: 25px 0;
-
-  &__logo {
-    width: 15%;
-    height: inherit;
-  }
+  margin: 1.5vh 0;
+  height: 50vh;
 
   &__text {
-    width: 80%;
-    max-width: 900px;
+    width: 100%;
+    max-width: 600px;
     text-align: center;
-    line-height: 1.6em;
+  }
+
+  &__subtitle {
+    margin-top: 7px;
   }
 
   &__actions {
@@ -293,7 +293,7 @@
 
   &__footer {
     margin-top: 0.25em;
-    font-size: 0.7em;
+    font-size: 14px;
     color: $theme-text-subdued;
   }
 }
@@ -336,7 +336,7 @@
   width: 80%;
   margin: 0 auto;
 
-  @media only screen and (max-width: 768px) {
+  @include mobile {
     width: 100%;
   }
 }
