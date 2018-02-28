@@ -105,31 +105,35 @@
   font-size: 1.3em;
   margin: 0.1em;
   padding: 0.15em 0.75em;
-  width: 5em;
   border: none;
   border-radius: 3px;
   cursor: pointer;
 
   &:disabled {
     cursor: default;
+
+    color: $theme-gray;
+
+    &:hover {
+      color: $theme-gray;
+    }
   }
 
   &--normal {
-    @include dynamicColor($theme-primary);
-    color: $theme-text-light;
+    @include dynamicColor($theme-normal);
   }
 
   &--happy {
     @include dynamicColor($theme-happy);
-    color: $theme-text-light;
   }
 
   &--angry {
     @include dynamicColor($theme-angry);
-    color: $theme-text-light;
   }
 
   &--normal, &--happy, &--angry {
+    color: $theme-text-light;
+
     &:hover {
       color: $theme-text-light;
     }
@@ -150,6 +154,7 @@
     border: 1px $theme-gray solid;
     color: lighten($theme-text, 15%);
     background: none;
+
   }
 
   &--long {
@@ -329,7 +334,7 @@
 }
 
 .router-view {
-  width: 80%;
+  width: 90%;
   margin: 0 auto;
 
   @include mobile {
@@ -343,25 +348,23 @@
   &__header {
     font-size: 36px;
     font-weight: 500;
-    color: darken($theme-primary, 15%);
+    color: darken($theme-normal, 15%);
   }
 
-  &__label {
+  &__section {
     margin: 0.5em 0 0.25em;
-    font-weight: 300;
-    font-size: 1.2em;
   }
 
   &__label:first-child {
     margin-top: 0;
   }
 
-  &__swap-size {
+  &__subheader {
     font-size: 1.5em;
   }
 
-  &__account {
-    font-size: 1.1em;
+  &__data {
+    font-size: 1.0em;
   }
 }
 
@@ -408,7 +411,7 @@
     font-size: 1.5em;
     align-self: flex-end;
     margin: 5px;
-    background: easyGradient($theme-primary);
+    background: easyGradient($theme-normal);
   }
 
   &__footer {

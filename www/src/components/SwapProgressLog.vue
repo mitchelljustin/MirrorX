@@ -19,9 +19,6 @@
           XLM on Stellar
           {{withdrawerStep}}
         </p>
-        <p>
-          <a class="button button--light button--small" href="">Refund XLM</a>
-        </p>
       </div>
     </progress-item>
     <progress-item :status="Status.CommitOnEthereum" :currentState="currentState">
@@ -30,9 +27,6 @@
           {{this.textForStatus(Status.CommitOnEthereum, 'Commit', 'Committing', 'Committed')}}
           ETH on Ethereum
           {{depositorStep}}
-        </p>
-        <p>
-          <a class="button button--light button--small" href="">Refund ETH</a>
         </p>
       </div>
     </progress-item>

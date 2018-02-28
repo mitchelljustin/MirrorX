@@ -1,5 +1,5 @@
 <template>
-  <div class="full row-spaced">
+  <div class="full row">
     <v-dialog/>
     <sign-transaction-dialog modalName="commit-on-stellar" network="stellar">
       <span slot="title">
@@ -41,12 +41,11 @@
         </p>
       </div>
     </sign-transaction-dialog>
-    <div class="half">
-      <div class="big-info">
-        <div class="big-info__header">
-          CONVERTING
-        </div>
-        <span v-if="reqInfo" class="big-info__swap-size">
+    <div class="big-info half row">
+      <div class="big-info__header">
+        CONVERTING
+      </div>
+      <span v-if="reqInfo" class="big-info__subheader">
           <span v-if="isWithdrawer">
             <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM TO
           </span>
@@ -57,31 +56,35 @@
             TO <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM
           </span>
         </span>
-        <div class="big-info__label">
-          {{ this.isWithdrawer ? 'TO' : 'FROM' }}:
-        </div>
-        <div class="big-info__account">
+      <h3 class="big-info__section">
+        {{ this.isWithdrawer ? 'TO' : 'FROM' }}:
+      </h3>
+      <div class="big-info__data">
           <span v-if="reqInfo">
             {{ reqInfo.cryptoAddress }}
           </span>
-          <span v-else>
+        <span v-else>
             ..
           </span>
-        </div>
-        <div class="big-info__label">
-          {{ this.isWithdrawer ? 'FROM' : 'TO' }}:
-        </div>
-        <div class="big-info__account">
+      </div>
+      <h3 class="big-info__section">
+        {{ this.isWithdrawer ? 'FROM' : 'TO' }}:
+      </h3>
+      <div class="big-info__data">
           <span v-if="reqInfo">
             {{myStellarAccountTrunc}}
           </span>
-          <span v-else>
+        <span v-else>
             ..
           </span>
-        </div>
+      </div>
+      <div class="big-info__section">
+        <button class="button button--light" disabled>
+          REFUND IN {{refundDelay || '..'}}
+        </button>
       </div>
     </div>
-    <div class="half col-spaced">
+    <div class="half col">
       <h3>Progress</h3>
       <swap-progress-log :failed="failed"
                          :status="status"
@@ -91,6 +94,8 @@
 </template>
 
 <script>
+  import BigNumber from 'bignumber.js'
+
   import Web3 from '../util/web3'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
   import {Stellar} from '../../../lib/stellar.mjs'
@@ -264,7 +269,7 @@
         if (String(expectedNetworkId) !== String(networkId)) {
           this.displayError({
             title: 'Metamask Error',
-            message: `Your metamask is using the wrong network. Please switch to ${expectedNetwork} network.`
+            message: `Your metamask is using the wrong network. Please switch to ${expectedNetwork} network.`,
           })
           return false
         }
@@ -411,6 +416,16 @@
           throw new Error('No holding secret')
         }
         return Stellar.Keypair.fromSecret(this.holdingSecret)
+      },
+      refundDelay() {
+        if (this.isDepositor) {
+          return null
+        }
+        if (!this.refundTx) {
+          return null
+        }
+        const secondsLeft = BigNumber(this.refundTx.timeBounds.minTime).minus(new Date().getTime())
+        return secondsLeft
       },
     },
     watch: {
