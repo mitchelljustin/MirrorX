@@ -78,11 +78,6 @@
             ..
           </span>
       </div>
-      <div class="big-info__section">
-        <button class="button button--light" disabled>
-          REFUND IN {{refundDelay || '..'}}
-        </button>
-      </div>
     </div>
     <div class="half col">
       <h3>Progress</h3>
@@ -94,8 +89,6 @@
 </template>
 
 <script>
-  import BigNumber from 'bignumber.js'
-
   import Web3 from '../util/web3'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
   import {Stellar} from '../../../lib/stellar.mjs'
@@ -265,11 +258,12 @@
       async checkMetamaskNetworkId() {
         const networkId = await Web3.eth.net.getId()
         const expectedNetworkId = process.env.ETHEREUM_NETWORK_ID
-        const expectedNetwork = {1: 'Main', 3: 'Rinkeby'}[expectedNetworkId] || 'different'
         if (String(expectedNetworkId) !== String(networkId)) {
+          console.log(`Metamask network mismatch: ${networkId} != ${expectedNetworkId}`)
+          const expectedNetwork = {1: 'Main', 4: 'Rinkeby'}[expectedNetworkId] || 'different'
           this.displayError({
             title: 'Metamask Error',
-            message: `Your metamask is using the wrong network. Please switch to ${expectedNetwork} network.`,
+            message: `Your metamask is using the wrong network. Please switch to ${expectedNetwork} network and reload this page.`,
           })
           return false
         }
@@ -416,16 +410,6 @@
           throw new Error('No holding secret')
         }
         return Stellar.Keypair.fromSecret(this.holdingSecret)
-      },
-      refundDelay() {
-        if (this.isDepositor) {
-          return null
-        }
-        if (!this.refundTx) {
-          return null
-        }
-        const secondsLeft = BigNumber(this.refundTx.timeBounds.minTime).minus(new Date().getTime())
-        return secondsLeft
       },
     },
     watch: {
