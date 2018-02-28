@@ -88,7 +88,7 @@
       <div class="full row">
         <h1>Why use MirrorX?</h1>
         <div class="article">
-          <h2 class="article__heading" id="anonymous">
+          <h2 id="anonymous">
             Anonymous
           </h2>
           <p class="article__content">
@@ -111,7 +111,7 @@
           </p>
         </div>
         <div class="article">
-          <h2 class="article__heading" id="fees">
+          <h2 id="fees">
             Fees
           </h2>
           <p class="article__content">
@@ -120,7 +120,7 @@
           </p>
         </div>
         <div class="article">
-          <h2 class="article__heading" id="security">
+          <h2 id="security">
             Secure
           </h2>
           <p class="article__content">

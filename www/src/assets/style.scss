@@ -22,9 +22,6 @@
   width: 100%;
   height: 7.5%;
 
-  &__title {
-  }
-
   &__version {
     font-weight: 600;
     font-size: 16px;
@@ -213,7 +210,6 @@
 
   &__header {
     @include flex($align-items: center);
-    font-size: 36px;
     font-weight: 400;
     margin: 0.3em 0;
 
@@ -444,10 +440,6 @@
 
 .article {
   margin: 0.5em 0;
-
-  &__heading {
-    font-size: 36px;
-  }
 
   &__content {
     margin: 0.5em 0;

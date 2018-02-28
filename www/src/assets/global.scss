@@ -38,11 +38,18 @@ p {
 
 h1 {
   font-weight: 400;
+
+  @include mobile {
+    font-size: 1.6em;
+  }
 }
 
 h2 {
-  font-size: 22px;
   font-weight: 300;
+
+  @include mobile {
+    font-size: 1.4em;
+  }
 }
 
 h3 {

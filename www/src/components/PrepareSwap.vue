@@ -2,12 +2,12 @@
   <div class="row justify-center">
     <v-dialog/>
     <div class="full col form">
-      <div class="form__header">
+      <h1 class="form__header">
         CONVERT
         {{side === 'deposit' ? currency : 'XLM'}}
         <icon class="form__header__icon" name="long-arrow-right" scale="2"/>
         {{side === 'deposit' ? 'XLM' : currency}}
-      </div>
+      </h1>
       <div class="form__group">
         <label class="form__label" for="stellarAccount">
           Stellar Account ID
