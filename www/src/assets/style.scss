@@ -300,13 +300,11 @@
 }
 
 .progress-log {
-  @include flex($flex-direction: column);
   list-style: none;
   font-weight: 500;
   padding: 0;
 
   &__icon {
-    @include flex($justify-content: center, $align-items: center);
     width: 25px;
     height: 25px;
 
@@ -316,16 +314,11 @@
   }
 
   &__item {
-    @include flex;
     margin: 0.2em 0;
 
     &--inactive {
       color: $theme-inactive;
     }
-  }
-
-  &__description {
-    @include flex;
   }
 
   &__rank {
@@ -433,6 +426,10 @@
 
   &--right {
     text-align: end;
+  }
+
+  &--subdued {
+    color: $theme-text-subdued;
   }
 }
 

@@ -81,14 +81,17 @@
     </div>
     <div class="half col">
       <h3>Progress</h3>
-      <swap-progress-log :failed="failed"
-                         :status="status"
-                         :side="side"/>
+      <swap-progress-log
+        :refundExpiry="refundExpiry"
+        :failed="failed"
+        :status="status"
+        :side="side"/>
     </div>
   </div>
 </template>
 
 <script>
+  import BigNumber from 'bignumber.js'
   import Web3 from '../util/web3'
   import SwapSpecs from '../../../lib/swapSpecs.mjs'
   import {Stellar} from '../../../lib/stellar.mjs'
@@ -122,16 +125,22 @@
         xlmPerUnit: null,
         failed: false,
         refundTx: null,
+        refundExpiry: {},
+        checkExpiryInterval: null,
         hashlock,
       }
     },
     mounted() {
       this.populateXlmPerUnit()
       this.status = Status.RequestingSwapInfo
+      this.checkExpiryInterval = setInterval(this.checkExpiry.bind(this), 1000)
     },
     beforeRouteLeave(to, from, next) {
       if (this.checkMatchTimeout !== null) {
         clearInterval(this.checkMatchTimeout)
+      }
+      if (this.checkExpiryInterval !== null) {
+        clearInterval(this.checkExpiryInterval)
       }
       next()
     },
@@ -155,6 +164,10 @@
         this.status = Status.CommitOnStellar
       },
       displayError(e) {
+        this.$modal.hide('commit-on-stellar')
+        this.$modal.hide('commit-on-ethereum')
+        this.$modal.hide('claim-on-stellar')
+        this.$modal.hide('claim-on-ethereum')
         this.$modal.show('dialog', {
           title: e.title || 'Error',
           text: e.message || JSON.stringify(e),
@@ -200,7 +213,11 @@
           return
         }
         this.refundTx = refundTx
-        this.status = Status.CommitOnEthereum
+        this.refundExpiry.stellar = BigNumber(refundTx.timeBounds.minTime)
+        await this.checkExpiry()
+        if (!this.failed) {
+          this.status = Status.CommitOnEthereum
+        }
       },
       async verifyRefundTx({refundTxHash}) {
         const hash = refundTxHash.toString('hex')
@@ -215,6 +232,7 @@
           hashlock,
           swapSize,
           holdingAccount,
+          holdingKeys,
           depositor: {stellarAccount: depositorAccount},
           withdrawer: {stellarAccount: withdrawerAccount},
         } = this
@@ -224,7 +242,9 @@
           depositorAccount,
           withdrawerAccount,
         })
+        refundTx.sign(holdingKeys)
         this.refundTx = refundTx
+        await this.uploadRefundXdr()
         const {holdingTx} = await this.swapSpec.genStellarHoldingTx({
           hashlock,
           refundTx,
@@ -233,8 +253,7 @@
           depositorAccount,
           withdrawerAccount,
         })
-        holdingTx.sign(this.holdingKeys)
-        await this.uploadRefundXdr()
+        holdingTx.sign(holdingKeys)
         const envelopeXdr = holdingTx.toEnvelope().toXDR('base64')
         this.$modal.show('commit-on-stellar', {envelopeXdr})
       },
@@ -253,6 +272,8 @@
           }
           eventLog = await this.findPrepareSwapCall({wait: true})
         }
+        const {expiry} = eventLog
+        this.refundExpiry.ethereum = BigNumber(expiry)
         this.status = Status.ClaimOnEthereum
       },
       async checkMetamaskNetworkId() {
@@ -372,6 +393,33 @@
         const {claimTx} = await this.swapSpec.genStellarClaimTx({preimage, depositorAccount, holdingAccount})
         const envelopeXdr = claimTx.toEnvelope().toXDR('base64')
         this.$modal.show('claim-on-stellar', {envelopeXdr})
+      },
+      async checkExpiry() {
+        const {refundTx, refundExpiry} = this
+        const now = Math.round(new Date().getTime() / 1000)
+        let expired = false
+        if (refundExpiry.stellar && refundExpiry.stellar.minus(now).lt(0)) {
+          expired = true
+          if (this.isWithdrawer) {
+            try {
+              await this.swapSpec.submitRefundTxIfNotExists({refundTx})
+            } catch (e) {
+              const message = JSON.stringify(e, null, 2)
+              console.error(message)
+              this.displayError({message})
+            }
+          }
+          this.displayError({
+            title: 'Stellar Commitment Expired',
+            message: 'Unfortunately, the window to claim XLM on Stellar has expired. ' +
+            'Either you or your Peer did not complete their transactions in time. ' +
+            'If you committed the XLM, you have now been refunded.',
+          })
+        }
+        if (expired) {
+          this.failed = true
+          clearInterval(this.checkExpiryInterval)
+        }
       },
     },
     computed: {

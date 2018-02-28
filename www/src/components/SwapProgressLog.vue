@@ -19,6 +19,14 @@
           XLM on Stellar
           {{withdrawerStep}}
         </p>
+        <p v-if="refundExpiry.stellar">
+          <span class="text text--subdued" v-if="refundExpirySecondsLeft('stellar').gt(0)">
+            Expires in {{refundExpirySecondsLeft('stellar') | timeRemaining}}
+          </span>
+          <span class="text text--angry" v-else>
+            Expired
+          </span>
+        </p>
       </div>
     </progress-item>
     <progress-item :status="Status.CommitOnEthereum" :currentState="currentState">
@@ -27,6 +35,9 @@
           {{this.textForStatus(Status.CommitOnEthereum, 'Commit', 'Committing', 'Committed')}}
           ETH on Ethereum
           {{depositorStep}}
+        </p>
+        <p class="text text--subdued" v-if="refundExpiry.ethereum">
+          Expires in {{refundExpirySecondsLeft('ethereum') | timeRemaining}}
         </p>
       </div>
     </progress-item>
@@ -53,6 +64,8 @@
 </template>
 
 <script>
+  import BigNumber from 'bignumber.js'
+
   import Status from '../util/swapStatus'
 
   export default {
@@ -61,8 +74,28 @@
       status: Number,
       side: String,
       failed: Boolean,
+      refundExpiry: Object,
+    },
+    data() {
+      const now = new Date()
+      return {
+        now,
+      }
+    },
+    mounted() {
+      setInterval(() => {
+        this.now = new Date()
+      }, 1000)
     },
     methods: {
+      refundExpirySecondsLeft(network) {
+        const expiryTimestamp = this.refundExpiry[network]
+        if (expiryTimestamp === undefined) {
+          throw new Error(`No expiry for network: ${network}`)
+        }
+        const nowSeconds = Math.round(this.now.getTime() / 1000)
+        return BigNumber(expiryTimestamp).minus(nowSeconds)
+      },
       textForStatus(targetStatus, incomplete, ongoing, completed) {
         if (this.status < targetStatus) {
           return incomplete
@@ -115,17 +148,17 @@
         },
         template: `
             <li
-              class="progress-log__item"
+              class="progress-log__item row align-start"
               :class="{'progress-log__item--inactive': status > currentStatus}">
-            <span class="progress-log__icon">
+            <span class="progress-log__icon row align-center justify-center">
               <icon name="check"
                     class="progress-log__icon--happy"
                     v-if="status < currentStatus || isDone"/>
               <icon name="close" class="text--angry" v-else-if="status === currentStatus && failed"/>
               <icon name="spinner" v-else-if="status === currentStatus" pulse/>
             </span>
-            <div class="progress-log__description">
-              <span class="progress-log__rank">{{status+1}}.</span>
+            <div class="row">
+              <p class="progress-log__rank">{{status+1}}.</p>
               <slot name="body">
               </slot>
             </div>
@@ -133,5 +166,13 @@
         `,
       },
     },
+    filters: {
+      timeRemaining(totalSeconds) {
+        const totalSecondsLeft = BigNumber(totalSeconds)
+        const minutesLeft = totalSecondsLeft.idiv(60)
+        const secondsLeft = totalSecondsLeft.mod(60)
+        return `${minutesLeft}m${secondsLeft}s`
+      },
+    }
   }
 </script>
