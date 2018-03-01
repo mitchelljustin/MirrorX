@@ -37,7 +37,13 @@
           {{depositorStep}}
         </p>
         <p class="text text--subdued" v-if="refundExpiry.ethereum">
-          Expires in {{refundExpirySecondsLeft('ethereum') | timeRemaining}}
+                    <span class="text text--subdued" v-if="refundExpirySecondsLeft('ethereum').gt(0)">
+            Expires in {{refundExpirySecondsLeft('ethereum') | timeRemaining}}
+          </span>
+          <span class="text text--angry" v-else>
+            Expired
+          </span>
+
         </p>
       </div>
     </progress-item>

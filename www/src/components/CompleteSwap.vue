@@ -60,6 +60,17 @@
         </p>
       </div>
     </sign-transaction-dialog>
+    <sign-transaction-dialog modalName="refund-on-ethereum" network="ethereum">
+      <span slot="title">
+        REFUND ETH
+      </span>
+      <div slot="description">
+        <p>
+          The swap has been cancelled: either you or your Peer took too long and the commitments expired.
+          Please approve the contract call in Metamask to refund your Ether.
+        </p>
+      </div>
+    </sign-transaction-dialog>
     <div class="big-info half row">
       <div class="big-info__header">
         SWAPPING
@@ -234,9 +245,7 @@
         this.refundTx = refundTx
         this.refundExpiry.stellar = BigNumber(refundTx.timeBounds.minTime)
         await this.checkExpiry()
-        if (!this.failed) {
-          this.status = Status.CommitOnEthereum
-        }
+        this.status = Status.CommitOnEthereum
       },
       async verifyRefundTx({refundTxHash}) {
         const hash = refundTxHash.toString('hex')
@@ -405,6 +414,13 @@
         const envelopeXdr = claimTx.toEnvelope().toXDR('base64')
         this.$modal.show('claim-on-stellar', {envelopeXdr})
       },
+      displayExpiryError() {
+        this.displayError({
+          title: 'Swap Expired',
+          message: 'Unfortunately, the commitments have expired and the swap has to be cancelled. ' +
+          'Either you or your Peer did not complete the swap in time.',
+        })
+      },
       async refundStellar() {
         const {refundTx} = this
         if (this.isWithdrawer) {
@@ -430,25 +446,30 @@
             const envelopeXdr = drainHoldingTx.toEnvelope().toXDR('base64')
             this.$modal.show('refund-on-stellar', {envelopeXdr})
           }
-        } else {
-          this.displayError({
-            title: 'Swap Expired',
-            message: 'Unfortunately, the Stellar commitment has expired and the swap has been cancelled. ' +
-            'Either you or your Peer did not complete the swap in time.',
-          })
+        }
+      },
+      async refundEthereum() {
+        if (this.isDepositor) {
+          const {
+            hashlock,
+            depositor: {cryptoAddress: depositorEthAddress},
+          } = this
+          const {funcName, params} = this.swapSpec.refundSwapParams({hashlock, depositorEthAddress})
+          this.$modal.show('refund-on-ethereum', {funcName, params})
         }
       },
       async checkExpiry() {
         const {refundExpiry} = this
         const now = Math.round(new Date().getTime() / 1000)
-        let expired = false
         if (refundExpiry.stellar && refundExpiry.stellar.minus(now).lte(-5)) {
-          expired = true
+          this.displayExpiryError()
           await this.refundStellar()
+          this.refundExpiry.stellar = null
         }
-        if (expired) {
-          this.failed = true
-          clearInterval(this.checkExpiryInterval)
+        if (refundExpiry.ethereum && refundExpiry.ethereum.minus(now).lte(0)) {
+          this.displayExpiryError()
+          await this.refundEthereum()
+          this.refundExpiry.ethereum = null
         }
       },
     },
