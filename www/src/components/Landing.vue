@@ -4,10 +4,10 @@
       <div class="landing-cta col align-center justify-around">
         <div class="landing-cta__text col justify-around">
           <h1>
-            Peer-to-peer cryptocurrency conversions.
+            Peer-to-peer cryptocurrency exchange.
           </h1>
           <small class="landing-cta__subtitle">
-            Convert Stellar and Ethereum for free and with no sign-up.
+            Swap Stellar Lumens and Ethereum for free. No sign-up required.
           </small>
         </div>
         <div class="landing-cta__actions">

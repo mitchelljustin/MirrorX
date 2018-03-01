@@ -1,7 +1,6 @@
 <template>
   <modal :name="modalName"
          :clickToClose="false"
-         :draggable="true"
          @before-open='beforeModalOpen'
          height="auto"
   >
@@ -15,11 +14,10 @@
           <div class="sign-dialog__description">
             <slot name="description"/>
           </div>
-          <p>
-            Please sign and submit the transaction.
-            You can sign on-site using this dialog, or off-site using your own wallet.
-          </p>
           <div class="sign-dialog__stellar" v-if="network === 'stellar'">
+            <p>
+              You can sign on-site using this dialog, or off-site using your own wallet.
+            </p>
             <label class="sign-dialog__line" for="envelopeXdr">
               Raw Transaction
               <a target="_blank"
@@ -155,11 +153,7 @@
           return
         }
         try {
-          const tx = new Stellar.Transaction(xdr)
-          if (tx.signatures.length !== 2) {
-            this.stellarSignedTxValid = false
-            return
-          }
+          new Stellar.Transaction(xdr)
           this.stellarSignedTxValid = true
         } catch (e) {
           this.stellarSignedTxValid = false

@@ -7,8 +7,12 @@
       </span>
       <div slot="description">
         <p>
-          MirrorX needs your signature to commit your XLM on Stellar.
+          Please sign this transaction to commit your Stellar Lumens.
         </p>
+        <strong>
+          NOTE: Beyond this point you are committed to the swap.
+          It cannot be reversed unless it expires before your Peer claims your Stellar Lumens.
+        </strong>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="commit-on-ethereum" network="ethereum">
@@ -17,8 +21,12 @@
       </span>
       <div slot="description">
         <p>
-          MirrorX needs your signature to commit your ETH on Ethereum.
+          Please approve the contract call in Metamask to commit your Ether.
         </p>
+        <strong>
+          NOTE: Beyond this point you are committed to the swap.
+          It cannot be reversed unless it expires before your Peer claims your Ether.
+        </strong>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="claim-on-ethereum" network="ethereum">
@@ -27,7 +35,7 @@
       </span>
       <div slot="description">
         <p>
-          MirrorX needs your signature to claim your ETH on Ethereum.
+          Please approve the contract call in Metamask to claim your Ether.
         </p>
       </div>
     </sign-transaction-dialog>
@@ -37,23 +45,34 @@
       </span>
       <div slot="description">
         <p>
-          MirrorX needs your signature to claim your XLM on Stellar.
+          Please sign this transaction to claim your Stellar Lumens.
+        </p>
+      </div>
+    </sign-transaction-dialog>
+    <sign-transaction-dialog modalName="refund-on-stellar" network="stellar">
+      <span slot="title">
+        REFUND XLM
+      </span>
+      <div slot="description">
+        <p>
+          The swap has been cancelled: either you or your Peer took too long and the commitments expired.
+          Please sign this transaction to refund your Stellar Lumens.
         </p>
       </div>
     </sign-transaction-dialog>
     <div class="big-info half row">
       <div class="big-info__header">
-        CONVERTING
+        SWAPPING
       </div>
       <span v-if="reqInfo" class="big-info__subheader">
           <span v-if="isWithdrawer">
-            <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM TO
+            <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM FOR
           </span>
           <span>
             {{ swapSize || '..' }} {{ currency }}
           </span>
           <span v-if="isDepositor">
-            TO <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM
+            FOR <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM
           </span>
         </span>
       <h3 class="big-info__section">
@@ -236,24 +255,16 @@
           depositor: {stellarAccount: depositorAccount},
           withdrawer: {stellarAccount: withdrawerAccount},
         } = this
-        const {refundTx} = await this.swapSpec.genStellarRefundTx({
+        const {refundTx, holdingTx} = await this.swapSpec.genStellarCommitmentTxs({
           hashlock,
-          holdingAccount,
-          depositorAccount,
-          withdrawerAccount,
-        })
-        refundTx.sign(holdingKeys)
-        this.refundTx = refundTx
-        await this.uploadRefundXdr()
-        const {holdingTx} = await this.swapSpec.genStellarHoldingTx({
-          hashlock,
-          refundTx,
           swapSize,
           holdingAccount,
           depositorAccount,
           withdrawerAccount,
         })
         holdingTx.sign(holdingKeys)
+        this.refundTx = refundTx
+        await this.uploadRefundXdr()
         const envelopeXdr = holdingTx.toEnvelope().toXDR('base64')
         this.$modal.show('commit-on-stellar', {envelopeXdr})
       },
@@ -394,27 +405,46 @@
         const envelopeXdr = claimTx.toEnvelope().toXDR('base64')
         this.$modal.show('claim-on-stellar', {envelopeXdr})
       },
+      async refundStellar() {
+        const {refundTx} = this
+        if (this.isWithdrawer) {
+          try {
+            await this.swapSpec.submitStellarTxIfNotExists(refundTx)
+          } catch (e) {
+            const message = JSON.stringify(e, null, 2)
+            console.error(message)
+            this.displayError({message})
+            return
+          }
+          const {
+            withdrawer: {stellarAccount: withdrawerAccount},
+            holdingAccount,
+          } = this
+          const holdingAccountExists = await this.swapSpec.stellarAccountExists(holdingAccount)
+          if (holdingAccountExists) {
+            const {drainHoldingTx} = await this.swapSpec.genStellarDrainHoldingTx({
+              holdingAccount,
+              withdrawerAccount,
+              refundTx,
+            })
+            const envelopeXdr = drainHoldingTx.toEnvelope().toXDR('base64')
+            this.$modal.show('refund-on-stellar', {envelopeXdr})
+          }
+        } else {
+          this.displayError({
+            title: 'Swap Expired',
+            message: 'Unfortunately, the Stellar commitment has expired and the swap has been cancelled. ' +
+            'Either you or your Peer did not complete the swap in time.',
+          })
+        }
+      },
       async checkExpiry() {
-        const {refundTx, refundExpiry} = this
+        const {refundExpiry} = this
         const now = Math.round(new Date().getTime() / 1000)
         let expired = false
-        if (refundExpiry.stellar && refundExpiry.stellar.minus(now).lt(0)) {
+        if (refundExpiry.stellar && refundExpiry.stellar.minus(now).lte(-5)) {
           expired = true
-          if (this.isWithdrawer) {
-            try {
-              await this.swapSpec.submitRefundTxIfNotExists({refundTx})
-            } catch (e) {
-              const message = JSON.stringify(e, null, 2)
-              console.error(message)
-              this.displayError({message})
-            }
-          }
-          this.displayError({
-            title: 'Stellar Commitment Expired',
-            message: 'Unfortunately, the window to claim XLM on Stellar has expired. ' +
-            'Either you or your Peer did not complete their transactions in time. ' +
-            'If you committed the XLM, you have now been refunded.',
-          })
+          await this.refundStellar()
         }
         if (expired) {
           this.failed = true
