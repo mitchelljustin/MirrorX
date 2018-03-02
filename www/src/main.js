@@ -29,6 +29,27 @@ Vue.use((Vue) => {
   })
 })
 
+Vue.config.errorHandler = function(err, vm, info) {
+  let handler
+  let current = vm
+  if (vm.$options.errorHandler) {
+    handler = vm.$options.errorHandler
+  } else {
+    while (current.$parent) {
+      current = current.$parent
+      handler = current.$options.errorHandler
+      if (handler) {
+        break
+      }
+    }
+  }
+  if (handler) {
+    handler.call(current, err, vm, info)
+  } else {
+    console.log(err)
+  }
+}
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <v-dialog />
     <div id="app">
       <div class="site-header row justify-spaced align-center">
         <h1 class="site-header__title row align-center one-third">
@@ -41,5 +42,22 @@
 <script>
   export default {
     name: 'App',
+    errorHandler(err) {
+      let text, title
+      if (err instanceof Error) {
+        title = 'Error'
+        text = `<p>${err.message}</p>`
+        if (process.env.NODE_ENV === 'development') {
+          text += `<pre class="text text--small">${err.stack}</pre>`
+        }
+      } else {
+        title = err.title || 'Error'
+        text = err.message || JSON.stringify(err)
+      }
+      this.$modal.show('dialog', {
+        title,
+        text,
+      })
+    },
   }
 </script>

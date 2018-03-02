@@ -341,11 +341,10 @@
   &__header {
     font-size: 36px;
     font-weight: 500;
-    color: darken($theme-normal, 15%);
   }
 
   &__section {
-    margin: 0.5em 0 0.25em;
+    margin: 1.0em 0 0.25em;
   }
 
   &__label:first-child {
@@ -391,7 +390,6 @@
   }
 
   &__stellar {
-    @include flex($align-items: center);
     width: 100%;
   }
 
@@ -411,7 +409,6 @@
     @include flex($justify-content: center);
     width: 100%;
     margin-top: 20px;
-    font-weight: 500;
     border-top: 1px solid $theme-gray;
   }
 
@@ -424,12 +421,20 @@
     color: $theme-angry;
   }
 
+  &--happy {
+    color: $theme-happy;
+  }
+
   &--right {
     text-align: end;
   }
 
   &--subdued {
     color: $theme-text-subdued;
+  }
+
+  &--small {
+    font-size: 10px;
   }
 }
 

@@ -19,14 +19,7 @@
           XLM on Stellar
           {{withdrawerStep}}
         </p>
-        <p v-if="refundExpiry.stellar">
-          <span class="text text--subdued" v-if="refundExpirySecondsLeft('stellar').gt(0)">
-            Expires in {{refundExpirySecondsLeft('stellar') | timeRemaining}}
-          </span>
-          <span class="text text--angry" v-else>
-            Expired
-          </span>
-        </p>
+        <expiry-view :expiryTimestamp='expiryTimestamps.stellar' />
       </div>
     </progress-item>
     <progress-item :status="Status.CommitOnEthereum" :currentState="currentState">
@@ -36,15 +29,7 @@
           ETH on Ethereum
           {{depositorStep}}
         </p>
-        <p class="text text--subdued" v-if="refundExpiry.ethereum">
-                    <span class="text text--subdued" v-if="refundExpirySecondsLeft('ethereum').gt(0)">
-            Expires in {{refundExpirySecondsLeft('ethereum') | timeRemaining}}
-          </span>
-          <span class="text text--angry" v-else>
-            Expired
-          </span>
-
-        </p>
+        <expiry-view :expiryTimestamp='expiryTimestamps.ethereum' />
       </div>
     </progress-item>
     <progress-item :status="Status.ClaimOnEthereum" :currentState="currentState">
@@ -80,7 +65,7 @@
       status: Number,
       side: String,
       failed: Boolean,
-      refundExpiry: Object,
+      expiryTimestamps: Object,
     },
     data() {
       const now = new Date()
@@ -94,14 +79,6 @@
       }, 1000)
     },
     methods: {
-      refundExpirySecondsLeft(network) {
-        const expiryTimestamp = this.refundExpiry[network]
-        if (expiryTimestamp === undefined) {
-          throw new Error(`No expiry for network: ${network}`)
-        }
-        const nowSeconds = Math.round(this.now.getTime() / 1000)
-        return BigNumber(expiryTimestamp).minus(nowSeconds)
-      },
       textForStatus(targetStatus, incomplete, ongoing, completed) {
         if (this.status < targetStatus) {
           return incomplete
@@ -171,14 +148,50 @@
           </li>
         `,
       },
-    },
-    filters: {
-      timeRemaining(totalSeconds) {
-        const totalSecondsLeft = BigNumber(totalSeconds)
-        const minutesLeft = totalSecondsLeft.idiv(60)
-        const secondsLeft = totalSecondsLeft.mod(60)
-        return `${minutesLeft}m${secondsLeft}s`
+      'expiry-view': {
+        props: ['expiryTimestamp'],
+        data() {
+          return {
+            now: new Date(),
+          }
+        },
+        mounted() {
+          setInterval(() => {
+            this.now = new Date()
+          }, 1000)
+        },
+        template: `
+          <p v-if="expiryTimestamp">
+            <span class="text text--subdued" v-if="expiryTimestamp === 'refunded'">
+              Refunded
+            </span>
+            <span class="text text--subdued" v-else-if="expiryTimestampSecondsLeft.gt(0)">
+              Expires in {{expiryTimestampSecondsLeft | timeRemaining}}
+            </span>
+            <span class="text text--angry" v-else>
+              Expired
+            </span>
+          </p>
+        `,
+        computed: {
+          expiryTimestampSecondsLeft() {
+            const {expiryTimestamp} = this
+            if (!expiryTimestamp) {
+              throw new Error(`No expiry timestamp`)
+            }
+            const nowSeconds = Math.round(this.now.getTime() / 1000)
+            return BigNumber(expiryTimestamp).minus(nowSeconds)
+          },
+        },
+        filters: {
+          timeRemaining(totalSeconds) {
+            const totalSecondsLeft = BigNumber(totalSeconds)
+            const minutesLeft = totalSecondsLeft.idiv(60)
+            const secondsLeft = totalSecondsLeft.mod(60)
+            return `${minutesLeft}m${secondsLeft}s`
+          },
+        },
       },
-    }
+    },
   }
 </script>

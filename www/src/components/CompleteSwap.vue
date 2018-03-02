@@ -67,6 +67,8 @@
       <div slot="description">
         <p>
           The swap has been cancelled: either you or your Peer took too long and the commitments expired.
+        </p>
+        <p>
           Please approve the contract call in Metamask to refund your Ether.
         </p>
       </div>
@@ -112,7 +114,7 @@
     <div class="half col">
       <h3>Progress</h3>
       <swap-progress-log
-        :refundExpiry="refundExpiry"
+        :expiryTimestamps="expiryTimestamps"
         :failed="failed"
         :status="status"
         :side="side"/>
@@ -155,22 +157,17 @@
         xlmPerUnit: null,
         failed: false,
         refundTx: null,
-        refundExpiry: {},
-        checkExpiryInterval: null,
+        expiryTimestamps: {},
         hashlock,
       }
     },
     mounted() {
       this.populateXlmPerUnit()
       this.status = Status.RequestingSwapInfo
-      this.checkExpiryInterval = setInterval(this.checkExpiry.bind(this), 1000)
     },
     beforeRouteLeave(to, from, next) {
       if (this.checkMatchTimeout !== null) {
         clearInterval(this.checkMatchTimeout)
-      }
-      if (this.checkExpiryInterval !== null) {
-        clearInterval(this.checkExpiryInterval)
       }
       next()
     },
@@ -193,16 +190,6 @@
         Object.assign(this, {holdingAccount})
         this.status = Status.CommitOnStellar
       },
-      displayError(e) {
-        this.$modal.hide('commit-on-stellar')
-        this.$modal.hide('commit-on-ethereum')
-        this.$modal.hide('claim-on-stellar')
-        this.$modal.hide('claim-on-ethereum')
-        this.$modal.show('dialog', {
-          title: e.title || 'Error',
-          text: e.message || JSON.stringify(e),
-        })
-      },
       async findHoldingTx({wait}) {
         const {
           swapSize,
@@ -210,18 +197,13 @@
           withdrawer: {stellarAccount: withdrawerAccount},
           depositor: {stellarAccount: depositorAccount},
         } = this
-        try {
-          return await this.swapSpec.findStellarHoldingTx({
-            swapSize,
-            withdrawerAccount,
-            depositorAccount,
-            holdingAccount,
-            wait,
-          })
-        } catch (e) {
-          this.displayError(e)
-          throw e
-        }
+        return this.swapSpec.findStellarHoldingTx({
+          swapSize,
+          withdrawerAccount,
+          depositorAccount,
+          holdingAccount,
+          wait,
+        })
       },
       async findStellarCommitment() {
         let holdingTxInfo = await this.findHoldingTx({wait: false})
@@ -238,14 +220,21 @@
         }
         const refundTx = await this.verifyRefundTx({refundTxHash})
         if (!refundTx) {
-          this.displayError({message: 'Invalid refund transaction, cannot continue swap. '})
           this.failed = true
-          return
+          throw new Error('Invalid refund transaction, cannot continue swap.')
         }
         this.refundTx = refundTx
-        this.refundExpiry.stellar = BigNumber(refundTx.timeBounds.minTime)
-        await this.checkExpiry()
-        this.status = Status.CommitOnEthereum
+        const {holdingAccount} = this
+        const holdingExists = await this.swapSpec.stellarAccountExists(holdingAccount)
+        if (holdingExists) {
+          this.expiryTimestamps.stellar = BigNumber(refundTx.timeBounds.minTime)
+          await this.checkStellarExpiry()
+        } else {
+          this.expiryTimestamps.stellar = 'refunded'
+        }
+        if (!this.failed) {
+          this.status = Status.CommitOnEthereum
+        }
       },
       async verifyRefundTx({refundTxHash}) {
         const hash = refundTxHash.toString('hex')
@@ -284,7 +273,6 @@
         console.log(`Uploaded refund xdr: ${hash}`)
       },
       async findEthereumCommitment() {
-        this.$modal.hide('commit-on-stellar')
         let eventLog = await this.findPrepareSwapCall({wait: false})
         if (!eventLog) {
           if (this.isDepositor) {
@@ -293,8 +281,17 @@
           eventLog = await this.findPrepareSwapCall({wait: true})
         }
         const {expiry} = eventLog
-        this.refundExpiry.ethereum = BigNumber(expiry)
-        this.status = Status.ClaimOnEthereum
+        const refundSwap = await this.findRefundSwapCall()
+        if (refundSwap) {
+          this.expiryTimestamps.ethereum = 'refunded'
+          this.failed = true
+        } else {
+          this.expiryTimestamps.ethereum = BigNumber(expiry)
+          await this.checkEthereumExpiry()
+        }
+        if (!this.failed) {
+          this.status = Status.ClaimOnEthereum
+        }
       },
       async checkMetamaskNetworkId() {
         const networkId = await Web3.eth.net.getId()
@@ -331,17 +328,11 @@
           swapSize,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
         } = this
-        try {
-          return await this.swapSpec.findPrepareSwap({
-            hashlock, swapSize, withdrawerEthAddress, wait,
-          })
-        } catch (e) {
-          this.displayError(e)
-          throw e
-        }
+        return this.swapSpec.findPrepareSwap({
+          hashlock, swapSize, withdrawerEthAddress, wait,
+        })
       },
       async findEthereumClaim() {
-        this.$modal.hide('commit-on-ethereum')
         let eventLog = await this.findFulfillSwapCall({wait: false})
         if (!eventLog) {
           if (this.isWithdrawer) {
@@ -359,14 +350,16 @@
       },
       async findFulfillSwapCall({wait}) {
         const {hashlock} = this
-        try {
-          return await this.swapSpec.findFulfillSwap({
-            hashlock, wait,
-          })
-        } catch (e) {
-          this.displayError(e)
-          throw e
-        }
+        return this.swapSpec.findFulfillSwap({
+          hashlock, wait,
+        })
+      },
+      async findRefundSwapCall() {
+        const {hashlock} = this
+        return this.swapSpec.findRefundSwap({
+          hashlock,
+          wait: false,
+        })
       },
       async signEthereumClaim() {
         if (!(await this.checkMetamaskNetworkId())) {
@@ -380,7 +373,6 @@
         this.$modal.show('claim-on-ethereum', {funcName, params})
       },
       async findStellarClaim() {
-        this.$modal.hide('claim-on-ethereum')
         let claimTx = await this.findStellarClaimTx({wait: false})
         if (!claimTx) {
           if (this.isDepositor) {
@@ -389,7 +381,6 @@
           claimTx = await this.findStellarClaimTx({wait: true})
         }
         this.status = Status.Done
-        this.$modal.hide('claim-on-stellar')
       },
       async findStellarClaimTx({wait}) {
         const {
@@ -415,23 +406,16 @@
         this.$modal.show('claim-on-stellar', {envelopeXdr})
       },
       displayExpiryError() {
-        this.displayError({
+        this.$modal.show('dialog', {
           title: 'Swap Expired',
-          message: 'Unfortunately, the commitments have expired and the swap has to be cancelled. ' +
+          text: 'Unfortunately, the commitments have expired and the swap has to be cancelled. ' +
           'Either you or your Peer did not complete the swap in time.',
         })
       },
       async refundStellar() {
         const {refundTx} = this
         if (this.isWithdrawer) {
-          try {
-            await this.swapSpec.submitStellarTxIfNotExists(refundTx)
-          } catch (e) {
-            const message = JSON.stringify(e, null, 2)
-            console.error(message)
-            this.displayError({message})
-            return
-          }
+          await this.swapSpec.submitStellarTxIfNotExists(refundTx)
           const {
             withdrawer: {stellarAccount: withdrawerAccount},
             holdingAccount,
@@ -450,6 +434,10 @@
       },
       async refundEthereum() {
         if (this.isDepositor) {
+          const refundSwap = await this.findRefundSwapCall()
+          if (refundSwap) {
+            return
+          }
           const {
             hashlock,
             depositor: {cryptoAddress: depositorEthAddress},
@@ -458,19 +446,33 @@
           this.$modal.show('refund-on-ethereum', {funcName, params})
         }
       },
-      async checkExpiry() {
-        const {refundExpiry} = this
-        const now = Math.round(new Date().getTime() / 1000)
-        if (refundExpiry.stellar && refundExpiry.stellar.minus(now).lte(-5)) {
-          this.displayExpiryError()
-          await this.refundStellar()
-          this.refundExpiry.stellar = null
+      async checkStellarExpiry() {
+        const now = new Date().getTime() / 1000
+        const {expiryTimestamps: {stellar: expiry}} = this
+        if (!expiry) {
+          throw new Error('Stellar expiry timestamp is null')
         }
-        if (refundExpiry.ethereum && refundExpiry.ethereum.minus(now).lte(0)) {
-          this.displayExpiryError()
-          await this.refundEthereum()
-          this.refundExpiry.ethereum = null
+        if (expiry.minus(now).gte(0)) {
+          setTimeout(this.checkStellarExpiry.bind(this), 1000)
+          return
         }
+        this.failed = true
+        await this.refundStellar()
+        this.displayExpiryError()
+      },
+      async checkEthereumExpiry() {
+        const now = new Date().getTime() / 1000
+        const {expiryTimestamps: {ethereum: expiry}} = this
+        if (!expiry) {
+          throw new Error('Ethereum expiry timestamp is null')
+        }
+        if (expiry.minus(now).gt(-5)) {
+          setTimeout(this.checkEthereumExpiry.bind(this), 1000)
+          return
+        }
+        this.failed = true
+        await this.refundEthereum()
+        this.displayExpiryError()
       },
     },
     computed: {
@@ -528,7 +530,18 @@
         } else if (newStatus === Status.ClaimOnStellar) {
           this.findStellarClaim()
         } else if (newStatus === Status.Done) {
-          console.log('Done!')
+          this.$modal.show('dialog', {
+            title: 'Done!',
+            text: 'Swap was executed successfully. You can now leave the page',
+          })
+        }
+      },
+      failed(newVal) {
+        if (newVal) {
+          this.$modal.hide('commit-on-stellar')
+          this.$modal.hide('commit-on-ethereum')
+          this.$modal.hide('claim-on-ethereum')
+          this.$modal.hide('claim-on-stellar')
         }
       },
     },
