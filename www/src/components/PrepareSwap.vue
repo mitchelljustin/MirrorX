@@ -103,8 +103,8 @@
     },
     methods: {
       async populateXlmPerUnit() {
-        const {side, currency} = this
-        this.xlmPerUnit = await getAssetPrice({side, currency})
+        const {currency} = this
+        this.xlmPerUnit = await getAssetPrice({currency})
       },
       async loadFromMetamaskClicked() {
         this.cryptoAddress = await this.loadEthAddressFromMetamask()
