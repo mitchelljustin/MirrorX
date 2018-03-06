@@ -26,9 +26,3 @@ services:
     command: node --experimental-modules match.mjs 0.1 ETH
     secrets:
       - secrets.env
-  anchor_xeth:
-    build: .
-    image: mirrorx_node
-    command: node --experimental-modules anchor.mjs XETH XLMETH
-    secrets:
-      - secrets.env
