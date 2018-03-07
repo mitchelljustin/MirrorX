@@ -7,7 +7,7 @@
             Peer-to-peer cryptocurrency exchange.
           </h1>
           <small class="landing-cta__subtitle">
-            Swap Stellar Lumens and Ethereum for free. No sign-up required.
+            Exchange Stellar Lumens and Ethereum for free. No sign-up required.
           </small>
         </div>
         <div class="landing-cta__actions">
@@ -23,13 +23,13 @@
             <icon class="button--long__item" name="arrow-circle-right" scale="1.5"/>
             <span class="button--long__item">ETH</span>
           </router-link>
-          <div class="landing-cta__footer">
-            <p>
+          <div class="text--subdued">
+            <small>
               More coins coming soon.
               <a href="#">
                 Which?
               </a>
-            </p>
+            </small>
           </div>
         </div>
       </div>
@@ -115,8 +115,8 @@
             Fees
           </h2>
           <p class="article__content">
-            MirrorX does not take transaction fees and never will.
-            There is only a small spread between buy and sell price that is used to prevent market manipulation.
+            MirrorX does not take transaction fees or spread fees.
+            Exchanging coins is completely free.
           </p>
         </div>
         <div class="article">
@@ -125,7 +125,7 @@
           </h2>
           <p class="article__content">
             By enabling all the signing to be done in the browser, MirrorX never holds your private keys or your funds.
-            This means your money can never get stolen.
+            This means your money can't stolen.
           </p>
           <p class="article__content">
             MirrorX is <a target="_blank" href="http://github.com/mvanderh/MirrorX">open source</a>.

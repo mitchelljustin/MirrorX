@@ -46,10 +46,7 @@ h1 {
 
 h2 {
   font-weight: 300;
-
-  @include mobile {
-    font-size: 1.4em;
-  }
+  font-size: 1.4em;
 }
 
 h3 {

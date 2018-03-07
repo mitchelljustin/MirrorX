@@ -13,6 +13,7 @@ import SwapSizeSelect from '@/components/SwapSizeSelect'
 import SignTransactionDialog from '@/components/SignTransactionDialog'
 import Axios from 'axios'
 import VModal from 'vue-js-modal'
+import VueAnalytics from 'vue-analytics'
 
 Vue.component('spinner', Spinner)
 Vue.component('icon', Icon)
@@ -27,6 +28,11 @@ Vue.use((Vue) => {
   Vue.prototype.$client = Axios.create({
     baseURL: process.env.API_URI,
   })
+})
+
+Vue.use(VueAnalytics, {
+  id: 'UA-115388337-1',
+  router,
 })
 
 Vue.config.errorHandler = function(err, vm, info) {
