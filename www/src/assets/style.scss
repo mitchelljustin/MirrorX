@@ -232,7 +232,7 @@
     width: 100%;
     margin: 1em 0;
 
-    input {
+    input[type=text] {
       flex-grow: 1;
     }
   }
@@ -249,11 +249,9 @@
 }
 
 .radio-buttons {
-  @include flex($flex-direction: column);
   padding: 0.2em 0;
 
   &__option {
-    @include flex($align-items: center);
     margin: 0.2em 0;
   }
 
@@ -335,8 +333,6 @@
 }
 
 .big-info {
-  @include flex($flex-direction: column);
-
   &__header {
     font-size: 36px;
     font-weight: 500;

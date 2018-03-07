@@ -14,15 +14,9 @@ services:
       - "80:80"
     secrets:
       - secrets.env
-  match_0_01_eth:
+  match:
     build: .
     image: mirrorx_node
     command: node --experimental-modules match.mjs 0.01 ETH
-    secrets:
-      - secrets.env
-  match_0_1_eth:
-    build: .
-    image: mirrorx_node
-    command: node --experimental-modules match.mjs 0.1 ETH
     secrets:
       - secrets.env

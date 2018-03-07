@@ -73,29 +73,27 @@
         </p>
       </div>
     </sign-transaction-dialog>
-    <div class="big-info half row">
+    <div class="big-info half col">
       <div class="big-info__header">
-        SWAPPING
+        EXCHANGING
       </div>
-      <span v-if="reqInfo" class="big-info__subheader">
-          <span v-if="isWithdrawer">
-            <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM FOR
-          </span>
-          <span>
-            {{ swapSize || '..' }} {{ currency }}
-          </span>
-          <span v-if="isDepositor">
-            FOR <price :size="swapSize" :xlmPerUnit="xlmPerUnit"/> XLM
-          </span>
+      <span v-if="reqInfo" class="big-info__subheader three-quarters row align-center">
+        <span :style="{order: isWithdrawer ? -1 : 1}">
+          {{swapSize}} XLM
         </span>
+        <icon class="" name="long-arrow-right" scale="2"/>
+        <span :style="{order: isWithdrawer ? 1 : -1}">
+          {{(xlmPerUnit && swapSize) ? xlmPerUnit.pow(-1).times(swapSize).toFixed(4) : '..'}} {{ currency }}
+        </span>
+      </span>
       <h3 class="big-info__section">
-        {{ this.isWithdrawer ? 'TO' : 'FROM' }}:
+        {{ isWithdrawer ? 'TO' : 'FROM' }}:
       </h3>
       <div class="big-info__data">
           <span v-if="reqInfo">
             {{ reqInfo.cryptoAddress }}
           </span>
-        <span v-else>
+          <span v-else>
             ..
           </span>
       </div>
@@ -106,7 +104,7 @@
           <span v-if="reqInfo">
             {{myStellarAccountTrunc}}
           </span>
-        <span v-else>
+          <span v-else>
             ..
           </span>
       </div>
@@ -125,12 +123,12 @@
 <script>
   import BigNumber from 'bignumber.js'
   import Web3 from '../util/web3'
-  import SwapSpecs from '../../../lib/swapSpecs.mjs'
+  import {swapSpecs} from '../../../lib/swapSpecs.mjs'
   import {Stellar} from '../../../lib/stellar.mjs'
   import {createHash} from 'crypto'
 
   import Status from '../util/swapStatus'
-  import {getAssetPrice} from '../util/prices.mjs'
+  import {loadEthXlmPrice} from '../util/prices.mjs'
 
   export default {
     name: 'complete-swap',
@@ -161,8 +159,8 @@
         hashlock,
       }
     },
-    mounted() {
-      this.populateXlmPerUnit()
+    async mounted() {
+      await this.loadEthXlmPrice()
       this.status = Status.RequestingSwapInfo
     },
     beforeRouteLeave(to, from, next) {
@@ -172,9 +170,9 @@
       next()
     },
     methods: {
-      async populateXlmPerUnit() {
+      async loadEthXlmPrice() {
         const {currency} = this
-        this.xlmPerUnit = await getAssetPrice({currency})
+        this.xlmPerUnit = await loadEthXlmPrice({currency})
       },
       async requestSwapInfo() {
         const {currency, swapReqId} = this
@@ -316,9 +314,10 @@
           swapSize,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
           depositor: {cryptoAddress: depositorEthAddress},
+          xlmPerUnit,
         } = this
         const {funcName, params} = this.swapSpec.prepareSwapParams({
-          swapSize, hashlock, withdrawerEthAddress, depositorEthAddress,
+          swapSize, hashlock, withdrawerEthAddress, depositorEthAddress, xlmPerUnit,
         })
         this.$modal.show('commit-on-ethereum', {funcName, params})
       },
@@ -327,9 +326,10 @@
           hashlock,
           swapSize,
           withdrawer: {cryptoAddress: withdrawerEthAddress},
+          xlmPerUnit,
         } = this
         return this.swapSpec.findPrepareSwap({
-          hashlock, swapSize, withdrawerEthAddress, wait,
+          hashlock, swapSize, withdrawerEthAddress, xlmPerUnit, wait,
         })
       },
       async findEthereumClaim() {
@@ -477,7 +477,7 @@
     },
     computed: {
       swapSpec() {
-        return SwapSpecs[this.currency]
+        return swapSpecs[this.currency]
       },
       swapSize() {
         return (this.reqInfo || {}).swapSize
@@ -543,16 +543,6 @@
           this.$modal.hide('claim-on-ethereum')
           this.$modal.hide('claim-on-stellar')
         }
-      },
-    },
-    components: {
-      'price': {
-        props: ['size', 'xlmPerUnit'],
-        template: `
-            <span>
-                {{(xlmPerUnit && size) ? xlmPerUnit.times(size).toFixed(2) : '??'}}
-            </span>
-        `,
       },
     },
   }

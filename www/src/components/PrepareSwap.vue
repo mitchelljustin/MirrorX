@@ -48,7 +48,6 @@
         </label>
         <swap-size-select
           :currency="currency"
-          :swapSizes="swapSpec.swapSizes"
           :disabled="requestingSwap"
           :xlmPerUnit="xlmPerUnit"
           :selectedSize.sync="swapSize"
@@ -68,8 +67,8 @@
 
 <script>
   import web3 from '../util/web3'
-  import SwapSpecs from '../../../lib/swapSpecs.mjs'
-  import {getAssetPrice} from '../util/prices.mjs'
+  import {allSwapSizes, currencySupported, swapSpecs} from '../../../lib/swapSpecs.mjs'
+  import {loadEthXlmPrice} from '../util/prices.mjs'
 
   export default {
     name: 'prepare-deposit',
@@ -78,9 +77,8 @@
       side: String,
     },
     data() {
-      const {swapSizes} = SwapSpecs[this.currency]
       return {
-        swapSize: swapSizes[0],
+        swapSize: allSwapSizes[0],
         stellarAccount: null,
         cryptoAddress: null,
         requestingSwap: false,
@@ -88,26 +86,27 @@
       }
     },
     mounted() {
-      this.populateXlmPerUnit()
+      if (this.currency === 'ETH') {
+        this.loadEthPrice()
+      }
     },
     beforeRouteEnter(to, from, next) {
-      if (SwapSpecs[to.params.currency] === undefined) {
+      if (!currencySupported(to.params.currency)) {
         return next(false)
       }
       next()
     },
     computed: {
       swapSpec() {
-        return SwapSpecs[this.currency]
+        return swapSpecs[this.currency]
       },
     },
     methods: {
-      async populateXlmPerUnit() {
-        const {currency} = this
-        this.xlmPerUnit = await getAssetPrice({currency})
-      },
       async loadFromMetamaskClicked() {
         this.cryptoAddress = await this.loadEthAddressFromMetamask()
+      },
+      async loadEthPrice() {
+        this.xlmPerUnit = await loadEthXlmPrice()
       },
       async loadEthAddressFromMetamask() {
         const address = (await web3.eth.getAccounts())[0]
@@ -149,21 +148,6 @@
             name: 'complete-swap',
             params: {side, currency},
             query,
-          })
-        } catch (err) {
-          const {response} = err
-          let title, text
-          if (response !== undefined) {
-            title = `HTTP ${response.status} Error`
-            text = response.data
-          } else {
-            title = 'Error'
-            text = err.message
-          }
-          this.$modal.show('dialog', {
-            title,
-            text,
-            buttons: [{title: 'OK'}],
           })
         } finally {
           this.requestingSwap = false
