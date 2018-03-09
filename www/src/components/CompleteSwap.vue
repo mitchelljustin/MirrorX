@@ -3,21 +3,20 @@
     <v-dialog/>
     <sign-transaction-dialog modalName="commit-on-stellar" network="stellar">
       <span slot="title">
-        COMMIT XLM
+        Commit Stellar Lumens
       </span>
       <div slot="description">
         <p>
-          Please sign this transaction to commit your Stellar Lumens.
+          Please sign this transaction to commit your Stellar Lumens to the swap.
         </p>
-        <strong>
-          NOTE: Beyond this point you are committed to the swap.
-          It cannot be reversed unless it expires before your Peer claims your Stellar Lumens.
-        </strong>
+        <p>
+          Note that until you claim Ethereum, you can still get your Lumens back.
+        </p>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="commit-on-ethereum" network="ethereum">
       <span slot="title">
-        COMMIT ETH
+        Commit Ether
       </span>
       <div slot="description">
         <p>
@@ -31,17 +30,21 @@
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="claim-on-ethereum" network="ethereum">
       <span slot="title">
-        CLAIM ETH
+        Claim Ether
       </span>
       <div slot="description">
         <p>
           Please approve the contract call in Metamask to claim your Ether.
         </p>
+        <strong>
+          NOTE: Beyond this point you are committed to the swap.
+          It cannot be reversed unless it expires before your Peer claims your Stellar Lumens.
+        </strong>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="claim-on-stellar" network="stellar">
       <span slot="title">
-        CLAIM XLM
+        Claim Stellar Lumens
       </span>
       <div slot="description">
         <p>
@@ -51,71 +54,84 @@
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="refund-on-stellar" network="stellar">
       <span slot="title">
-        REFUND XLM
+        Refund Stellar Lumens
       </span>
       <div slot="description">
         <p>
           The swap has been cancelled: either you or your Peer took too long and the commitments expired.
-          Please sign this transaction to refund your Stellar Lumens.
+        </p>
+        <p>
+          Please sign this transaction to refund your Stellar Lumens back to your account.
         </p>
       </div>
     </sign-transaction-dialog>
     <sign-transaction-dialog modalName="refund-on-ethereum" network="ethereum">
       <span slot="title">
-        REFUND ETH
+        Refund Ether
       </span>
       <div slot="description">
         <p>
           The swap has been cancelled: either you or your Peer took too long and the commitments expired.
         </p>
         <p>
-          Please approve the contract call in Metamask to refund your Ether.
+          Please approve the contract call in Metamask to refund your Ether back to your address.
         </p>
       </div>
     </sign-transaction-dialog>
-    <div class="big-info half col">
+    <div class="big-info half col" v-if="swapExists">
       <div class="big-info__header">
-        EXCHANGING
+        CONVERTING
       </div>
       <span v-if="reqInfo" class="big-info__subheader three-quarters row align-center">
         <span :style="{order: isWithdrawer ? -1 : 1}">
           {{swapSize}} XLM
         </span>
-        <icon class="" name="long-arrow-right" scale="2"/>
+        <span class="row align-center hor-space">
+          <icon class="" name="long-arrow-right" scale="2"/>
+        </span>
         <span :style="{order: isWithdrawer ? 1 : -1}">
           {{(xlmPerUnit && swapSize) ? xlmPerUnit.pow(-1).times(swapSize).toFixed(4) : '..'}} {{ currency }}
         </span>
       </span>
       <h3 class="big-info__section">
-        {{ isWithdrawer ? 'TO' : 'FROM' }}:
+        SOURCE
       </h3>
       <div class="big-info__data">
-          <span v-if="reqInfo">
-            {{ reqInfo.cryptoAddress }}
-          </span>
-          <span v-else>
-            ..
-          </span>
+        <account-address :addressSource="reqInfo"
+                         :side="side"
+                         withdrawCurrency="XLM"
+                         :depositCurrency="currency"
+        />
       </div>
       <h3 class="big-info__section">
-        {{ this.isWithdrawer ? 'FROM' : 'TO' }}:
+        DESTINATION
       </h3>
       <div class="big-info__data">
-          <span v-if="reqInfo">
-            {{myStellarAccountTrunc}}
-          </span>
-          <span v-else>
-            ..
-          </span>
+        <account-address :addressSource="reqInfo"
+                         :side="side"
+                         :withdrawCurrency="currency"
+                         depositCurrency="XLM"
+        />
       </div>
     </div>
-    <div class="half col">
-      <h3>Progress</h3>
+    <div class="half col" v-if="swapExists">
+      <h3>Steps</h3>
       <swap-progress-log
+        :transactionLinks="transactionLinks"
         :expiryTimestamps="expiryTimestamps"
         :failed="failed"
         :status="status"
         :side="side"/>
+    </div>
+    <div class="full col align-center" v-if="!swapExists">
+        <div class="col two-thirds align-center">
+          <h1 class="text--angry">
+            Not Found
+          </h1>
+          <p class="text-center">
+            Possibly you entered the URL wrong, or the swap existed in the past but has been completed since.
+          </p>
+        </div>
     </div>
   </div>
 </template>
@@ -129,6 +145,7 @@
 
   import Status from '../util/swapStatus'
   import {loadEthXlmPrice} from '../util/prices.mjs'
+  import {makeEthereumLink, makeStellarLink} from '../util/links.mjs'
 
   export default {
     name: 'complete-swap',
@@ -147,6 +164,10 @@
         hashlock = h.digest()
         console.log(`Hashlock=${hashlock.toString('hex')}, preimage=${this.preimage} `)
       }
+      const transactionLinks = {}
+      for (const status of Object.values(Status)) {
+        transactionLinks[status] = null
+      }
       return {
         status: null,
         reqInfo: null,
@@ -155,7 +176,9 @@
         xlmPerUnit: null,
         failed: false,
         refundTx: null,
+        swapExists: true,
         expiryTimestamps: {},
+        transactionLinks,
         hashlock,
       }
     },
@@ -176,8 +199,17 @@
       },
       async requestSwapInfo() {
         const {currency, swapReqId} = this
-        const {data: {status, matchedInfo, reqInfo}} =
-          await this.$client.get(`/swap/${currency}/match/${swapReqId}`)
+        let response
+        try {
+          response = await this.$client.get(`/swap/${currency}/match/${swapReqId}`)
+        } catch (e) {
+          if (!e.response || e.response.status !== 404) {
+            throw e
+          }
+          this.swapExists = false
+          return
+        }
+        const {data: {status, matchedInfo, reqInfo}} = response
         Object.assign(this, {reqInfo, matchedInfo})
         if (status !== 'matched') {
           this.status = Status.WaitingForMatch
@@ -203,6 +235,9 @@
           wait,
         })
       },
+      addTransactionLink({link, status}) {
+        this.transactionLinks[status] = link
+      },
       async findStellarCommitment() {
         let holdingTxInfo = await this.findHoldingTx({wait: false})
         if (!holdingTxInfo) {
@@ -211,7 +246,7 @@
           }
           holdingTxInfo = await this.findHoldingTx({wait: true})
         }
-        const {hashlock, refundTxHash} = holdingTxInfo
+        const {hashlock, refundTxHash, txId} = holdingTxInfo
         if (!this.hashlock) {
           Object.assign(this, {hashlock})
           console.log(`Found hashlock: ${hashlock.toString('hex')}`)
@@ -222,6 +257,8 @@
           throw new Error('Invalid refund transaction, cannot continue swap.')
         }
         this.refundTx = refundTx
+        const link = makeStellarLink({id: txId, type: 'tx'})
+        this.addTransactionLink({link, status: Status.CommitOnStellar})
         const {holdingAccount} = this
         const holdingExists = await this.swapSpec.stellarAccountExists(holdingAccount)
         if (holdingExists) {
@@ -278,7 +315,9 @@
           }
           eventLog = await this.findPrepareSwapCall({wait: true})
         }
-        const {expiry} = eventLog
+        const {transactionHash, args: {expiry}} = eventLog
+        const link = makeEthereumLink({id: transactionHash, type: 'tx'})
+        this.addTransactionLink({link, status: Status.CommitOnEthereum})
         const refundSwap = await this.findRefundSwapCall()
         if (refundSwap) {
           this.expiryTimestamps.ethereum = 'refunded'
@@ -340,12 +379,14 @@
           }
           eventLog = await this.findFulfillSwapCall({wait: true})
         }
+        const {args: {preimage}, transactionHash} = eventLog
         if (!this.preimageBuf) {
-          let {preimage} = eventLog
-          preimage = Buffer.from(preimage.slice(2), 'hex')
-          this.preimageBuf = preimage
-          console.log(`Found preimage: ${preimage.toString('hex')}`)
+          const preimageBuf = Buffer.from(preimage.slice(2), 'hex')
+          this.preimageBuf = preimageBuf
+          console.log(`Found preimage: ${preimageBuf.toString('hex')}`)
         }
+        const link = makeEthereumLink({id: transactionHash, type: 'tx'})
+        this.addTransactionLink({link, status: Status.ClaimOnEthereum})
         this.status = Status.ClaimOnStellar
       },
       async findFulfillSwapCall({wait}) {
@@ -380,6 +421,9 @@
           }
           claimTx = await this.findStellarClaimTx({wait: true})
         }
+        const {txId} = claimTx
+        const link = makeStellarLink({id: txId, type: 'tx'})
+        this.addTransactionLink({link, status: Status.ClaimOnStellar})
         this.status = Status.Done
       },
       async findStellarClaimTx({wait}) {
@@ -391,7 +435,7 @@
         try {
           return await this.swapSpec.findStellarClaimTx({depositorAccount, holdingAccount, preimage, wait})
         } catch (e) {
-          this.displayError(e)
+          this.$displayError(e)
           throw e
         }
       },
@@ -415,19 +459,12 @@
       async refundStellar() {
         const {refundTx} = this
         if (this.isWithdrawer) {
-          await this.swapSpec.submitStellarTxIfNotExists(refundTx)
           const {
-            withdrawer: {stellarAccount: withdrawerAccount},
             holdingAccount,
           } = this
           const holdingAccountExists = await this.swapSpec.stellarAccountExists(holdingAccount)
           if (holdingAccountExists) {
-            const {drainHoldingTx} = await this.swapSpec.genStellarDrainHoldingTx({
-              holdingAccount,
-              withdrawerAccount,
-              refundTx,
-            })
-            const envelopeXdr = drainHoldingTx.toEnvelope().toXDR('base64')
+            const envelopeXdr = refundTx.toEnvelope().toXDR('base64')
             this.$modal.show('refund-on-stellar', {envelopeXdr})
           }
         }
@@ -473,6 +510,10 @@
         this.failed = true
         await this.refundEthereum()
         this.displayExpiryError()
+      },
+      async finishSwap() {
+        const {currency, swapReqId} = this
+        await this.$client.delete(`swap/${currency}/match/${swapReqId}`)
       },
     },
     computed: {
@@ -530,10 +571,7 @@
         } else if (newStatus === Status.ClaimOnStellar) {
           this.findStellarClaim()
         } else if (newStatus === Status.Done) {
-          this.$modal.show('dialog', {
-            title: 'Done!',
-            text: 'Swap was executed successfully. You can now leave the page',
-          })
+          this.finishSwap()
         }
       },
       failed(newVal) {
@@ -543,6 +581,56 @@
           this.$modal.hide('claim-on-ethereum')
           this.$modal.hide('claim-on-stellar')
         }
+      },
+    },
+    components: {
+      'account-address': {
+        props: ['addressSource', 'side', 'withdrawCurrency', 'depositCurrency'],
+        template: `
+          <span class="text--monospace">
+            <a target="_blank" :href="addressLink">
+              {{addressTrunc}}
+            </a>
+          </span class="text--monospace">
+        `,
+        computed: {
+          currency() {
+            const {side, withdrawCurrency, depositCurrency} = this
+            return (side === 'withdraw') ? withdrawCurrency : depositCurrency
+          },
+          address() {
+            const {addressSource, currency} = this
+            if (!addressSource) {
+              return null
+            }
+            const propName = (currency === 'XLM') ? 'stellarAccount' : 'cryptoAddress'
+            return addressSource[propName]
+          },
+          addressTrunc() {
+            const {address} = this
+            if (!address) {
+              return null
+            }
+            const {length} = address
+            if (length < 45) {
+              return address
+            }
+            return address.slice(0, 21) + '...' + address.slice(length - 21)
+          },
+          addressLink() {
+            const {address, currency} = this
+            if (!address) {
+              return null
+            }
+            if (currency === 'XLM') {
+              return makeStellarLink({id: address, type: 'account'})
+            }
+            if (currency === 'ETH') {
+              return makeEthereumLink({id: address, type: 'address'})
+            }
+            throw new Error(`Currency not supported: ${currency}`)
+          },
+        },
       },
     },
   }

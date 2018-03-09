@@ -1,6 +1,5 @@
 <template>
   <div class="row justify-center">
-    <v-dialog/>
     <div class="full col form">
       <h1 class="form__header">
         CONVERT
@@ -16,7 +15,7 @@
             v-if="side === 'deposit'"
             target="_blank"
             href="https://stellarterm.com/#signup">
-              Don't have an account?
+            Don't have an account?
           </a>
         </label>
         <input type="text"
@@ -36,10 +35,10 @@
         </label>
         <input type="text"
                class="text-input"
-               :disabled="requestingSwap"
                v-model="cryptoAddress"
                id="cryptoAddress"
                name="cryptoAddress"
+               disabled
         >
       </div>
       <div class="form__group">
@@ -88,6 +87,7 @@
     mounted() {
       if (this.currency === 'ETH') {
         this.loadEthPrice()
+        this.loadAddressFromMetamask()
       }
     },
     beforeRouteEnter(to, from, next) {
@@ -102,13 +102,38 @@
       },
     },
     methods: {
-      async loadFromMetamaskClicked() {
+      async loadAddressFromMetamask() {
         this.cryptoAddress = await this.loadEthAddressFromMetamask()
+      },
+      async loadFromMetamaskClicked() {
+        this.loadAddressFromMetamask()
       },
       async loadEthPrice() {
         this.xlmPerUnit = await loadEthXlmPrice()
       },
       async loadEthAddressFromMetamask() {
+        if (web3 === null) {
+          this.$modal.show('dialog', {
+            title: '<strong class="text--angry">Metamask Error</strong>',
+            text: `
+              <p>
+                You need the Metamask Extension to commit and claim funds on Ethereum.
+                <a href="https://metamask.io">Install Metamask</a>
+              </p>
+            `,
+            buttons: [
+              {
+                title: 'Go Back',
+                handler: () => {
+                  this.$modal.hide('dialog')
+                  this.$router.back()
+                },
+              },
+            ],
+            clickToClose: false,
+          })
+          return null
+        }
         const address = (await web3.eth.getAccounts())[0]
         if (address === undefined) {
           this.$modal.show('dialog', {
@@ -119,7 +144,7 @@
         }
         return address
       },
-      async startClicked() {
+      async startSwap() {
         const addr = await this.loadEthAddressFromMetamask()
         if (addr === null) {
           return
@@ -152,6 +177,10 @@
         } finally {
           this.requestingSwap = false
         }
+      },
+      startClicked() {
+        this.startSwap()
+          .catch(this.$displayError.bind(this))
       },
     },
   }

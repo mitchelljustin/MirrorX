@@ -20,7 +20,6 @@
 
 .site-header {
   width: 100%;
-  height: 7.5%;
 
   &__version {
     font-weight: 600;
@@ -36,6 +35,11 @@
       width: 100%;
       height: 100%;
     }
+  }
+
+  &__title {
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
   }
 }
 
@@ -147,11 +151,11 @@
   &--small {
     font-size: 1em;
     line-height: 1em;
-    width: auto;
+    padding: 0.2em 0.25em;
   }
 
   &--light {
-    border: 1px $theme-gray solid;
+    border: 1px lighten($theme-gray, 5%) solid;
     color: lighten($theme-text, 15%);
     background: none;
 
@@ -317,7 +321,7 @@
 }
 
 .router-view {
-  width: 90%;
+  width: 85%;
   margin: 0 auto;
 
   @include mobile {
@@ -332,7 +336,7 @@
   }
 
   &__section {
-    margin: 1.0em 0 0.25em;
+    margin: 1.25em 0 0em;
   }
 
   &__label:first-child {
@@ -344,12 +348,12 @@
   }
 
   &__data {
-    font-size: 1.0em;
+    font-size: 1.1em;
+    color: $theme-focus;
   }
 }
 
 .sign-dialog {
-  @include flex;
   width: 100%;
 
   &__header {
@@ -362,7 +366,6 @@
   }
 
   &__body {
-    @include flex($flex-direction: column);
     margin-top: 0;
     padding: 10px;
     width: 100%;
@@ -423,6 +426,10 @@
 
   &--small {
     font-size: 10px;
+  }
+
+  &--monospace {
+    font-family: monospace;
   }
 }
 

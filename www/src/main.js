@@ -28,6 +28,28 @@ Vue.use((Vue) => {
   Vue.prototype.$client = Axios.create({
     baseURL: process.env.API_URI,
   })
+
+  Vue.prototype.$displayError = function displayError(err) {
+    let text, title
+    if (err.response) {
+      const {response} = err
+      title = `HTTP ${response.status} Error`
+      text = response.data
+    } else if (err instanceof Error) {
+      title = 'Error'
+      text = `<p>${err.message}</p>`
+      if (process.env.NODE_ENV === 'development') {
+        text += `<pre class="text text--small">${err.stack}</pre>`
+      }
+    } else {
+      title = err.title || 'Error'
+      text = err.message || JSON.stringify(err)
+    }
+    this.$modal.show('dialog', {
+      title,
+      text,
+    })
+  }
 })
 
 Vue.use(VueAnalytics, {

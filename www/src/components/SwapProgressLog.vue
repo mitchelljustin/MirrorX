@@ -2,8 +2,8 @@
   <ul class="progress-log">
     <progress-item :status="Status.RequestingSwapInfo" :currentState="currentState">
       <p slot="body">
-        {{this.textForStatus(Status.RequestingSwapInfo, 'Request', 'Requesting', 'Requested')}}
-        Swap Info
+        {{this.textForStatus(Status.RequestingSwapInfo, 'Load', 'Loading', 'Loaded')}}
+        Details
       </p>
     </progress-item>
     <progress-item :status="Status.WaitingForMatch" :currentState="currentState">
@@ -19,7 +19,12 @@
           XLM on Stellar
           {{withdrawerStep}}
         </p>
-        <expiry-view :expiryTimestamp='expiryTimestamps.stellar' />
+        <p>
+          <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.stellar'/>
+          <transaction-link :links="transactionLinks"
+                            :status="Status.CommitOnStellar"
+          />
+        </p>
       </div>
     </progress-item>
     <progress-item :status="Status.CommitOnEthereum" :currentState="currentState">
@@ -29,22 +34,41 @@
           ETH on Ethereum
           {{depositorStep}}
         </p>
-        <expiry-view :expiryTimestamp='expiryTimestamps.ethereum' />
+        <p>
+          <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.ethereum'/>
+          <transaction-link :links="transactionLinks"
+                            :status="Status.CommitOnEthereum"
+          />
+        </p>
       </div>
     </progress-item>
     <progress-item :status="Status.ClaimOnEthereum" :currentState="currentState">
-      <p slot="body">
-        {{this.textForStatus(Status.ClaimOnEthereum, 'Claim', 'Claiming', 'Claimed')}}
-        ETH on Ethereum
-        {{withdrawerStep}}
-      </p>
+      <div slot="body">
+        <p>
+          {{this.textForStatus(Status.ClaimOnEthereum, 'Claim', 'Claiming', 'Claimed')}}
+          ETH on Ethereum
+          {{withdrawerStep}}
+        </p>
+        <p>
+          <transaction-link :links="transactionLinks"
+                            :status="Status.ClaimOnEthereum"
+          />
+        </p>
+      </div>
     </progress-item>
     <progress-item :status="Status.ClaimOnStellar" :currentState="currentState">
-      <p slot="body">
-        {{this.textForStatus(Status.ClaimOnStellar, 'Claim', 'Claiming', 'Claimed')}}
-        XLM on Stellar
-        {{depositorStep}}
-      </p>
+      <div slot="body">
+        <p>
+          {{this.textForStatus(Status.ClaimOnStellar, 'Claim', 'Claiming', 'Claimed')}}
+          XLM on Stellar
+          {{depositorStep}}
+        </p>
+        <p>
+          <transaction-link :links="transactionLinks"
+                            :status="Status.ClaimOnStellar"
+          />
+        </p>
+      </div>
     </progress-item>
     <progress-item :status="Status.Done" :currentState="currentState">
       <p slot="body">
@@ -66,6 +90,7 @@
       side: String,
       failed: Boolean,
       expiryTimestamps: Object,
+      transactionLinks: Object,
     },
     data() {
       const now = new Date()
@@ -116,6 +141,21 @@
       },
     },
     components: {
+      'transaction-link': {
+        props: ['links', 'status'],
+        computed: {
+          transactionLink() {
+            return this.links[this.status]
+          },
+        },
+        template: `
+          <span v-if="transactionLink" class="hor-space">
+            <a target="_blank" :href="transactionLink">
+                Transaction
+            </a>
+          </span>
+        `,
+      },
       'progress-item': {
         props: ['status', 'currentState'],
         computed: {
@@ -149,7 +189,7 @@
         `,
       },
       'expiry-view': {
-        props: ['expiryTimestamp'],
+        props: ['expiryTimestamp', 'isDone'],
         data() {
           return {
             now: new Date(),
@@ -161,17 +201,17 @@
           }, 1000)
         },
         template: `
-          <p v-if="expiryTimestamp">
+          <span v-if="expiryTimestamp && !isDone">
             <span class="text text--subdued" v-if="expiryTimestamp === 'refunded'">
               Refunded
             </span>
             <span class="text text--subdued" v-else-if="expiryTimestampSecondsLeft.gt(0)">
-              Expires in {{expiryTimestampSecondsLeft | timeRemaining}}
+              {{expiryTimestampSecondsLeft | timeRemaining}} remaining
             </span>
             <span class="text text--angry" v-else>
               Expired
             </span>
-          </p>
+          </span>
         `,
         computed: {
           expiryTimestampSecondsLeft() {
@@ -188,7 +228,8 @@
             const totalSecondsLeft = BigNumber(totalSeconds)
             const minutesLeft = totalSecondsLeft.idiv(60)
             const secondsLeft = totalSecondsLeft.mod(60)
-            return `${minutesLeft}m${secondsLeft}s`
+            const secondsLeftStr = secondsLeft.lt(10) ? `0${secondsLeft.toString()}` : secondsLeft.toString()
+            return `${minutesLeft}m${secondsLeftStr}s`
           },
         },
       },

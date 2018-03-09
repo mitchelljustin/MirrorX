@@ -43,21 +43,7 @@
   export default {
     name: 'App',
     errorHandler(err) {
-      let text, title
-      if (err instanceof Error) {
-        title = 'Error'
-        text = `<p>${err.message}</p>`
-        if (process.env.NODE_ENV === 'development') {
-          text += `<pre class="text text--small">${err.stack}</pre>`
-        }
-      } else {
-        title = err.title || 'Error'
-        text = err.message || JSON.stringify(err)
-      }
-      this.$modal.show('dialog', {
-        title,
-        text,
-      })
+      this.$displayError(err)
     },
   }
 </script>

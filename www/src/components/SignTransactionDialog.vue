@@ -5,19 +5,31 @@
          height="auto"
   >
     <div class="modal">
-      <div class="sign-dialog">
+      <div class="sign-dialog row">
         <div class="sign-dialog__header">
           <icon v-if="submitting" name="spinner" pulse/>
-          <slot name="title"/>
+          Sign Transaction
         </div>
         <div class="sign-dialog__body">
+          <h3>
+            <slot name="title"/>
+          </h3>
           <div class="sign-dialog__description">
             <slot name="description"/>
           </div>
           <div class="sign-dialog__stellar row align-center" v-if="network === 'stellar'">
-            <p>
-              You can sign on-site using this dialog, or off-site using your own wallet.
-            </p>
+            <label for="stellarPrivateKey" class="sign-dialog__line">
+              Private Key
+            </label>
+            <input
+              class="text-input sign-dialog__input"
+              type="text"
+              id="stellarPrivateKey"
+              :disabled="submitting"
+              v-model="stellarPrivateKey">
+            <button class="button button--normal" @click="stellarSignClicked">
+              SIGN
+            </button>
             <label class="sign-dialog__line" for="envelopeXdr">
               Raw Transaction
               <a target="_blank"
@@ -31,17 +43,6 @@
                    id="envelopeXdr"
                    disabled
             >
-            <label for="stellarPrivateKey" class="sign-dialog__line">
-              Private Key
-            </label>
-            <input
-              class="text-input sign-dialog__input"
-              type="text"
-              id="stellarPrivateKey"
-              v-model="stellarPrivateKey">
-            <button class="button button--normal" @click="stellarSignClicked">
-              SIGN
-            </button>
             <span class="sign-dialog__line">
               <a
                 :href="`https://www.stellar.org/laboratory/#txsigner?xdr=${encodeURIComponent(envelopeXdr)}&network=test`">

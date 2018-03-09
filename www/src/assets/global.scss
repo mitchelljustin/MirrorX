@@ -2,6 +2,11 @@
 @import "colors";
 
 h1, h2, h3 {
+  -webkit-margin-before: 0.3em;
+  -webkit-margin-after: 0.3em;
+}
+
+ul {
   -webkit-margin-before: 0;
   -webkit-margin-after: 0;
 }
@@ -60,6 +65,7 @@ input:focus {
 
 a {
   color: $theme-link;
+  font-weight: 400;
   text-decoration: none;
 
   &:hover {
@@ -94,4 +100,8 @@ label {
 select {
   border: none;
   font-size: 1em;
+}
+
+.text-center {
+  text-align: center;
 }
