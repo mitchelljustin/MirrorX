@@ -40,8 +40,14 @@ export default new Router({
             ...r.query,
           }),
         },
-
       ],
+    },
+    {
+      path: '/vote',
+      name: 'vote',
+      beforeEnter() {
+        window.open('https://goo.gl/forms/qRnrqfJnVbSQq5FD2', '_blank')
+      },
     },
     {
       path: '*',

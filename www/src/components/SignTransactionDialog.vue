@@ -18,6 +18,30 @@
             <slot name="description"/>
           </div>
           <div class="sign-dialog__stellar row align-center" v-if="network === 'stellar'">
+            <label class="sign-dialog__line" for="envelopeXdr">
+              <span class="hor-space">
+                Transaction
+              </span>
+              <span class="hor-space">
+                <a target="_blank"
+                   :href="`https://www.stellar.org/laboratory/#xdr-viewer?input=${encodeURIComponent(envelopeXdr)}&type=TransactionEnvelope&network=${stellarNetwork}`">
+                  Inspect
+                </a>
+              </span>
+              <span class="hor-space">
+                <a target="_blank"
+                   :href="`https://www.stellar.org/laboratory/#txsigner?xdr=${encodeURIComponent(envelopeXdr)}&network=${stellarNetwork}`">
+                  Sign on Stellar.org
+                </a>
+              </span>
+            </label>
+            <input type="text"
+                   class="sign-dialog__input text-input"
+                   v-model="envelopeXdr"
+                   id="envelopeXdr"
+                   disabled
+            >
+            <hr>
             <label for="stellarPrivateKey" class="sign-dialog__line">
               Private Key
             </label>
@@ -30,25 +54,9 @@
             <button class="button button--normal" @click="stellarSignClicked">
               SIGN
             </button>
-            <label class="sign-dialog__line" for="envelopeXdr">
-              Raw Transaction
-              <a target="_blank"
-                 :href="`https://www.stellar.org/laboratory/#xdr-viewer?input=${encodeURIComponent(envelopeXdr)}&type=TransactionEnvelope&network=test`">
-                Inspect
-              </a>
-            </label>
-            <input type="text"
-                   class="sign-dialog__input text-input"
-                   v-model="envelopeXdr"
-                   id="envelopeXdr"
-                   disabled
-            >
-            <span class="sign-dialog__line">
-              <a
-                :href="`https://www.stellar.org/laboratory/#txsigner?xdr=${encodeURIComponent(envelopeXdr)}&network=test`">
-                Sign on Stellar.org
-              </a>
-            </span>
+            <p>
+              You can enter your Private Key above and click SIGN to sign the transaction.
+            </p>
             <label class="sign-dialog__line" for="stellarSignedTx">
               Signed Transaction
             </label>
@@ -66,16 +74,13 @@
             <button class="button button--happy" :disabled="submitting" @click="stellarSubmitClicked">
               SUBMIT
             </button>
-          </div>
-          <div v-if="network === 'ethereum'">
-            <button class="button button--normal"
-                    @click="callContractButtonClicked">
-              CALL
-            </button>
+            <p>
+              Click SUBMIT to submit the signed transaction to the Stellar network.
+            </p>
           </div>
           <pre class="text--angry" v-if="errorText">{{ errorText }}</pre>
           <div class="sign-dialog__footer">
-            <p>
+            <p class="text--subdued">
               Dialog will disappear once transaction is confirmed.
             </p>
           </div>
@@ -184,6 +189,9 @@
     computed: {
       stellarTx() {
         return new Stellar.Transaction(this.envelopeXdr)
+      },
+      stellarNetwork() {
+        return process.env.STELLAR_NETWORK === 'PUBLIC' ? 'public' : 'test'
       },
     },
     watch: {

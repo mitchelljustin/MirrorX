@@ -26,9 +26,9 @@
           <div class="text--subdued">
             <small>
               More coins coming soon.
-              <a href="#">
+              <router-link :to="{name: 'vote'}">
                 Which?
-              </a>
+              </router-link>
             </small>
           </div>
         </div>

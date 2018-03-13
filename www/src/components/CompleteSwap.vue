@@ -7,10 +7,10 @@
       </span>
       <div slot="description">
         <p>
-          Please sign this transaction to commit your Stellar Lumens to the swap.
+          This transaction moves your Stellar Lumens in a holding account and locks it with a secret.
         </p>
         <p>
-          Note that until you claim Ethereum, you can still get your Lumens back.
+          You can still get your Lumens back if the exchange does not complete.
         </p>
       </div>
     </sign-transaction-dialog>
@@ -20,11 +20,12 @@
       </span>
       <div slot="description">
         <p>
-          Please approve the contract call in Metamask to commit your Ether.
+          This contract call locks your Ether in the smart contract with the secret.
+          Approve it in Metamask.
         </p>
         <strong>
-          NOTE: Beyond this point you are committed to the swap.
-          It cannot be reversed unless it expires before your Peer claims your Ether.
+          Beyond this point you are committed to the exchange.
+          It cannot be reversed unless the Peer does not claim the Ether in time.
         </strong>
       </div>
     </sign-transaction-dialog>
@@ -34,11 +35,11 @@
       </span>
       <div slot="description">
         <p>
-          Please approve the contract call in Metamask to claim your Ether.
+          This contract call claims the Ether in the smart contract by publishing the secret.
+          Approve it in Metamask.
         </p>
         <strong>
-          NOTE: Beyond this point you are committed to the swap.
-          It cannot be reversed unless it expires before your Peer claims your Stellar Lumens.
+          Beyond this point you are committed to the exchange,. It cannot be reversed.
         </strong>
       </div>
     </sign-transaction-dialog>
@@ -493,15 +494,18 @@
         }
       },
       async checkStellarExpiry() {
-        const now = new Date().getTime() / 1000
         const {
-          failed,
+          status,
           expiryTimestamps: {stellar: expiry},
         } = this
+        if (status === Status.Done) {
+          return
+        }
+        const now = new Date().getTime() / 1000
         if (!expiry) {
           throw new Error('Stellar expiry timestamp is null')
         }
-        if (expiry.minus(now).gte(0) && !failed) {
+        if (expiry.minus(now).gte(0)) {
           setTimeout(this.checkStellarExpiry.bind(this), 1000)
           return
         }
@@ -510,8 +514,14 @@
         this.displayExpiryError()
       },
       async checkEthereumExpiry() {
+        const {
+          status,
+          expiryTimestamps: {ethereum: expiry},
+        } = this
+        if (status >= Status.ClaimOnStellar) {
+          return
+        }
         const now = new Date().getTime() / 1000
-        const {expiryTimestamps: {ethereum: expiry}} = this
         if (!expiry) {
           throw new Error('Ethereum expiry timestamp is null')
         }

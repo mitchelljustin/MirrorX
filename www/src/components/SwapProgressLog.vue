@@ -85,7 +85,19 @@
         Done!
       </div>
       <div slot="description">
-        Check your {{rightCurrency}} wallet to see your coins.
+        <p>
+          Check your {{rightCurrency}} wallet to see your coins.
+        </p>
+        <p class="ver-space">
+          <router-link :to="{name: 'prepare-swap', params: {currency, side}}"
+                       class="button button--light">
+            Convert more {{leftCurrency}}
+          </router-link>
+          <router-link :to="{name: 'vote'}"
+                       class="button button--normal">
+            Vote for Coins
+          </router-link>
+        </p>
       </div>
     </progress-item>
   </ul>
@@ -142,6 +154,10 @@
           return '(You)'
         }
         return '(Peer)'
+      },
+      leftCurrency() {
+        const {side, currency} = this
+        return side === 'withdraw' ? 'XLM' : currency
       },
       rightCurrency() {
         const {side, currency} = this

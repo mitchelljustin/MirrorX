@@ -159,6 +159,9 @@
     color: lighten($theme-text, 15%);
     background: none;
 
+    &:hover {
+      color: lighten($theme-text, 30%);
+    }
   }
 
   &--long {
@@ -350,9 +353,10 @@
 
 .sign-dialog {
   width: 100%;
+  background: darken($theme-background, 2.5%);
 
   &__header {
-    background: easyGradient($theme-happy);
+    background: easyGradient($theme-normal);
     color: $theme-text-light;
     width: 100%;
     padding: 10px;
@@ -372,7 +376,7 @@
 
   &__line {
     width: 100%;
-    margin-top: 1em;
+    margin-top: 0.5em;
   }
 
   &__stellar {

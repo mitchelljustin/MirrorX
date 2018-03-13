@@ -65,7 +65,7 @@
           :selectedSize.sync="swapSize"
         />
         <p>
-          The price may fluctuate slightly between now and when coins are converted.
+          The price may fluctuate slightly between now and when coins are exchanged.
         </p>
       </div>
       <div class="form__submit">

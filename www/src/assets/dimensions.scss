@@ -116,3 +116,15 @@
     margin-right: 0;
   }
 }
+
+.ver-space {
+  margin: 0.28em 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
