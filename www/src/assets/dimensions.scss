@@ -2,18 +2,32 @@
 
 .two-thirds {
   width: 65%;
+
+  @include full-on-mobile;
+}
+
+.one-quarter {
+  width: 25%;
+
+  @include full-on-mobile;
 }
 
 .three-quarters {
   width: 75%;
+
+  @include full-on-mobile;
 }
 
 .one-third {
   width: 32%;
+
+  @include full-on-mobile;
 }
 
 .half {
   width: 49%;
+
+  @include full-on-mobile;
 }
 
 .exclude-small {
@@ -32,32 +46,34 @@
   }
 }
 
-@include mobile {
-  .half {
-    width: 100%;
-  }
-
-  .two-thirds, .one-third, .three-quarters {
-    width: 100%;
-  }
-}
-
 .full {
   width: 100%;
 }
 
 .row {
   display: flex;
-  flex-wrap: wrap;
-  flex-direction: row;
+  flex-flow: wrap row;
+}
+
+.inline-row {
+  display: inline-flex;
+  flex-flow: wrap row;
 }
 
 .col {
   display: flex;
   flex-direction: column;
+
+  > * {
+    margin-bottom: 0.2em;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 }
 
-.justify-left {
+.justify-start {
   justify-content: flex-start;
 }
 
@@ -65,7 +81,7 @@
   justify-content: center;
 }
 
-.justify-right {
+.justify-end {
   justify-content: flex-end;
 }
 
@@ -91,4 +107,12 @@
 
 .hor-space {
   margin: 0 0.28em;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
 }

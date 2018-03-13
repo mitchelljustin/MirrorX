@@ -42,3 +42,9 @@
     @content;
   }
 }
+
+@mixin full-on-mobile {
+  @include mobile {
+    width: 100%;
+  }
+}

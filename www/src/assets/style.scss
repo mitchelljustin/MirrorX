@@ -218,9 +218,7 @@
   padding: 15px;
 
   &__header {
-    @include flex($align-items: center);
     font-weight: 400;
-    margin: 0.3em 0;
 
     &__icon {
       margin: 0 0.15em;
@@ -295,7 +293,7 @@
 
 .progress-log {
   list-style: none;
-  font-weight: 500;
+  margin: 0.4em 0;
   padding: 0;
 
   &__icon {
@@ -308,7 +306,7 @@
   }
 
   &__item {
-    margin: 0.2em 0;
+    margin: 0.4em 0;
 
     &--inactive {
       color: $theme-inactive;
@@ -317,6 +315,11 @@
 
   &__rank {
     margin: 0 0.2em;
+    font-size: 1.25em;
+  }
+
+  &__title {
+    font-size: 1.25em;
   }
 }
 
@@ -331,20 +334,12 @@
 
 .big-info {
   &__header {
-    font-size: 36px;
-    font-weight: 500;
-  }
-
-  &__section {
-    margin: 1.25em 0 0em;
+    font-size: 1.2em;
+    margin: 0.4em 0;
   }
 
   &__label:first-child {
     margin-top: 0;
-  }
-
-  &__subheader {
-    font-size: 1.5em;
   }
 
   &__data {

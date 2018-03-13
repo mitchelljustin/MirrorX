@@ -1,79 +1,92 @@
 <template>
   <ul class="progress-log">
     <progress-item :status="Status.RequestingSwapInfo" :currentState="currentState">
-      <p slot="body">
+      <div slot="title">
         {{this.textForStatus(Status.RequestingSwapInfo, 'Load', 'Loading', 'Loaded')}}
         Details
-      </p>
+      </div>
     </progress-item>
     <progress-item :status="Status.WaitingForMatch" :currentState="currentState">
-      <p slot="body">
+      <div slot="title">
         {{this.textForStatus(Status.WaitingForMatch, 'Match', 'Matching', 'Matched')}}
         with Peer
-      </p>
+      </div>
+      <div slot="description">
+        Finding Peer to swap with.
+        Note that this might take a while depending on how many people are using MirrorX right now.
+      </div>
     </progress-item>
     <progress-item :status="Status.CommitOnStellar" :currentState="currentState">
-      <div slot="body">
-        <p>
-          {{this.textForStatus(Status.CommitOnStellar, 'Commit', 'Committing', 'Committed')}}
-          XLM on Stellar
-          {{withdrawerStep}}
-        </p>
-        <p>
-          <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.stellar'/>
-          <transaction-link :links="transactionLinks"
-                            :status="Status.CommitOnStellar"
-          />
-        </p>
+      <div slot="title">
+        {{this.textForStatus(Status.CommitOnStellar, 'Commit', 'Committing', 'Committed')}}
+        XLM on Stellar
+        {{withdrawerStep}}
+      </div>
+      <div slot="description">
+        Move XLM to a holding account and lock it with a secret.
+      </div>
+      <div slot="details">
+        <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.stellar'/>
+        <transaction-link :links="transactionLinks"
+                          :status="Status.CommitOnStellar"
+        />
       </div>
     </progress-item>
     <progress-item :status="Status.CommitOnEthereum" :currentState="currentState">
-      <div slot="body">
-        <p>
-          {{this.textForStatus(Status.CommitOnEthereum, 'Commit', 'Committing', 'Committed')}}
-          ETH on Ethereum
-          {{depositorStep}}
-        </p>
-        <p>
-          <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.ethereum'/>
-          <transaction-link :links="transactionLinks"
-                            :status="Status.CommitOnEthereum"
-          />
-        </p>
+      <div slot="title">
+        {{this.textForStatus(Status.CommitOnEthereum, 'Commit', 'Committing', 'Committed')}}
+        ETH on Ethereum
+        {{depositorStep}}
+      </div>
+      <div slot="description">
+        Move ETH funds to a smart contract and lock it with the secret.
+      </div>
+      <div slot="details">
+        <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.ethereum'/>
+        <transaction-link :links="transactionLinks"
+                          :status="Status.CommitOnEthereum"
+        />
       </div>
     </progress-item>
     <progress-item :status="Status.ClaimOnEthereum" :currentState="currentState">
-      <div slot="body">
-        <p>
-          {{this.textForStatus(Status.ClaimOnEthereum, 'Claim', 'Claiming', 'Claimed')}}
-          ETH on Ethereum
-          {{withdrawerStep}}
-        </p>
-        <p>
-          <transaction-link :links="transactionLinks"
-                            :status="Status.ClaimOnEthereum"
-          />
-        </p>
+      <div slot="title">
+        {{this.textForStatus(Status.ClaimOnEthereum, 'Claim', 'Claiming', 'Claimed')}}
+        ETH on Ethereum
+        {{withdrawerStep}}
+      </div>
+      <div slot="description">
+        Publish the secret to unlock the ETH funds in the smart contract.
+      </div>
+      <div slot="details">
+        <transaction-link :links="transactionLinks"
+                          :status="Status.ClaimOnEthereum"
+        />
       </div>
     </progress-item>
     <progress-item :status="Status.ClaimOnStellar" :currentState="currentState">
-      <div slot="body">
+      <div slot="title">
         <p>
           {{this.textForStatus(Status.ClaimOnStellar, 'Claim', 'Claiming', 'Claimed')}}
           XLM on Stellar
           {{depositorStep}}
         </p>
-        <p>
-          <transaction-link :links="transactionLinks"
-                            :status="Status.ClaimOnStellar"
-          />
-        </p>
+      </div>
+      <div slot="details">
+        <transaction-link :links="transactionLinks"
+                          :status="Status.ClaimOnStellar"
+        />
+      </div>
+      <div slot="description">
+        Use the published secret to unlock the XLM funds in the holding account.
       </div>
     </progress-item>
     <progress-item :status="Status.Done" :currentState="currentState">
-      <p slot="body">
+      <div slot="title">
         Done!
-      </p>
+      </div>
+      <div slot="description">
+        Check your {{rightCurrency}} wallet to see your coins.
+      </div>
     </progress-item>
   </ul>
 </template>
@@ -88,6 +101,7 @@
     props: {
       status: Number,
       side: String,
+      currency: String,
       failed: Boolean,
       expiryTimestamps: Object,
       transactionLinks: Object,
@@ -129,6 +143,10 @@
         }
         return '(Peer)'
       },
+      rightCurrency() {
+        const {side, currency} = this
+        return side === 'deposit' ? 'XLM' : currency
+      },
       currentState() {
         const {status, isDone, failed} = this
         return {status, isDone, failed}
@@ -150,7 +168,7 @@
         },
         template: `
           <span v-if="transactionLink" class="hor-space">
-            <a target="_blank" :href="transactionLink">
+            <a target="_blank" class="button button--small button--light" :href="transactionLink">
                 Transaction
             </a>
           </span>
@@ -173,19 +191,20 @@
             <li
               class="progress-log__item row align-start"
               :class="{'progress-log__item--inactive': status > currentStatus}">
-            <span class="progress-log__icon row align-center justify-center">
-              <icon name="check"
-                    class="progress-log__icon--happy"
-                    v-if="status < currentStatus || isDone"/>
-              <icon name="close" class="text--angry" v-else-if="status === currentStatus && failed"/>
-              <icon name="spinner" v-else-if="status === currentStatus" pulse/>
-            </span>
-            <div class="row">
+              <span class="progress-log__icon row align-center justify-center">
+                <icon name="check"
+                      class="progress-log__icon--happy"
+                      v-if="status < currentStatus || isDone"/>
+                <icon name="close" class="text--angry" v-else-if="status === currentStatus && failed"/>
+                <icon name="spinner" v-else-if="status === currentStatus" pulse/>
+              </span>
               <p class="progress-log__rank">{{status+1}}.</p>
-              <slot name="body">
-              </slot>
-            </div>
-          </li>
+              <div class="col three-quarters">
+                <p class="progress-log__title"><slot name="title" /></p>
+                <p v-if="currentStatus === status"><slot name="description" /></p>
+                <p v-if="currentStatus > status"><slot name="details" /></p>
+              </div>
+            </li>
         `,
       },
       'expiry-view': {
@@ -202,13 +221,13 @@
         },
         template: `
           <span v-if="expiryTimestamp && !isDone">
-            <span class="text text--subdued" v-if="expiryTimestamp === 'refunded'">
+            <span class="text--subdued" v-if="expiryTimestamp === 'refunded'">
               Refunded
             </span>
-            <span class="text text--subdued" v-else-if="expiryTimestampSecondsLeft.gt(0)">
+            <span class="text--subdued" v-else-if="expiryTimestampSecondsLeft.gt(0)">
               {{expiryTimestampSecondsLeft | timeRemaining}} remaining
             </span>
-            <span class="text text--angry" v-else>
+            <span class="text--angry" v-else>
               Expired
             </span>
           </span>

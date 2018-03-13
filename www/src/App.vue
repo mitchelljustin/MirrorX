@@ -18,7 +18,7 @@
           </span>
         </span>
         </h1>
-        <h2 class="two-thirds row justify-right">
+        <h2 class="two-thirds row justify-end">
           <span class="exclude-small">
             Convert between Stellar & Ethereum for free. No sign-up required.
           </span>

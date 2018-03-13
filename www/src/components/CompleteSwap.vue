@@ -78,50 +78,59 @@
         </p>
       </div>
     </sign-transaction-dialog>
-    <div class="big-info half col" v-if="swapExists">
-      <div class="big-info__header">
-        CONVERTING
+    <div class="big-info full col" v-if="swapExists">
+      <div class="big-info__header full col align-center">
+        <h2>CONVERTING</h2>
+        <h1 v-if="reqInfo" class="row align-center">
+          <span :style="{order: isWithdrawer ? -1 : 1}">
+            {{swapSize}} XLM
+          </span>
+          <span class="row align-center hor-space">
+            <icon class="" name="long-arrow-right" scale="2"/>
+          </span>
+          <span :style="{order: isWithdrawer ? 1 : -1}">
+            {{(xlmPerUnit && swapSize) ? xlmPerUnit.pow(-1).times(swapSize).toFixed(4) : '..'}} {{ currency }}
+          </span>
+        </h1>
       </div>
-      <span v-if="reqInfo" class="big-info__subheader three-quarters row align-center">
-        <span :style="{order: isWithdrawer ? -1 : 1}">
-          {{swapSize}} XLM
-        </span>
-        <span class="row align-center hor-space">
-          <icon class="" name="long-arrow-right" scale="2"/>
-        </span>
-        <span :style="{order: isWithdrawer ? 1 : -1}">
-          {{(xlmPerUnit && swapSize) ? xlmPerUnit.pow(-1).times(swapSize).toFixed(4) : '..'}} {{ currency }}
-        </span>
-      </span>
-      <h3 class="big-info__section">
-        SOURCE
-      </h3>
-      <div class="big-info__data">
-        <account-address :addressSource="reqInfo"
-                         :side="side"
-                         withdrawCurrency="XLM"
-                         :depositCurrency="currency"
-        />
-      </div>
-      <h3 class="big-info__section">
-        DESTINATION
-      </h3>
-      <div class="big-info__data">
-        <account-address :addressSource="reqInfo"
-                         :side="side"
-                         :withdrawCurrency="currency"
-                         depositCurrency="XLM"
-        />
+      <div class="full row">
+        <div class="half col">
+          <h3>
+            SOURCE
+          </h3>
+          <div class="big-info__data">
+            <account-address :addressSource="reqInfo"
+                             :side="side"
+                             withdrawCurrency="XLM"
+                             :depositCurrency="currency"
+            />
+          </div>
+        </div>
+        <div class="half col align-right">
+          <h3>
+            DESTINATION
+          </h3>
+          <div class="big-info__data">
+            <account-address :addressSource="reqInfo"
+                             :side="side"
+                             :withdrawCurrency="currency"
+                             depositCurrency="XLM"
+            />
+          </div>
+        </div>
       </div>
     </div>
-    <div class="half col" v-if="swapExists">
-      <h3>Steps</h3>
-      <swap-progress-log
-        :transactionLinks="transactionLinks"
-        :expiryTimestamps="expiryTimestamps"
-        :failed="failed"
-        :status="status"
-        :side="side"/>
+    <hr>
+    <div class="full col align-center" v-if="swapExists">
+      <div class="two-thirds">
+        <swap-progress-log
+          :currency="currency"
+          :transactionLinks="transactionLinks"
+          :expiryTimestamps="expiryTimestamps"
+          :failed="failed"
+          :status="status"
+          :side="side"/>
+      </div>
     </div>
     <div class="full col align-center" v-if="!swapExists">
         <div class="col two-thirds align-center">
@@ -194,8 +203,7 @@
     },
     methods: {
       async loadEthXlmPrice() {
-        const {currency} = this
-        this.xlmPerUnit = await loadEthXlmPrice({currency})
+        this.xlmPerUnit = await loadEthXlmPrice()
       },
       async requestSwapInfo() {
         const {currency, swapReqId} = this
@@ -239,25 +247,26 @@
         this.transactionLinks[status] = link
       },
       async findStellarCommitment() {
-        let holdingTxInfo = await this.findHoldingTx({wait: false})
-        if (!holdingTxInfo) {
+        await this.loadEthXlmPrice()
+        let info = await this.findHoldingTx({wait: false})
+        if (!info) {
           if (this.isWithdrawer) {
             await this.signStellarCommitment()
           }
-          holdingTxInfo = await this.findHoldingTx({wait: true})
+          info = await this.findHoldingTx({wait: true})
         }
-        const {hashlock, refundTxHash, txId} = holdingTxInfo
+        const {hashlock, refundTxHash, tx} = info
         if (!this.hashlock) {
           Object.assign(this, {hashlock})
           console.log(`Found hashlock: ${hashlock.toString('hex')}`)
         }
-        const refundTx = await this.verifyRefundTx({refundTxHash})
+        const refundTx = await this.verifyRefundTx({refundTxHash, holdingTx: tx})
         if (!refundTx) {
           this.failed = true
           throw new Error('Invalid refund transaction, cannot continue swap.')
         }
         this.refundTx = refundTx
-        const link = makeStellarLink({id: txId, type: 'tx'})
+        const link = makeStellarLink({id: tx.id, type: 'tx'})
         this.addTransactionLink({link, status: Status.CommitOnStellar})
         const {holdingAccount} = this
         const holdingExists = await this.swapSpec.stellarAccountExists(holdingAccount)
@@ -271,13 +280,13 @@
           this.status = Status.CommitOnEthereum
         }
       },
-      async verifyRefundTx({refundTxHash}) {
+      async verifyRefundTx({refundTxHash, holdingTx}) {
         const hash = refundTxHash.toString('hex')
         const {data: {xdr}} = await this.$client.get(`refundTx/${hash}`)
         if (xdr === null) {
           return null
         }
-        return this.swapSpec.verifyStellarRefundTx({xdr, hash})
+        return this.swapSpec.verifyStellarRefundTx({xdr, hash, holdingTx})
       },
       async signStellarCommitment() {
         const {
@@ -485,11 +494,14 @@
       },
       async checkStellarExpiry() {
         const now = new Date().getTime() / 1000
-        const {expiryTimestamps: {stellar: expiry}} = this
+        const {
+          failed,
+          expiryTimestamps: {stellar: expiry},
+        } = this
         if (!expiry) {
           throw new Error('Stellar expiry timestamp is null')
         }
-        if (expiry.minus(now).gte(0)) {
+        if (expiry.minus(now).gte(0) && !failed) {
           setTimeout(this.checkStellarExpiry.bind(this), 1000)
           return
         }
