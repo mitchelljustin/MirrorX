@@ -26,9 +26,9 @@
           <div class="text--subdued">
             <small>
               More coins coming soon.
-              <router-link :to="{name: 'vote'}">
+              <a target="_blank" :href="COIN_VOTE_URL">
                 Which?
-              </router-link>
+              </a>
             </small>
           </div>
         </div>
@@ -138,7 +138,14 @@
 </template>
 
 <script>
+  import {COIN_VOTE_URL} from '../util/constants'
+
   export default {
     name: 'landing',
+    data() {
+      return {
+        COIN_VOTE_URL,
+      }
+    },
   }
 </script>

@@ -55,7 +55,8 @@
         <label class="form__label">
           Amount
           <small v-if="xlmPerUnit">
-            (Price: {{xlmPerUnit.toFixed(2)}} XLM per 1 {{currency}})
+            (Price: {{xlmPerUnit.toFixed(2)}} XLM per 1 {{currency}}.
+            <a target="_blank" :href="`https://currencio.co/${currency}/XLM/`">Source</a>)
           </small>
         </label>
         <swap-size-select

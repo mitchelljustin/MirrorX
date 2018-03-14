@@ -57,6 +57,10 @@
             <p>
               You can enter your Private Key above and click SIGN to sign the transaction.
             </p>
+            <p>
+              Alternatively you can copy the unsigned transaction, sign it externally
+              and paste the signed transaction in the field below.
+            </p>
             <label class="sign-dialog__line" for="stellarSignedTx">
               Signed Transaction
             </label>

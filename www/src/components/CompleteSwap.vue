@@ -39,7 +39,7 @@
           Approve it in Metamask.
         </p>
         <strong>
-          Beyond this point you are committed to the exchange,. It cannot be reversed.
+          Beyond this point you are committed to the exchange. It cannot be reversed.
         </strong>
       </div>
     </sign-transaction-dialog>
@@ -79,69 +79,72 @@
         </p>
       </div>
     </sign-transaction-dialog>
-    <div class="big-info full col" v-if="swapExists">
-      <div class="big-info__header full col align-center">
-        <h2>CONVERTING</h2>
-        <h1 v-if="reqInfo" class="row align-center">
+    <div v-if="swapExists">
+
+      <div class="big-info full col">
+        <div class="big-info__header full col align-center">
+          <h2>CONVERTING</h2>
+          <h1 v-if="reqInfo" class="row align-center">
           <span :style="{order: isWithdrawer ? -1 : 1}">
             {{swapSize}} XLM
           </span>
-          <span class="row align-center hor-space">
+            <span class="row align-center hor-space">
             <icon class="" name="long-arrow-right" scale="2"/>
           </span>
-          <span :style="{order: isWithdrawer ? 1 : -1}">
+            <span :style="{order: isWithdrawer ? 1 : -1}">
             {{(xlmPerUnit && swapSize) ? xlmPerUnit.pow(-1).times(swapSize).toFixed(4) : '..'}} {{ currency }}
           </span>
-        </h1>
-      </div>
-      <div class="full row">
-        <div class="half col">
-          <h3>
-            SOURCE
-          </h3>
-          <div class="big-info__data">
-            <account-address :addressSource="reqInfo"
-                             :side="side"
-                             withdrawCurrency="XLM"
-                             :depositCurrency="currency"
-            />
+          </h1>
+        </div>
+        <div class="full row">
+          <div class="half col">
+            <h3>
+              SOURCE
+            </h3>
+            <div class="big-info__data">
+              <account-address :addressSource="reqInfo"
+                               :side="side"
+                               withdrawCurrency="XLM"
+                               :depositCurrency="currency"
+              />
+            </div>
+          </div>
+          <div class="half col align-right">
+            <h3>
+              DESTINATION
+            </h3>
+            <div class="big-info__data">
+              <account-address :addressSource="reqInfo"
+                               :side="side"
+                               :withdrawCurrency="currency"
+                               depositCurrency="XLM"
+              />
+            </div>
           </div>
         </div>
-        <div class="half col align-right">
-          <h3>
-            DESTINATION
-          </h3>
-          <div class="big-info__data">
-            <account-address :addressSource="reqInfo"
-                             :side="side"
-                             :withdrawCurrency="currency"
-                             depositCurrency="XLM"
-            />
-          </div>
-        </div>
       </div>
-    </div>
-    <hr>
-    <div class="full col align-center" v-if="swapExists">
-      <div class="two-thirds">
-        <swap-progress-log
-          :currency="currency"
-          :transactionLinks="transactionLinks"
-          :expiryTimestamps="expiryTimestamps"
-          :failed="failed"
-          :status="status"
-          :side="side"/>
+      <hr>
+      <div class="full col align-center">
+        <div class="two-thirds">
+          <swap-progress-log
+            :currency="currency"
+            :transactionLinks="transactionLinks"
+            :expiryTimestamps="expiryTimestamps"
+            :failed="failed"
+            :status="status"
+            :side="side"/>
+        </div>
       </div>
     </div>
     <div class="full col align-center" v-if="!swapExists">
-        <div class="col two-thirds align-center">
-          <h1 class="text--angry">
-            Not Found
-          </h1>
-          <p class="text-center">
-            Possibly you entered the URL wrong, or the swap existed in the past but has been completed since.
-          </p>
-        </div>
+      <div class="col two-thirds align-center">
+        <h1 class="text--angry">
+          Not Found
+        </h1>
+        <p class="text-center">
+          Possibly you entered the URL wrong, or this swap existed in the past but has been completed since.
+        </p>
+      </div>
     </div>
   </div>
 </template>

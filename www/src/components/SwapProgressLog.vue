@@ -20,10 +20,13 @@
       <div slot="title">
         {{this.textForStatus(Status.CommitOnStellar, 'Commit', 'Committing', 'Committed')}}
         XLM on Stellar
-        {{withdrawerStep}}
+        ({{textForSide('Peer', 'You')}})
       </div>
       <div slot="description">
-        Move XLM to a holding account and lock it with a secret.
+        {{textForSide('Peer is moving', 'Publish')}}
+        XLM to a holding account and
+        {{textForSide('locking', 'lock')}}
+        it with a secret.
       </div>
       <div slot="details">
         <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.stellar'/>
@@ -36,10 +39,13 @@
       <div slot="title">
         {{this.textForStatus(Status.CommitOnEthereum, 'Commit', 'Committing', 'Committed')}}
         ETH on Ethereum
-        {{depositorStep}}
+        ({{textForSide('You', 'Peer')}})
       </div>
       <div slot="description">
-        Move ETH funds to a smart contract and lock it with the secret.
+        {{textForSide('Move', 'Peer is moving')}}
+        ETH funds to a smart contract and
+        {{textForSide('lock', 'locking')}}
+        it with the secret.
       </div>
       <div slot="details">
         <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.ethereum'/>
@@ -52,10 +58,11 @@
       <div slot="title">
         {{this.textForStatus(Status.ClaimOnEthereum, 'Claim', 'Claiming', 'Claimed')}}
         ETH on Ethereum
-        {{withdrawerStep}}
+        ({{textForSide('Peer', 'You')}})
       </div>
       <div slot="description">
-        Publish the secret to unlock the ETH funds in the smart contract.
+        {{textForSide('Peer is publishing', 'Publish')}}
+        the secret to unlock the ETH funds in the smart contract.
       </div>
       <div slot="details">
         <transaction-link :links="transactionLinks"
@@ -68,7 +75,7 @@
         <p>
           {{this.textForStatus(Status.ClaimOnStellar, 'Claim', 'Claiming', 'Claimed')}}
           XLM on Stellar
-          {{depositorStep}}
+          ({{textForSide('You', 'Peer')}})
         </p>
       </div>
       <div slot="details">
@@ -77,7 +84,8 @@
         />
       </div>
       <div slot="description">
-        Use the published secret to unlock the XLM funds in the holding account.
+        {{textForSide('Use', 'Peer is using')}}
+        the published secret to unlock the XLM funds in the holding account.
       </div>
     </progress-item>
     <progress-item :status="Status.Done" :currentState="currentState">
@@ -93,10 +101,11 @@
                        class="button button--light">
             Convert more {{leftCurrency}}
           </router-link>
-          <router-link :to="{name: 'vote'}"
-                       class="button button--normal">
+          <a target="_blank"
+             :href="COIN_VOTE_URL"
+             class="button button--normal">
             Vote for Coins
-          </router-link>
+          </a>
         </p>
       </div>
     </progress-item>
@@ -107,6 +116,7 @@
   import BigNumber from 'bignumber.js'
 
   import Status from '../util/swapStatus'
+  import {COIN_VOTE_URL} from '../util/constants'
 
   export default {
     name: 'progress-log',
@@ -122,6 +132,7 @@
       const now = new Date()
       return {
         now,
+        COIN_VOTE_URL,
       }
     },
     mounted() {
@@ -141,6 +152,9 @@
           return completed
         }
       },
+      textForSide(depositor, withdrawer) {
+        return (this.side === 'deposit') ? depositor : withdrawer
+      }
     },
     computed: {
       depositorStep() {
