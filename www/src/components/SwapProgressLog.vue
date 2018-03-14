@@ -2,13 +2,13 @@
   <ul class="progress-log">
     <progress-item :status="Status.RequestingSwapInfo" :currentState="currentState">
       <div slot="title">
-        {{this.textForStatus(Status.RequestingSwapInfo, 'Load', 'Loading', 'Loaded')}}
+        {{subjectAndVerb(Status.RequestingSwapInfo, 'Load', 'Loading', 'Loaded', 'both')}}
         Details
       </div>
     </progress-item>
     <progress-item :status="Status.WaitingForMatch" :currentState="currentState">
       <div slot="title">
-        {{this.textForStatus(Status.WaitingForMatch, 'Match', 'Matching', 'Matched')}}
+        {{subjectAndVerb(Status.WaitingForMatch, 'Match', 'Matching', 'Matched', 'both')}}
         with Peer
       </div>
       <div slot="description">
@@ -18,9 +18,13 @@
     </progress-item>
     <progress-item :status="Status.CommitOnStellar" :currentState="currentState">
       <div slot="title">
-        {{this.textForStatus(Status.CommitOnStellar, 'Commit', 'Committing', 'Committed')}}
+        {{this.subjectAndVerb(Status.CommitOnStellar,
+        'Commit',
+        'committing',
+        'committed',
+        'withdraw',
+        )}}
         XLM on Stellar
-        ({{textForSide('Peer', 'You')}})
       </div>
       <div slot="description">
         {{textForSide('Peer is moving', 'Publish')}}
@@ -39,9 +43,13 @@
     </progress-item>
     <progress-item :status="Status.CommitOnEthereum" :currentState="currentState">
       <div slot="title">
-        {{this.textForStatus(Status.CommitOnEthereum, 'Commit', 'Committing', 'Committed')}}
+        {{subjectAndVerb(Status.CommitOnEthereum,
+        'Commit',
+        'committing',
+        'committed',
+        'deposit',
+        )}}
         ETH on Ethereum
-        ({{textForSide('You', 'Peer')}})
       </div>
       <div slot="description">
         {{textForSide('Move', 'Peer is moving')}}
@@ -60,9 +68,14 @@
     </progress-item>
     <progress-item :status="Status.ClaimOnEthereum" :currentState="currentState">
       <div slot="title">
-        {{this.textForStatus(Status.ClaimOnEthereum, 'Claim', 'Claiming', 'Claimed')}}
+        {{subjectAndVerb(
+        Status.ClaimOnEthereum,
+        'Claim',
+        'claiming',
+        'claimed',
+        'withdraw',
+        )}}
         ETH on Ethereum
-        ({{textForSide('Peer', 'You')}})
       </div>
       <div slot="description">
         {{textForSide('Peer is publishing', 'Publish')}}
@@ -77,9 +90,13 @@
     <progress-item :status="Status.ClaimOnStellar" :currentState="currentState">
       <div slot="title">
         <p>
-          {{this.textForStatus(Status.ClaimOnStellar, 'Claim', 'Claiming', 'Claimed')}}
+          {{subjectAndVerb(Status.ClaimOnStellar,
+          'Claim',
+          'claiming',
+          'claimed',
+          'deposit',
+          )}}
           XLM on Stellar
-          ({{textForSide('You', 'Peer')}})
         </p>
       </div>
       <div slot="details">
@@ -145,34 +162,33 @@
       }, 1000)
     },
     methods: {
-      textForStatus(targetStatus, incomplete, ongoing, completed) {
+      subjectAndVerb(targetStatus, incomplete, ongoing, completed, side) {
+        const subject = (side === this.side) ? 'You' : 'Peer'
         if (this.status < targetStatus) {
+          if (side !== 'both') {
+            return `${subject}: ${incomplete}`
+          }
           return incomplete
         }
         if (this.status === targetStatus) {
+          if (side !== 'both') {
+            const auxiliary = (side === this.side) ? 'are' : 'is'
+            return `${subject} ${auxiliary} ${ongoing}`
+          }
           return ongoing
         }
         if (this.status > targetStatus) {
+          if (side !== 'both') {
+            return `${subject} ${completed}`
+          }
           return completed
         }
       },
       textForSide(depositor, withdrawer) {
         return (this.side === 'deposit') ? depositor : withdrawer
-      }
+      },
     },
     computed: {
-      depositorStep() {
-        if (this.side === 'deposit') {
-          return '(You)'
-        }
-        return '(Peer)'
-      },
-      withdrawerStep() {
-        if (this.side === 'withdraw') {
-          return '(You)'
-        }
-        return '(Peer)'
-      },
       leftCurrency() {
         const {side, currency} = this
         return side === 'withdraw' ? 'XLM' : currency
