@@ -1,4 +1,4 @@
-# MirrorX - Atomic Swaps for Stellar
+# MirrorX - Peer-to-peer cryptocurrency conversions
 
 Table of contents
 =================
@@ -20,8 +20,16 @@ In particular, MirrorX enables swaps into and out of [Stellar](https://www.stell
 
 How it Works
 ============
-MirrorX is a frontend Web application first and foremost, with a small backend server to match users & perform some other tasks.
-All the signing is done in the browser to preserve security of private keys.
+MirrorX is mostly a frontend Web application written with VueJS and Webpack. 
+It has only two small server processes: one to match users, and one to perform some other tasks (e.g. store refund transaction).
+
+All the signing is done in the browser to preserve security of users' private keys.
+
+Currently these currencies are supported:
+1. Stellar Lumens
+1. Ethereum
+
+I plan to add more coins in the future. [Vote on the next currency to add](https://goo.gl/forms/gBmhcNLQ48S5pHyt1). 
 
 Example
 ============
