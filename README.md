@@ -46,7 +46,7 @@ Let's say Alice wants to convert 0.004 ETH into 10 XLM, and Bob wants to convert
 6. Bob sees this transaction, and confirms that Bob's Ethereum address, the ETH amount and the hashlock are valid. 
 7. Bob claims his 0.004 ETH from the Ethereum using the preimage he generated in step 1. Note that the preimage is now public knowledge.
 8. Alice watches the Ethereum contract and sees that Bob has claimed the ETH using the preimage. She can now use the preimage to claim her own XLM.
-9. Alice submits a Stellar transaction that claims the XLM funds in the Swap account using the preimage that is know public knowledge.
+9. Alice submits a Stellar transaction that claims the XLM funds in the Swap account using the preimage that is now public knowledge.
 
 Additionally, both parties can refund their part of the swap after a certain (long) time period. This prevents malicious actors from stealing money, and other errors that would cause swaps to fail. For security reasons, the swap initiator (Bob) will have to wait longer to claim their refund than the swap fulfiller. [Read more here](https://blog.lightning.engineering/announcement/2017/11/16/ln-swap.html).
 
