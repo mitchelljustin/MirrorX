@@ -1,6 +1,6 @@
 <template>
   <div class="row justify-center">
-    <div class="full col form">
+    <div class="three-quarters col form">
       <h1 class="row align-center">
         CONVERT
         {{leftCurrency}}
@@ -116,11 +116,11 @@
       },
       leftCurrency() {
         const {side, currency} = this
-        return side === 'depositor' ? 'XLM' : currency
+        return side === 'deposit' ? currency : 'XLM'
       },
       rightCurrency() {
         const {side, currency} = this
-        return side === 'depositor' ? currency : 'XLM'
+        return side === 'deposit' ? 'XLM' : currency
       },
     },
     methods: {

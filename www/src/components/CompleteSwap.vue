@@ -79,8 +79,7 @@
         </p>
       </div>
     </sign-transaction-dialog>
-    <div v-if="swapExists">
-
+    <div v-if="swapExists" class="full">
       <div class="big-info full col">
         <div class="big-info__header full col align-center">
           <h2>CONVERTING</h2>
@@ -125,7 +124,7 @@
       </div>
       <hr>
       <div class="full col align-center">
-        <div class="two-thirds">
+        <div class="three-quarters">
           <swap-progress-log
             :currency="currency"
             :transactionLinks="transactionLinks"

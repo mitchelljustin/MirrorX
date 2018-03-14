@@ -107,7 +107,7 @@
             By doing this, she automatically allows Bob to claim the funds she committed on Stellar using the same secret.
           </p>
           <p class="article__content">
-            <a target="_blank" href="https://github.com/mvanderh/MirrorX">Learn more..</a>
+            <a target="_blank" href="https://github.com/mvanderh/MirrorX#example">Learn more..</a>
           </p>
         </div>
         <div class="article">

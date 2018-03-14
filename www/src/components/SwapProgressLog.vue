@@ -29,7 +29,9 @@
         it with a secret.
       </div>
       <div slot="details">
-        <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.stellar'/>
+        <expiry-view :isDone="isDone"
+                     :isInitiator="side === 'withdraw'"
+                     :expiryTimestamp='expiryTimestamps.stellar'/>
         <transaction-link :links="transactionLinks"
                           :status="Status.CommitOnStellar"
         />
@@ -48,7 +50,9 @@
         it with the secret.
       </div>
       <div slot="details">
-        <expiry-view :isDone="isDone" :expiryTimestamp='expiryTimestamps.ethereum'/>
+        <expiry-view :isDone="isDone"
+                     :isInitiator="side === 'deposit'"
+                     :expiryTimestamp='expiryTimestamps.ethereum'/>
         <transaction-link :links="transactionLinks"
                           :status="Status.CommitOnEthereum"
         />
@@ -238,7 +242,7 @@
         `,
       },
       'expiry-view': {
-        props: ['expiryTimestamp', 'isDone'],
+        props: ['expiryTimestamp', 'isDone', 'isInitiator'],
         data() {
           return {
             now: new Date(),
@@ -255,7 +259,7 @@
               Refunded
             </span>
             <span class="text--subdued" v-else-if="expiryTimestampSecondsLeft.gt(0)">
-              {{expiryTimestampSecondsLeft | timeRemaining}} remaining
+              Waiting for {{isInitiator ? 'Peer' : 'you'}}, {{expiryTimestampSecondsLeft | timeRemaining}} until refund
             </span>
             <span class="text--angry" v-else>
               Expired
