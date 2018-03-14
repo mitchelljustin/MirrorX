@@ -91,6 +91,5 @@ Running Example
 1. Install [Metamask](metamask.io). Once installed, point it at Rinkeby by selecting "Rinkeby" from the Network dropdown.
 1. Copy your Metamask Ethereum address and use it to get Rinkeby test Ethereum [HERE](https://www.rinkeby.io/#faucet). 
 1. Follow the instructions in the [Usage](#usage) section to run MirrorX locally.
-1. Navigate to `http://localhost:8080` and initiate two swaps: one deposit and one withdrawal.
- Use the secret keys from config/keys.json. Remember to switch the Metamask account you're using between swaps.
+1. Navigate to `http://localhost:8080` and initiate two simultaneous swaps: one XLM->ETH and one ETH->XLM. Use the Stellar secret keys from config/keys.json. 
 1. Follow the instructions in the swap.
