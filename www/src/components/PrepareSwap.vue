@@ -159,7 +159,8 @@
         if (!cryptoAddress) {
           return
         }
-        if (!await this.swapSpec.stellarAccountExists(stellarAccount)) {
+        const accountExists = await this.swapSpec.stellarAccountExists(stellarAccount)
+        if (!accountExists) {
           throw new Error(`Stellar account is not funded with Lumens.`)
         }
         const query = {}

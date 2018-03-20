@@ -272,7 +272,8 @@
         const link = makeStellarLink({id: tx.id, type: 'tx'})
         this.addTransactionLink({link, status: Status.CommitOnStellar})
         const {holdingAccount} = this
-        const holdingExists = await this.swapSpec.stellarAccountExists(holdingAccount)
+        // eslint-disable-next-line semi
+        const holdingExists = await this.swapSpec.stellarAccountExists(holdingAccount);
         if (holdingExists) {
           this.expiryTimestamps.stellar = BigNumber(refundTx.timeBounds.minTime)
           await this.checkStellarExpiry()
@@ -357,7 +358,8 @@
         return true
       },
       async signEthereumCommit() {
-        if (!(await this.checkMetamaskNetworkId())) {
+        const metamaskNetworkMatches = await this.checkMetamaskNetworkId()
+        if (!metamaskNetworkMatches) {
           return
         }
         const {
@@ -415,7 +417,8 @@
         })
       },
       async signEthereumClaim() {
-        if (!(await this.checkMetamaskNetworkId())) {
+        const metamaskNetwworkMatches = await this.checkMetamaskNetworkId()
+        if (!metamaskNetwworkMatches) {
           return
         }
         const {

@@ -125,7 +125,7 @@
           </h2>
           <p class="article__content">
             By enabling all the signing to be done in the browser, MirrorX never holds your private keys or your funds.
-            This means your money can't stolen.
+            This means your money can't be stolen.
           </p>
           <p class="article__content">
             MirrorX is <a target="_blank" href="http://github.com/mvanderh/MirrorX">open source</a>.
